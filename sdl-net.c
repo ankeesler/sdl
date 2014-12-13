@@ -39,6 +39,13 @@ int SDL_NETWORK_UP(void)
 
 int SDL_NETWORK_DOWN(void)
 {
+  // Free any packets left in the air.
+  int i;
+  for (i = 0; i < SDL_BANDWIDTH; i ++) {
+    if (networkQ[i].data)
+      free(networkQ[i].data);
+  }
+
   return 0;
 }
 
@@ -88,6 +95,7 @@ int sdlReceive(unsigned char *buffer, int length)
     if (packetIsAlive(networkQ + head, &now)) {
       memcpy(buffer, networkQ[head].data, length);
       free(networkQ[head].data);
+      networkQ[head].data = NULL;
       NETWORK_Q_INCREMENT(head);
       txHO = rxHO = 0;
       return SDL_SUCCESS;
