@@ -11,6 +11,7 @@
 #include <stdlib.h>
 
 #include "sdl.h"
+#include "sdl-log.h"
 #include "sdl-internal.h"
 
 #define USAGE "sdl -n nodeCount"
@@ -61,9 +62,17 @@ int main(int argc, char *argv[])
     return err;
   }
 
+  // Maybe start the log. This will be macro'd out if it is not used.
+  if ((err = sdlLogInit()))
+    printf("Error: Log could not be started. (err : %d)\n", err);
+
   // Let the user do their thing.
   if ((err = SDL_USER_MAIN()))
     printf("Error: SDL_USER_MAIN() returned error.\n");
+
+  // Maybe dump the log. This will be macro'd out if it is not used.
+  if ((err = sdlLogDump()))
+    printf("Error: Could not dump log. (err : %d)\n", err);
 
   // Quit out of the network.
   if ((err = SDL_NETWORK_DOWN()))

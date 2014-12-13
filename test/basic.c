@@ -13,6 +13,7 @@
 #include <pthread.h>
 
 #include "sdl.h"
+#include "sdl-log.h"
 
 int nodeCountTest(void)
 {
@@ -72,6 +73,9 @@ int synchronusRawTest(void)
   expect(!memcmp(shortBuffer, shortPacket, SHORT_PACKET_LENGTH));
   expect(!sdlReceive(longBuffer, LONG_PACKET_LENGTH));
   expect(!memcmp(longBuffer, longPacket, LONG_PACKET_LENGTH));
+
+  // Log should be off.
+  expect(!sdlLogOn());
 
   return 0;
 }

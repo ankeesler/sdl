@@ -1,2 +1,5 @@
 # Build...
 /build/
+
+# The test log file.
+tuna.sdl

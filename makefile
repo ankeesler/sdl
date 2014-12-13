@@ -14,9 +14,9 @@ $(BUILD_DIR_CREATED):
 	mkdir -p $(BUILD_DIR); touch $(BUILD_DIR_CREATED)
 
 clean:
-	rm -frd ./*.o $(SDL_LIB) $(BUILD_DIR)
+	rm -frd ./*.o $(SDL_LIB) $(BUILD_DIR) tuna.sdl
 
-SDL_FILES=sdl-main.c sdl-net.c
+SDL_FILES=sdl-main.c sdl-net.c sdl-log.c
 SDL_OBJ=$(shell echo $(SDL_FILES) | sed -E -e 's/([a-z\-]+).c/$(BUILD_DIR)\/\1.o/g')
 
 SDL_CALLBACK_STUB_OBJ=$(BUILD_DIR)/sdl-stub.o
@@ -24,21 +24,36 @@ SDL_CALLBACK_STUB_OBJ=$(BUILD_DIR)/sdl-stub.o
 $(BUILD_DIR)/%.o: %.c $(BUILD_DIR_CREATED)
 	$(CC) -g -Wall -Werror -o $@ -c $<
 
-$(BUILD_DIR)/basic.o: test/basic.c $(BUILD_DIR_CREATED)
+$(BUILD_DIR)/%.o: test/%.c $(BUILD_DIR_CREATED)
 	$(CC) -g -I. -o $@ -c $<
+
+$(BUILD_DIR)/sdl-log-on.o: sdl-log.c $(BUILD_DIR_CREATED)
+	$(CC) -g -DSDL_LOG -DSDL_LOG_FILE=\"tuna.sdl\" -I. -o $@ -c $<
 
 $(BUILD_DIR)/sdl: $(SDL_OBJ) $(SDL_CALLBACK_STUB_OBJ)
 	$(CC) -g -Wall -Werror -o $@ $^
 
-test: run-cli-test run-basic-test
+test: run-cli-test run-basic-test run-full-log-test
 
 CLI_TEST=test/cli-test.pl
 
 run-cli-test: $(BUILD_DIR)/sdl
 	./test/cli-test.pl
 
-$(BUILD_DIR)/basic-test: $(BUILD_DIR)/basic.o $(SDL_OBJ)
+$(BUILD_DIR)/basic-test: $(BUILD_DIR)/basic.o $(BUILD_DIR)/sdl-log.o $(SDL_OBJ)
 	$(CC) -g -Wall -lmcgoo -o $@ $^
 
 run-basic-test: $(BUILD_DIR)/basic-test
 	./$< -n 2
+
+$(BUILD_DIR)/log-test: $(BUILD_DIR)/log.o \
+											 $(BUILD_DIR)/sdl-log-on.o \
+	                     $(BUILD_DIR)/sdl-main.o \
+                       $(BUILD_DIR)/sdl-net.o
+	$(CC) -g -Wall -lmcgoo -o $@ $^
+
+run-log-test: $(BUILD_DIR)/log-test
+	./$< -n 2
+
+run-full-log-test: run-log-test
+	./test/log-test.pl

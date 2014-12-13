@@ -15,6 +15,7 @@
 #include <sys/time.h>
 
 #include "sdl.h"
+#include "sdl-log.h"
 
 typedef struct {
   unsigned char *data;
@@ -66,6 +67,9 @@ int sdlTransmit(unsigned char *data, int length)
     = (unsigned char *)malloc(sizeof(unsigned char) * length);
   memcpy(networkQ[tail].data, data, length);
   gettimeofday(&(networkQ[tail].birth), NULL);
+  
+  // Log. Will be stubbed out if client does not want to use it.
+  sdlLogTx(data, length);
 
   NETWORK_Q_INCREMENT(tail);
 
@@ -97,7 +101,12 @@ int sdlReceive(unsigned char *buffer, int length)
       free(networkQ[head].data);
       networkQ[head].data = NULL;
       NETWORK_Q_INCREMENT(head);
+      
+      // Log. Will be stubbed out if client does not want to use it.
+      sdlLogRx(buffer, length);
+
       txHO = rxHO = 0;
+
       return SDL_SUCCESS;
     }
     NETWORK_Q_INCREMENT(head);
