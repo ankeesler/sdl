@@ -81,7 +81,7 @@ int sdlLogDump()
               ? head->time.tv_usec - startTime.tv_usec
               : LONG_MAX - startTime.tv_usec - head->time.tv_usec)
              / 1000000.0)));
-    fprintf(stream, "(%lf) %s\n  [", timeS, (head->isTx ? "TX" : "RX"));
+    fprintf(stream, "(%lf) %s [", timeS, (head->isTx ? "TX" : "RX"));
     for (i = 0; i < head->length-1; i ++)
       fprintf(stream, "0x%02X, ", head->data[i]);
     fprintf(stream, "0x%02X]\n", head->data[i]);
