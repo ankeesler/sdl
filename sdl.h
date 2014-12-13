@@ -11,26 +11,6 @@
 #ifndef __SDL_H__
 #define __SDL_H__
 
-/*
-// Initializes a simulated network. Must be called!
-// Returns 0 on success.
-int sdlInit(void);
-
-// Submit the buffer of length to the data link layer.
-//
-// Returns 0 on success.
-int sdlSubmit(unsigned char *buffer, unsigned int length);
-
-// Receive into a buffer of length from the data link layer.
-//
-// Returns 0 on success, or 1 if there is nothing there.
-int sdlReceive(unsigned char *buffer, unsigned int length);
-
-// Clean up the network. Must be called!
-// Returns 0 on success.
-int sdlClean(void);
-*/
-
 // Return values.
 #define SDL_SUCCESS 0x00
 #define SDL_ERROR_NETWORK_SATURATED 0x01
