@@ -13,7 +13,7 @@ OBJ_FILES=$(BUILD_DIR)/unit-test.o
 $(BUILD_DIR_CREATED):
 	mkdir -p $(BUILD_DIR); touch $(BUILD_DIR_CREATED)
 
-clean:
+clean: clean-cap
 	rm -frd ./*.o $(SDL_LIB) $(BUILD_DIR) tuna.sdl
 
 SDL_FILES=sdl-main.c sdl-net.c sdl-log.c
@@ -57,3 +57,24 @@ run-log-test: $(BUILD_DIR)/log-test
 
 run-full-log-test: run-log-test
 	./test/log-test.pl
+
+ANTLR_JAR=/usr/local/lib/antlr-4.2-complete.jar
+
+grammar:
+	java -jar $(ANTLR_JAR) cap/SdlLog.g4
+
+.PHONY: cap
+cap: grammar
+	javac -cp $(ANTLR_JAR):$@ $@/*.java
+
+.PHONY: cap/Decode.jar
+cap/Decode.jar: cap
+	cd $<; jar cfm $(@F) manifest.txt *.class 
+
+decoder: cap/Decode.jar
+	java -jar $<
+
+
+clean-cap:
+	rm -f cap/*.class cap/*.jar
+

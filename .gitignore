@@ -3,3 +3,6 @@
 
 # The test log file.
 tuna.sdl
+
+# Class files
+*.class

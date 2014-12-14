@@ -1,0 +1,2 @@
+Main-Class: Decode
+Class-Path: /usr/local/lib/antlr-4.2-complete.jar
