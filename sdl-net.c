@@ -18,7 +18,7 @@
 #include "sdl-log.h"
 
 typedef struct {
-  unsigned char *data;
+  unsigned char data[SDL_MTU];
   struct timeval birth;
 } QData;
 
@@ -40,13 +40,6 @@ int SDL_NETWORK_UP(void)
 
 int SDL_NETWORK_DOWN(void)
 {
-  // Free any packets left in the air.
-  int i;
-  for (i = 0; i < SDL_BANDWIDTH; i ++) {
-    if (networkQ[i].data)
-      free(networkQ[i].data);
-  }
-
   return 0;
 }
 
@@ -63,8 +56,6 @@ int sdlTransmit(unsigned char *data, int length)
     txHO = rxHO = 1;
 
   // Deep copy.
-  networkQ[tail].data
-    = (unsigned char *)malloc(sizeof(unsigned char) * length);
   memcpy(networkQ[tail].data, data, length);
   gettimeofday(&(networkQ[tail].birth), NULL);
   
@@ -98,8 +89,6 @@ int sdlReceive(unsigned char *buffer, int length)
     gettimeofday(&now, NULL);
     if (packetIsAlive(networkQ + head, &now)) {
       memcpy(buffer, networkQ[head].data, length);
-      free(networkQ[head].data);
-      networkQ[head].data = NULL;
       NETWORK_Q_INCREMENT(head);
       
       // Log. Will be stubbed out if client does not want to use it.
