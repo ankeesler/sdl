@@ -74,7 +74,6 @@ cap/Decode.jar: cap
 decoder: cap/Decode.jar
 	java -jar $<
 
-
 clean-cap:
-	rm -f cap/*.class cap/*.jar
+	rm -f cap/*.class cap/*.jar cap/Decode.jar
 
