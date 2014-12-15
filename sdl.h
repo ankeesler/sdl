@@ -16,6 +16,7 @@
 #define SDL_ERROR_NETWORK_SATURATED 0x01
 #define SDL_ERROR_COLLISION 0x02
 #define SDL_ERROR_NETWORK_EMPTY 0x03
+#define SDL_STATUS_DATA_MTU_EXCEEDED 0x04
 
 // This is the port that SDL uses.
 #define SDL_PORT 8923
