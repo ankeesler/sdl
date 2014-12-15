@@ -32,6 +32,9 @@
 // Network packet lifetime in microseconds.
 #define SDL_PACKET_LIFETIME_US 1000000 /* 1 second */
 
+// A MTU for the link...yeah its fake.
+#define SDL_MTU 255
+
 //
 // User must define this. It is like the main loop. Bitches.
 //
