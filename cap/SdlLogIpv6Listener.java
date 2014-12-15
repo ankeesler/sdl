@@ -57,13 +57,12 @@ public class SdlLogIpv6Listener extends SdlLogBaseListener {
 
     // Pull off in two byte increments, so 7 times and then one more.
     for (int i = 0; i < 7; i ++) {
-      value = bytes.remove(0);
-      value |= (bytes.remove(0) << 8);
+      value  = bytes.remove(0) << 8;
+      value |= bytes.remove(0) << 0;
       if (value == 0 && !skippedZeros) {
         if (!skippingZeros)
-          address.append(":");
-        else
-          skippingZeros = true;
+          address.append((i == 0 ? "::" : ":"));
+        skippingZeros = true;
       } else {
         if (skippingZeros)
           skippedZeros = true;
@@ -71,9 +70,14 @@ public class SdlLogIpv6Listener extends SdlLogBaseListener {
       }
     }
 
-    value = bytes.remove(0);
-    value |= (bytes.remove(0) << 8);
-    address.append(String.format("%04X", value));
+    value  = bytes.remove(0) << 8;
+    value |= bytes.remove(0) << 0;
+    if (value == 0) {
+      if (!skippingZeros && !skippedZeros)
+        address.append(":");
+    } else {
+      address.append(String.format("%04X", value));
+    }
 
     return address.toString();
   }
@@ -82,14 +86,14 @@ public class SdlLogIpv6Listener extends SdlLogBaseListener {
     StringBuilder packet = new StringBuilder();
     List<Integer> bytes = bytes(ctx.DATA().getText());
 
-    // TODO: assuming little endian for now.
+    // Big-endian.
 
     int first  = bytes.remove(0);
     int second = bytes.remove(1);
     // Version.
-    packet.append(String.format("Version: %d\n", first & 0x0F));
+    packet.append(String.format("Version: %d\n", (first & 0xF0) >> 4));
     // Traffic class.
-    int trafficClass = (first & 0xF0) | (second & 0x0F);
+    int trafficClass = (first & 0x0F) | (second & 0xF0);
     packet.append(String.format("Traffic class: %d\n", trafficClass));
 
     // Flow label.
