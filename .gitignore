@@ -6,3 +6,6 @@ tuna.sdl
 
 # Class files
 *.class
+
+# The decode jar
+cap/Decode.jar
