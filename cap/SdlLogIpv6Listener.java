@@ -82,25 +82,29 @@ public class SdlLogIpv6Listener extends SdlLogBaseListener {
     return address.toString();
   }
 
+  @Override
   public void enterPacket(SdlLogParser.PacketContext ctx) {
     StringBuilder packet = new StringBuilder();
     List<Integer> bytes = bytes(ctx.DATA().getText());
+
+    packet.append(String.format("Time: %s s\n", ctx.TIMESTAMP()));
+    packet.append(String.format("Direction: %s\n", ctx.DIRECTION()));
 
     // Big-endian.
 
     int first  = bytes.remove(0);
     int second = bytes.remove(1);
     // Version.
-    packet.append(String.format("Version: %d\n", (first & 0xF0) >> 4));
+    packet.append(String.format("  Version: %d\n", (first & 0xF0) >> 4));
     // Traffic class.
     int trafficClass = (first & 0x0F) | (second & 0xF0);
-    packet.append(String.format("Traffic class: %d\n", trafficClass));
+    packet.append(String.format("  Traffic class: %d\n", trafficClass));
 
     // Flow label.
     int third  = bytes.remove(0);
     int fourth = bytes.remove(0);
     int flowLabel = (second & 0xF0 << 12) | (third << 4) | (fourth);
-    packet.append(String.format("Flow label: %d\n", flowLabel));
+    packet.append(String.format("  Flow label: %d\n", flowLabel));
 
     if (bytes.isEmpty())
       return;
@@ -109,25 +113,24 @@ public class SdlLogIpv6Listener extends SdlLogBaseListener {
     int high = bytes.remove(0);
     int low  = bytes.remove(0);
     int payloadLength = low | (high << 8);
-    packet.append(String.format("Payload length: %d\n", payloadLength));
+    packet.append(String.format("  Payload length: %d\n", payloadLength));
 
     // Next header.
     int nextHeader = bytes.remove(0);
     String name = NEXT_HEADER_MAP.get(nextHeader);
-    packet.append(String.format("Next header: %d (%s)\n",
+    packet.append(String.format("  Next header: %d (%s)\n",
                                 nextHeader,
                                 (name == null ? "Unknown" : name)));
 
     // Hop limit.
-    packet.append(String.format("Hop limit: %d\n", bytes.remove(0)));
-
+    packet.append(String.format("  Hop limit: %d\n", bytes.remove(0)));
 
     try {
       // Source address.
-      packet.append(ipv6Address(bytes)).append("\n");
+      packet.append("  Source: " + ipv6Address(bytes)).append("\n");
 
       // Destination address.
-      packet.append(ipv6Address(bytes)).append("\n");
+      packet.append("  Destination: " + ipv6Address(bytes)).append("\n");
     } catch (Exception e) {}
 
     System.out.println(packet.toString());

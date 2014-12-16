@@ -2,9 +2,9 @@
 grammar SdlLog;
 
 capture : 'CAPTURE' '{' packet+ '}' ;
-packet : TIMESTAMP DIRECTION DATA ;
+packet : '(' TIMESTAMP ')' DIRECTION DATA ;
 
-TIMESTAMP : '(' FLOAT ')' ;
+TIMESTAMP : FLOAT ;
 FLOAT: [0-9]+ '.' [0-9]+ ;
 
 DIRECTION : 'TX' | 'RX' ;
