@@ -86,7 +86,10 @@ int sdlLogDump()
       fprintf(stream, "0x%02X, ", head->data[i]);
     fprintf(stream, "0x%02X]\n", head->data[i]);
 
+    // Use a tail as a place holder.
+    tail = head;
     head = head->next;
+    free(tail->data); free(tail);
   }
   fprintf(stream, "}\n");
 
