@@ -34,6 +34,7 @@
 #define SDL_PACKET_LIFETIME_US 1000000 /* 1 second */
 
 // A MTU for the link...yeah its fake.
+// In bytes.
 #define SDL_MTU 255
 
 //
@@ -46,9 +47,11 @@ int SDL_USER_MAIN(void);
 //
 
 // Does not block.
+// Length is in bytes.
 int sdlTransmit(unsigned char *data, int length);
 
 // Does block.
+// Length is in bytes.
 int sdlReceive(unsigned char *buffer, int length);
 
 int sdlGetNodeCount(void);
