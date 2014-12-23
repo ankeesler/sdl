@@ -34,8 +34,7 @@ static int txHO = 0, rxHO = 0;
 
 int SDL_NETWORK_UP(void)
 {
-  head = tail = txHO = rxHO = 0;
-  return 0;
+  return (head = tail = txHO = rxHO = 0);
 }
 
 int SDL_NETWORK_DOWN(void)
