@@ -14,28 +14,6 @@ import java.util.*;
 
 public class SdlLogIpv6Listener extends SdlLogBaseListener {
 
-  public static final Map<Integer, String> NEXT_HEADER_MAP
-    = new HashMap<Integer, String>();
-
-  static {
-    NEXT_HEADER_MAP.put(6, "TCP");
-    NEXT_HEADER_MAP.put(17, "UDP");
-    NEXT_HEADER_MAP.put(1, "ICMP");
-    NEXT_HEADER_MAP.put(2, "IGMP");
-    NEXT_HEADER_MAP.put(58, "ICMPv6");
-
-    NEXT_HEADER_MAP.put(50, "ESP Header");
-    NEXT_HEADER_MAP.put(51, "Authentication Header");
-
-    NEXT_HEADER_MAP.put(0, "Hop-by-Hop Options Header");
-    NEXT_HEADER_MAP.put(43, "Routing Header");
-    NEXT_HEADER_MAP.put(44, "Fragment Header");
-    NEXT_HEADER_MAP.put(59, "No Next Header");
-    NEXT_HEADER_MAP.put(60, "Destination Options Header");
-
-    NEXT_HEADER_MAP.put(41, "Ipv6 Encapsulation");
-  };
-
   private static List<Integer> bytes(String stuff) {
     // Take off first and last '['.
     int stringLength = stuff.length();
@@ -82,18 +60,11 @@ public class SdlLogIpv6Listener extends SdlLogBaseListener {
     return address.toString();
   }
 
-  @Override
-  public void enterPacket(SdlLogParser.PacketContext ctx) {
-    PacketDisplay packet = new PacketDisplay();
-    List<Integer> bytes = bytes(ctx.DATA().getText());
-
-    packet.headerLine("Time", "" + ctx.TIMESTAMP().getText() + " s");
-    packet.headerLine("Direction", ctx.DIRECTION().getText());
-
-    // Big-endian.
-
+  // Returns next header.
+  private Integer decodeIp(PacketDisplay packet, List<Integer> bytes) {
     int first  = bytes.remove(0);
     int second = bytes.remove(1);
+
     // Version.
     packet.detailLine("Version", (first & 0xF0) >> 4);
     // Traffic class.
@@ -107,7 +78,7 @@ public class SdlLogIpv6Listener extends SdlLogBaseListener {
     packet.detailLine("Flow label", flowLabel);
 
     if (bytes.isEmpty())
-      return;
+      return Ipv6.nextHeader("No Next Header");
 
     // Payload length.
     int high = bytes.remove(0);
@@ -117,7 +88,7 @@ public class SdlLogIpv6Listener extends SdlLogBaseListener {
 
     // Next header.
     int nextHeader = bytes.remove(0);
-    String name = NEXT_HEADER_MAP.get(nextHeader);
+    String name = Ipv6.nextHeader(nextHeader);
     packet.detailLine("Next header",
                       (""
                        + nextHeader
@@ -135,6 +106,51 @@ public class SdlLogIpv6Listener extends SdlLogBaseListener {
       // Destination address.
       packet.detailLine("Destination", ipv6Address(bytes));
     } catch (Exception e) {}
+
+    return nextHeader;
+  }
+
+  private void decodeIcmpv6(PacketDisplay packet, List<Integer> bytes) {
+    int type = bytes.remove(0);
+    String typeName = Ipv6.icmpv6Type(type);
+    int code = bytes.remove(0);
+
+    packet.headerLine("ICMPv6", (typeName == null ? "" : typeName));
+
+    // Type.
+    packet.detailLine("Type",
+                      String.format("%d (%s)",
+                                    type,
+                                    (typeName == null ? "Unknown" : typeName)));
+
+    // Code.
+    packet.detailLine("Code",
+                      String.format("%d",
+                                    code));
+
+    // Checksum.
+    int checksum = ((bytes.remove(0) & 0x000000FF) << 8);
+    checksum |= (bytes.remove(0) & 0x000000FF);
+    packet.detailLine("Checksum", checksum);
+
+    // Data.
+    while (!bytes.isEmpty())
+      packet.detailLine("Data", String.format("0x%02X", bytes.remove(0)));
+  }
+  
+  @Override
+  public void enterPacket(SdlLogParser.PacketContext ctx) {
+    PacketDisplay packet = new PacketDisplay();
+    List<Integer> bytes = bytes(ctx.DATA().getText());
+
+    packet.headerLine("Time", "" + ctx.TIMESTAMP().getText() + " s");
+    packet.headerLine("Direction", ctx.DIRECTION().getText());
+
+    Integer nextHeader = decodeIp(packet, bytes);
+    if (nextHeader != null) {
+      if (nextHeader == 58)
+        decodeIcmpv6(packet, bytes);
+    }
 
     System.out.println(packet);
   }

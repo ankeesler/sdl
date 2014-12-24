@@ -1,2 +1,4 @@
 Main-Class: Decode
-Class-Path: /usr/local/lib/antlr-4.2-complete.jar
+Class-Path: /usr/local/lib/antlr-4.2-complete.jar /usr/local/lib/snakeyaml-1.14.jar
+Manifest-Version: 0.1
+Created-By: Elo

@@ -15,7 +15,7 @@
  * lines are.
  *
  * @author Andrew Keesler <ankeesler1@gmail.com>
- * @data December 15, 2014
+ * @date December 15, 2014
  *
  */
 public class PacketDisplay {

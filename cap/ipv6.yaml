@@ -1,0 +1,56 @@
+#
+# ipv6.yaml
+#
+# Andrew Keesler
+#
+# December 23, 2014
+#
+# Uh, is this a YAML file?
+# Going for a place to store ipv6 constants here.
+
+# ICMPv6
+# From http://www.iana.org/assignments/icmpv6-parameters/icmpv6-parameters.xhtml.
+icmpv6Types : {
+  0x01 : Destination Unreachable,
+  0x02 : Packet Too Big,
+  0x03 : Packet Time Exceeded,
+  0x04 : Parameter Problem,
+
+  0x80 : Echo Request,
+  0x81 : Echo Reply,
+  0x82 : Multicast Listener Query,
+  0x83 : Multicast Listener Report,
+  0x84 : Multicast Listener Done,
+  0x85 : Router Solicitation,
+  0x86 : Router Advertisement,
+  0x87 : Neighbor Solicitation,
+  0x88 : Neighbor Advertisement,
+  0x89 : Redirect Message,
+  0x8A : Router Renumbering,
+  0x8B : Node Information Query,
+  0x8C : Node Information Response,
+}
+
+# IPv6 next headers
+# From http://www.iana.org/assignments/ipv6-parameters/ipv6-parameters.txt.
+# And http://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml.
+ipv6Headers : {
+  0 : Hop-by-Hop Options Header,
+
+  43 : Routing Header,
+  44 : Fragment Header,
+  
+  50 : ESP Header,
+  51 : AH Header,
+
+  58 : ICMPv6 Header,
+  59 : No Next Header,
+  60 : Destination Options Header,
+}
+
+ipv6HeaderOptions : {
+  0 : Pad 1,
+  1 : Pad N,
+
+  5 : Router Alert Options,
+}
