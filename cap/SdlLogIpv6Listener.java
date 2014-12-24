@@ -149,7 +149,7 @@ public class SdlLogIpv6Listener extends SdlLogBaseListener {
     // Checksum.
     int checksum = ((bytes.remove(0) & 0x000000FF) << 8);
     checksum |= (bytes.remove(0) & 0x000000FF);
-    packet.detailLine("Checksum", checksum);
+    packet.detailLine("Checksum", String.format("0x%04X", checksum));
 
     // Data.
     niceBytes(packet, bytes, bytes.size());
