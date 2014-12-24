@@ -119,7 +119,11 @@ public class SdlLogIpv6Listener extends SdlLogBaseListener {
     int nextHeader = bytes.remove(0);
     String name = NEXT_HEADER_MAP.get(nextHeader);
     packet.detailLine("Next header",
-                      "" + nextHeader + (name == null ? "Unknown" : name));
+                      (""
+                       + nextHeader
+                       + " ("
+                       + (name == null ? "Unknown" : name)
+                       + ")"));
 
     // Hop limit.
     packet.detailLine("Hop limit", bytes.remove(0));
