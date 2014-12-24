@@ -1,11 +1,13 @@
 //
-// main.c
+// sdl-main.c
 //
 // Andrew Keesler
 //
 // December 5, 2014
 //
 // Main code for SDL.
+
+#define __SDL_MAIN_C__
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -68,7 +70,7 @@ int main(int argc, char *argv[])
     printf("Error: Log could not be started. (err : %d)\n", err);
 
   // Let the user do their thing.
-  if ((err = SDL_USER_MAIN()))
+  if ((err = SDL_USER_MAIN(argc, argv)))
     printf("Error: SDL_USER_MAIN() returned error.\n");
 
   // Maybe dump the log. This will be macro'd out if it is not used.

@@ -233,7 +233,7 @@ int asynchronusRawTwoWayTest(void)
   return 0;
 }
 
-int SDL_USER_MAIN(void)
+int main(void)
 {
   announce();
   run(nodeCountTest);

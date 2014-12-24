@@ -11,6 +11,12 @@
 #ifndef __SDL_H__
 #define __SDL_H__
 
+#ifndef __SDL_MAIN_C__
+#define main SDL_USER_MAIN
+#else
+int SDL_USER_MAIN(int argc, char *argv[]);
+#endif
+
 // Return values.
 #define SDL_SUCCESS 0x00
 #define SDL_ERROR_NETWORK_SATURATED 0x01
@@ -38,12 +44,7 @@
 #define SDL_MTU 255
 
 //
-// User must define this. It is like the main loop. Bitches.
-//
-int SDL_USER_MAIN(void);
-
-//
-// Utilities.
+// Communication.
 //
 
 // Does not block.
@@ -53,6 +54,10 @@ int sdlTransmit(unsigned char *data, int length);
 // Does block.
 // Length is in bytes.
 int sdlReceive(unsigned char *buffer, int length);
+
+//
+// Utilities.
+//
 
 int sdlGetNodeCount(void);
 
