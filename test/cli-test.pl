@@ -12,9 +12,9 @@ my $EXEC = "./build/sdl";
 Mcgoo::Announce;
 
 # Check to make sure we get usage with no args.
-my @outputs = `$EXEC`;
-chomp @outputs;
-Mcgoo::Expect @outputs, "Usage: sdl.*";
+#my @outputs = `$EXEC`;
+#chomp @outputs;
+#Mcgoo::Expect @outputs, "Usage: sdl.*";
 
 # Check to make sure no args to -n throws error.
 #@outputs = `$EXEC -n`;
