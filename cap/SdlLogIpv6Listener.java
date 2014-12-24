@@ -62,6 +62,8 @@ public class SdlLogIpv6Listener extends SdlLogBaseListener {
 
   // Returns next header.
   private Integer decodeIp(PacketDisplay packet, List<Integer> bytes) {
+    packet.headerLine("Ipv6", "Data"); // TODO: put something for the value here
+
     int first  = bytes.remove(0);
     int second = bytes.remove(1);
 
@@ -143,8 +145,8 @@ public class SdlLogIpv6Listener extends SdlLogBaseListener {
     PacketDisplay packet = new PacketDisplay();
     List<Integer> bytes = bytes(ctx.DATA().getText());
 
-    packet.headerLine("Time", "" + ctx.TIMESTAMP().getText() + " s");
-    packet.headerLine("Direction", ctx.DIRECTION().getText());
+    packet.titleLine("Time", "" + ctx.TIMESTAMP().getText() + " s");
+    packet.titleLine("Direction", ctx.DIRECTION().getText());
 
     Integer nextHeader = decodeIp(packet, bytes);
     if (nextHeader != null) {

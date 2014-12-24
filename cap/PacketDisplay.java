@@ -10,9 +10,17 @@
 /**
  * An abstraction for a packet display.
  *
- * Add header lines to it with {@link #headerLine} and detail lines to it
- * with {@line #detailLine}. Detail lines are more indented than header
- * lines are.
+ * You can add lines to the display using this <code>*line(String, String)</code>
+ * APIs. They are formatted as follows.
+ *
+ * Title Line Key : Title Line Value
+ *   Header Line Key : Header Line Value
+ *     Detail Line Key : Detail Line Value
+ *     Detail Line Key : Detail Line Value
+ *     Detail Line Key : Detail Line Value
+ *   Header Line Key : Header Line Value
+ *     Detail Line Key : Detail Line Value
+ *     Detail Line Key : Detail Line Value
  *
  * @author Andrew Keesler <ankeesler1@gmail.com>
  * @date December 15, 2014
@@ -23,13 +31,23 @@ public class PacketDisplay {
   private StringBuilder builder = new StringBuilder();
 
   /**
+   * Add a title line with the format <it>key: value</it>.
+   *
+   * @param key The key for the key value pair.
+   * @param value The value for the key value pair.
+   */
+  public void titleLine(String key, String value) {
+    kvp(key, value, 0); // no spaces for a title
+  }
+
+  /**
    * Add a header line with the format <it>key: value</it>.
    *
    * @param key The key for the key value pair.
    * @param value The value for the key value pair.
    */
   public void headerLine(String key, String value) {
-    kvp(key, value, true);
+    kvp(key, value, 2); // 2 spaces for a header
   }
 
   /**
@@ -39,7 +57,7 @@ public class PacketDisplay {
    * @param value The value for the key value pair.
    */
   public void detailLine(String key, int value) {
-    kvp(key, String.format("%d", value), false);    
+    kvp(key, String.format("%d", value), 4); //  4 spaces for a detail
   }
 
   /**
@@ -49,12 +67,15 @@ public class PacketDisplay {
    * @param value The value for the key value pair.
    */
   public void detailLine(String key, String value) {
-    kvp(key, value, false);    
+    kvp(key, value, 4); //  4 spaces for a detail
   }
 
-  private void kvp(String key, String value, boolean header) {
+  private void kvp(String key, String value, int spaces) {
+    StringBuffer buffer = new StringBuffer(spaces);
+    for (int i = 0; i < spaces; i ++)
+      buffer.append(' ');
     builder.append(String.format("%s%s: %s\n",
-                                 (header ? "" : "  "),
+                                 buffer.toString(),
                                  key,
                                  value));
   }
