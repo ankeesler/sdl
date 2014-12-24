@@ -27,6 +27,22 @@ public class SdlLogIpv6Listener extends SdlLogBaseListener {
     return bytes;
   }
 
+  // Organized by word.
+  private static void niceBytes(PacketDisplay packet, List<Integer> bytes, int length) {
+    StringBuilder builder = new StringBuilder();
+    int i = 0;
+    while (i < length) {
+      if (i % 4 == 3) {
+        builder.append(String.format("0x%02X", bytes.remove(0)));
+        packet.detailLine("Data", builder.toString());
+        builder.delete(0, builder.length());
+      } else {
+        builder.append(String.format("0x%02X, ", bytes.remove(0)));
+      }
+      i ++;
+    }
+  }
+
   private static String ipv6Address(List<Integer> bytes) throws Exception {
     StringBuilder address = new StringBuilder();
     boolean skippingZeros = false;
@@ -136,8 +152,7 @@ public class SdlLogIpv6Listener extends SdlLogBaseListener {
     packet.detailLine("Checksum", checksum);
 
     // Data.
-    while (!bytes.isEmpty())
-      packet.detailLine("Data", String.format("0x%02X", bytes.remove(0)));
+    niceBytes(packet, bytes, bytes.size());
   }
   
   @Override
