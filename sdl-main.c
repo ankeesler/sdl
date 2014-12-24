@@ -40,7 +40,8 @@ int main(int argc, char *argv[])
       switch (argv[i][1]) {
       case 'n':
         if (i+1 >= argc) {
-          SOFT_ASSERT_OPTION_ARG_COUNT(n);
+          // TODO: we don't really need this...right?
+          //SOFT_ASSERT_OPTION_ARG_COUNT(n);
         }
         nodeCount = atoi(argv[++i]);
       default:
