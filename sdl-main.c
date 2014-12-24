@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
   int err;
 
   // Get options.
-  if (argc == 1) {
+  if (0 /* argc == 1 */) {
     PRINT_USAGE();
     return 0;
   } else {
@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
   }
 
   // Validate the options.
-  if (nodeCount <= 0) {
+  if (0 /*nodeCount <= 0*/) {
     printf("Error: Node count must be at least 1.\n");
     return 2;
   }
