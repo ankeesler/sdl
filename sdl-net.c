@@ -30,11 +30,21 @@ static int head, tail;
 #define NETWORK_Q_IS_FULL()    (head == ((tail+1)%SDL_BANDWIDTH))
 #define NETWORK_Q_INCREMENT(n) (n = (n == SDL_BANDWIDTH-1 ? 0 : n+1))
 
-static int txHO = 0, rxHO = 0;
+static int maskHO;
+#define HO_MASK_INIT()      HO_MASK_CLEAR_ALL()
+#define HO_MASK_READ_TX()   (maskHO & 0x01) /* hardcode these so we can get atomic ops */
+#define HO_MASK_SET_TX()    maskHO |= 0x01  /* hardcode these so we can get atomic ops */
+#define HO_MASK_CLEAR_TX()  maskHO &= 0xFE  /* hardcode these so we can get atomic ops */
+#define HO_MASK_READ_RX()   (maskHO & 0x02) /* hardcode these so we can get atomic ops */
+#define HO_MASK_SET_RX()    maskHO |= 0x02  /* hardcode these so we can get atomic ops */
+#define HO_MASK_CLEAR_RX()  maskHO &= 0xFD  /* hardcode these so we can get atomic ops */
+#define HO_MASK_SET_ALL()   maskHO |= 0x03  /* hardcode these so we can get atomic ops */
+#define HO_MASK_CLEAR_ALL() maskHO &= 0x00  /* hardcode these so we can get atomic ops */
 
 int SDL_NETWORK_UP(void)
 {
-  return (head = tail = txHO = rxHO = 0);
+  HO_MASK_INIT();
+  return (head = tail = 0);
 }
 
 int SDL_NETWORK_DOWN(void)
@@ -47,12 +57,12 @@ int sdlTransmit(unsigned char *data, int length)
   // If someone else (including ourselves) is already
   // transmitting, then we will just cheat and call it a collision.
   // We do not currently use any CSMA mechanism.
-  if (txHO)
+  if (HO_MASK_READ_TX())
     return SDL_ERROR_COLLISION;
   else if (NETWORK_Q_IS_FULL())
     return SDL_ERROR_NETWORK_SATURATED;
   else
-    txHO = rxHO = 1;
+    HO_MASK_SET_ALL();
 
   // Deep copy.
   memcpy(networkQ[tail].data, data, length);
@@ -63,14 +73,14 @@ int sdlTransmit(unsigned char *data, int length)
 
   NETWORK_Q_INCREMENT(tail);
 
-  txHO = rxHO = 0;
+  HO_MASK_CLEAR_ALL();
 
   return SDL_SUCCESS;
 }
 
 int sdlReceive(unsigned char *buffer, int length)
 {
-  while (rxHO)
+  while (HO_MASK_READ_RX())
     ; // block
   
   // This is dangerous AF.
@@ -80,7 +90,7 @@ int sdlReceive(unsigned char *buffer, int length)
   // Don't rx right now because someone could steal data
   // that was meant for us.
   // Don't tx right now because...just don't! 
-  rxHO = txHO = 1;
+  HO_MASK_SET_ALL();
 
   // Deep copy. Find the first packet that is still alive.
   do {
@@ -93,14 +103,14 @@ int sdlReceive(unsigned char *buffer, int length)
       // Log. Will be stubbed out if client does not want to use it.
       sdlLogRx(buffer, length);
 
-      txHO = rxHO = 0;
+      HO_MASK_CLEAR_ALL();
 
       return SDL_SUCCESS;
     }
     NETWORK_Q_INCREMENT(head);
   } while (!NETWORK_Q_IS_EMPTY());
   
-  rxHO = txHO = 0;
+  HO_MASK_CLEAR_ALL();
   return SDL_ERROR_NETWORK_EMPTY;
 }
 
