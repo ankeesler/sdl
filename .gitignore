@@ -9,3 +9,6 @@ tuna.sdl
 
 # The decode jar
 cap/Decode.jar
+
+# emacs files
+*~
