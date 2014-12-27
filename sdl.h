@@ -24,15 +24,6 @@ int SDL_USER_MAIN(int argc, char *argv[]);
 #define SDL_ERROR_NETWORK_EMPTY 0x03
 #define SDL_STATUS_DATA_MTU_EXCEEDED 0x04
 
-// This is the port that SDL uses.
-#define SDL_PORT 8923
-
-// A pseudo-baud rate.
-#define SDL_BAUD 255
-
-// RX timeout.
-#define SDL_RCVTIMEO_S 1
-
 // Network 'bandwidth' in packets.
 #define SDL_BANDWIDTH 10
 
