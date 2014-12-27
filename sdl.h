@@ -46,10 +46,4 @@ int sdlTransmit(unsigned char *data, int length);
 // Length is in bytes.
 int sdlReceive(unsigned char *buffer, int length);
 
-//
-// Utilities.
-//
-
-int sdlGetNodeCount(void);
-
 #endif /* __SDL_H__ */

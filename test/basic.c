@@ -15,12 +15,6 @@
 #include "sdl.h"
 #include "sdl-log.h"
 
-int nodeCountTest(void)
-{
-  expect(sdlGetNodeCount() == 2);
-  return 0;
-}
-
 #define SHORT_PACKET {0x01, 0x02, 0x03, 0x04}
 #define SHORT_PACKET_LENGTH 4
 #define LONG_PACKET {0,1,2,4,8,16,32,64,128}
@@ -236,7 +230,6 @@ int asynchronusRawTwoWayTest(void)
 int main(void)
 {
   announce();
-  run(nodeCountTest);
   run(synchronusRawTest);
   run(asynchronusRawBasicTest);
   run(asynchronusRawOneWayTest);

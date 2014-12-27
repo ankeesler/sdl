@@ -24,40 +24,9 @@
   PRINT_USAGE();                                                    \
   return 1;
 
-static int nodeCount = 0;
-int sdlGetNodeCount(void) { return nodeCount; }
-
 int main(int argc, char *argv[])
 {
   int err;
-
-  // Get options.
-  if (0 /* argc == 1 */) {
-    PRINT_USAGE();
-    return 0;
-  } else {
-    int i = 1;
-    while (i < argc) {
-      // Starting from the top of this loop assumes an option -[a-z].
-      switch (argv[i][1]) {
-      case 'n':
-        if (i+1 >= argc) {
-          // TODO: we don't really need this...right?
-          //SOFT_ASSERT_OPTION_ARG_COUNT(n);
-        }
-        nodeCount = atoi(argv[++i]);
-      default:
-        ; // pass
-      }
-      i ++;
-    }
-  }
-
-  // Validate the options.
-  if (0 /*nodeCount <= 0*/) {
-    printf("Error: Node count must be at least 1.\n");
-    return 2;
-  }
 
   // Try to start the network.
   if ((err = SDL_NETWORK_UP())) {
