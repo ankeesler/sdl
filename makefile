@@ -1,5 +1,4 @@
-
-all:lib
+all:test
 
 CC=cc
 CFLAGS=-g -Wall -Werror -fpic
@@ -16,8 +15,8 @@ $(BUILD_DIR_CREATED):
 clean: clean-cap
 	rm -frd ./*.o $(SDL_LIB) $(BUILD_DIR) $(SDL_LOG_TEST_FILE)
 
-SDL_FILES=sdl-main.c sdl-net.c sdl-log.c
-SDL_OBJ=$(shell echo $(SDL_FILES) | sed -E -e 's/([a-z\-]+).c/$(BUILD_DIR)\/\1.o/g')
+SDL_FILES=sdl-main.c sdl-net.c sdl-log.c sdl-id.c
+SDL_OBJ=$(patsubst %.c,$(BUILD_DIR)/%.o,$(SDL_FILES))
 
 SDL_LOG_TEST_FILE=tuna.sdl
 
@@ -51,7 +50,8 @@ run-basic-test: $(BUILD_DIR)/basic-test
 $(BUILD_DIR)/log-test: $(BUILD_DIR)/log.o \
 											 $(BUILD_DIR)/sdl-log-on.o \
 	                     $(BUILD_DIR)/sdl-main.o \
-                       $(BUILD_DIR)/sdl-net.o
+                       $(BUILD_DIR)/sdl-net.o \
+											 $(BUILD_DIR)/sdl-id.o
 	$(CC) -g -Wall -lmcgoo -o $@ $^
 
 run-log-test: $(BUILD_DIR)/log-test

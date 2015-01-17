@@ -34,6 +34,20 @@ int SDL_USER_MAIN(int argc, char *argv[]);
 // In bytes.
 #define SDL_MTU 255
 
+// The maximum number of hosts for one network.
+#define SDL_MAX_HOSTS 10
+
+//
+// Management.
+//
+
+// Pass a positive integer for a key. If it hasn't seen it yet,
+// it will give you a new id. If it has seen it, it will
+// give you the id that was given before.
+// Returns -1 on failure. This can happen if a negative key is passed
+// or the network is full.
+int sdlInterfaceId(int key);
+
 //
 // Communication.
 //

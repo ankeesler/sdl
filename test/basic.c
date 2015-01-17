@@ -227,13 +227,41 @@ int asynchronusRawTwoWayTest(void)
   return 0;
 }
 
+int idTest(void)
+{
+  // Get an id. It should be positive.
+  int id1 = sdlInterfaceId(1);
+  expect(id1 > 0);
+  
+  // Should be able to get the same id with the same key.
+  expect(sdlInterfaceId(1) == id1);
+  
+  // Should get a different id with a different key.
+  int id2 = sdlInterfaceId(2);
+  expect(id1 != id2);
+  
+  // Should still be able to get both ids with the same keys.
+  expect(sdlInterfaceId(1) == id1);
+  expect(sdlInterfaceId(2) == id2);
+  
+  // Should be able to get a new id with a weird number.
+  int id3 = sdlInterfaceId(123123123);
+  expect(id3 != id1);
+  expect(id3 != id2);
+
+  return 0;
+}
+
 int main(void)
 {
   announce();
+  /*
   run(synchronusRawTest);
   run(asynchronusRawBasicTest);
   run(asynchronusRawOneWayTest);
   run(asynchronusRawTwoWayTest);
+  */
+  run(idTest);
   return 0;
 }
 

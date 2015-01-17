@@ -33,6 +33,9 @@ int main(int argc, char *argv[])
     printf("Error: Network could not be brought up. (err : %d)\n", err);
     return err;
   }
+  
+  // Reset the interface ids.
+  sdlResetInterfaceIds();
 
   // Maybe start the log. This will be macro'd out if it is not used.
   if ((err = sdlLogInit()))
