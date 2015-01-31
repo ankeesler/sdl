@@ -252,6 +252,21 @@ int idTest(void)
   return 0;
 }
 
+int deadPacketTest(void)
+{
+  // Send something.
+  unsigned char packet[5];
+  expect(!sdlTransmit(packet, 5));
+  
+  // Wait over the packet lifetime.
+  usleep(SDL_PACKET_LIFETIME_US);
+  
+  // There should be nothing in the network.
+  expect(sdlReceive(packet, 5) == SDL_ERROR_NETWORK_EMPTY);
+  
+  return 0;
+}
+
 int main(void)
 {
   announce();
@@ -260,6 +275,7 @@ int main(void)
   run(asynchronusRawOneWayTest);
   run(asynchronusRawTwoWayTest);
   run(idTest);
+  run(deadPacketTest);
   return 0;
 }
 
