@@ -13,6 +13,7 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/time.h>
+#include "unistd.h"
 
 #include "sdl.h"
 #include "sdl-log.h"
@@ -30,6 +31,7 @@ static int head, tail;
 #define NETWORK_Q_IS_FULL()    (head == ((tail+1)%SDL_BANDWIDTH))
 #define NETWORK_Q_INCREMENT(n) (n = (n == SDL_BANDWIDTH-1 ? 0 : n+1))
 
+// This is basically our mutex for the networkQ.
 static int maskHO;
 #define HO_MASK_INIT()      HO_MASK_CLEAR_ALL()
 #define HO_MASK_READ_TX()   (maskHO & 0x01) /* hardcode these so we can get atomic ops */
@@ -40,6 +42,11 @@ static int maskHO;
 #define HO_MASK_CLEAR_RX()  maskHO &= 0xFD  /* hardcode these so we can get atomic ops */
 #define HO_MASK_SET_ALL()   maskHO |= 0x03  /* hardcode these so we can get atomic ops */
 #define HO_MASK_CLEAR_ALL() maskHO &= 0x00  /* hardcode these so we can get atomic ops */
+
+// CSMA stuff.
+int sdlCsmaOn      = SDL_CSMA_ON;
+int sdlCsmaRetries = SDL_CSMA_RETRIES;
+int randMask    = 0x00000007;
 
 int SDL_NETWORK_UP(void)
 {
@@ -52,17 +59,30 @@ int SDL_NETWORK_DOWN(void)
   return 0;
 }
 
-int sdlTransmit(unsigned char *data, int length)
+static int transmit(unsigned char *data,
+                    int length,
+                    int timeoutUS,
+                    int retries)
 {
   // If someone else (including ourselves) is already
-  // transmitting, then we will just cheat and call it a collision.
-  // We do not currently use any CSMA mechanism.
-  if (HO_MASK_READ_TX())
-    return SDL_ERROR_COLLISION;
-  else if (NETWORK_Q_IS_FULL())
+  // transmitting, then the CSMA mechanism may fix that.
+  // If we are transmitting, then we will not be able to transmit
+  // even with CSMA, and that sounds about right.
+  if (HO_MASK_READ_TX()) {
+    if (sdlCsmaIsOn() && retries) {
+      usleep(timeoutUS);
+      return transmit(data,
+                      length,
+                      ((1 << (randMask & rand())) - 1),
+                      -- retries);
+    } else {
+      return SDL_ERROR_COLLISION;
+    }
+  } else if (NETWORK_Q_IS_FULL()) {
     return SDL_ERROR_NETWORK_SATURATED;
-  else
+  } else {
     HO_MASK_SET_ALL();
+  }
 
   // Deep copy.
   memcpy(networkQ[tail].data, data, length);
@@ -75,7 +95,12 @@ int sdlTransmit(unsigned char *data, int length)
 
   HO_MASK_CLEAR_ALL();
 
-  return SDL_SUCCESS;
+  return SDL_SUCCESS;  
+}
+
+int sdlTransmit(unsigned char *data, int length)
+{
+  return transmit(data, length, 0, 0);
 }
 
 int sdlReceive(unsigned char *buffer, int length)

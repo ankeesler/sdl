@@ -37,6 +37,21 @@ int SDL_USER_MAIN(int argc, char *argv[]);
 // The maximum number of hosts for one network.
 #define SDL_MAX_HOSTS 10
 
+// CSMA.
+
+// Whether or not to use CSMA mechanism per transmit.
+extern int sdlCsmaOn;
+#define SDL_CSMA_ON 1
+#define sdlCsmaIsOn()   (sdlCsmaOn)
+#define sdlCsmaSetOn()  (sdlCsmaOn = 1)
+#define sdlCsmaSetOff() (sdlCsmaOn = 0)
+
+// CSMA parameters.
+extern int sdlCsmaRetries;
+#define SDL_CSMA_RETRIES 3
+#define sdlCsmaSetRetries(r) (sdlCsmaRetries = r)
+#define sdlCsmaGetRetries()  (sdlCsmaRetries)
+
 //
 // Management.
 //
