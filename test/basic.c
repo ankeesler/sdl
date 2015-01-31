@@ -255,12 +255,10 @@ int idTest(void)
 int main(void)
 {
   announce();
-  /*
   run(synchronusRawTest);
   run(asynchronusRawBasicTest);
   run(asynchronusRawOneWayTest);
   run(asynchronusRawTwoWayTest);
-  */
   run(idTest);
   return 0;
 }
