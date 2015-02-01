@@ -16,14 +16,6 @@
 #include "sdl-log.h"
 #include "sdl-internal.h"
 
-#define USAGE "sdl -n nodeCount"
-#define PRINT_USAGE() printf("Usage: %s\n", USAGE);
-
-#define SOFT_ASSERT_OPTION_ARG_COUNT(opt)                           \
-  printf("Error: Incorrect argument count for option %s.\n", #opt); \
-  PRINT_USAGE();                                                    \
-  return 1;
-
 int main(int argc, char *argv[])
 {
   int err;
