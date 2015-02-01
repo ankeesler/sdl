@@ -25,10 +25,16 @@ static unsigned char longPacket[] = LONG_PACKET;
 static unsigned char shortBuffer[SHORT_PACKET_LENGTH];
 static unsigned char longBuffer[LONG_PACKET_LENGTH];
 
+#define expectSdlEmpty() expect(!sdlActivity())
+#define expectSdlNotEmpty() expect(sdlActivity())
+
 int synchronusRawTest(void)
 {
+  expectSdlEmpty();
+  
   // One node sends something.
   expect(!sdlTransmit(shortPacket, SHORT_PACKET_LENGTH));
+  expectSdlNotEmpty();
 
   // The other node receives it.
   expect(!sdlReceive(shortBuffer, SHORT_PACKET_LENGTH));
@@ -36,6 +42,7 @@ int synchronusRawTest(void)
 
   // The other node sends something.
   expect(!sdlTransmit(longPacket, LONG_PACKET_LENGTH));
+  expectSdlNotEmpty();
 
   // The other node receives it.
   expect(!sdlReceive(longBuffer, LONG_PACKET_LENGTH));
@@ -54,6 +61,7 @@ int synchronusRawTest(void)
   // One node sends two things.
   expect(!sdlTransmit(longPacket, LONG_PACKET_LENGTH));
   expect(!sdlTransmit(shortPacket, SHORT_PACKET_LENGTH));
+  expectSdlNotEmpty();
   
   // The other node receives the first of them.
   expect(!sdlReceive(longBuffer, LONG_PACKET_LENGTH));
@@ -78,6 +86,7 @@ static void *node1BasicTask(void *data)
 {
   // tx...
   expect(!sdlTransmit(shortBuffer, SHORT_PACKET_LENGTH));
+  expectSdlNotEmpty();
   
   pthread_exit(NULL);
 }

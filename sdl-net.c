@@ -151,3 +151,9 @@ static int packetIsAlive(QData *data, struct timeval *now)
             + (diffS * 1000000)); // microseconds per second
   return (diffUS < SDL_PACKET_LIFETIME_US);
 }
+
+int sdlActivity(void)
+{
+  return (head > tail ? head - tail : tail - head);
+}
+

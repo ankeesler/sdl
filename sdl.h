@@ -75,4 +75,7 @@ int sdlTransmit(unsigned char *data, int length);
 // Length is in bytes.
 int sdlReceive(unsigned char *buffer, int length);
 
+// Do something kinda like a CCA.
+int sdlActivity(void);
+
 #endif /* __SDL_H__ */
