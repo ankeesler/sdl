@@ -23,6 +23,7 @@ int SDL_USER_MAIN(int argc, char *argv[]);
 #define SDL_ERROR_COLLISION 0x02
 #define SDL_ERROR_NETWORK_EMPTY 0x03
 #define SDL_STATUS_DATA_MTU_EXCEEDED 0x04
+#define SDL_ERROR_NETWORK_UP 0x05
 
 // Network 'bandwidth' in packets.
 #define SDL_BANDWIDTH 10
