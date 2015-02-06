@@ -18,7 +18,7 @@
 
 int main(int argc, char *argv[])
 {
-  int err;
+  int err = 0;
 
   // Try to start the network.
   if ((err = SDL_NETWORK_UP())) {
