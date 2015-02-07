@@ -20,8 +20,6 @@ SDL_OBJ=$(patsubst %.c,$(BUILD_DIR)/%.o,$(SDL_FILES))
 
 SDL_LOG_TEST_FILE=tuna.sdl
 
-SDL_CALLBACK_STUB_OBJ=$(BUILD_DIR)/sdl-stub.o
-
 $(BUILD_DIR)/%.o: %.c $(BUILD_DIR_CREATED)
 	$(CC) -g -Wall -Werror -o $@ -c $<
 
@@ -31,15 +29,7 @@ $(BUILD_DIR)/%.o: test/%.c $(BUILD_DIR_CREATED)
 $(BUILD_DIR)/sdl-log-on.o: sdl-log.c $(BUILD_DIR_CREATED)
 	$(CC) -g -DSDL_LOG -DSDL_LOG_FILE=\"$(SDL_LOG_TEST_FILE)\" -I. -o $@ -c $<
 
-$(BUILD_DIR)/sdl: $(SDL_OBJ) $(SDL_CALLBACK_STUB_OBJ)
-	$(CC) -g -Wall -Werror -o $@ $^
-
-test: run-cli-test run-basic-test run-full-log-test
-
-CLI_TEST=test/cli-test.pl
-
-run-cli-test: $(BUILD_DIR)/sdl
-	./test/cli-test.pl
+test: run-basic-test run-full-log-test
 
 $(BUILD_DIR)/basic-test: $(BUILD_DIR)/basic.o $(BUILD_DIR)/sdl-log.o $(SDL_OBJ)
 	$(CC) -g -Wall -lmcgoo -o $@ $^
