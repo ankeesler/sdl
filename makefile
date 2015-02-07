@@ -1,7 +1,7 @@
 all:test
 
 CC=cc
-CFLAGS=-g -Wall -Werror -fpic
+CFLAGS=-g -Wall -Werror -fpic -I.
 LIBFLAGS=-shared
 SHELL=sh
 
@@ -49,11 +49,42 @@ run-log-test: $(BUILD_DIR)/log-test
 
 run-full-log-test: run-log-test
 	./test/log-test.pl
-	
+
 $(BUILD_DIR)/ipc-test: $(SDL_OBJ) $(BUILD_DIR)/ipc.o
 	$(CC) -g -Wall -lmcgoo -o $@ $^
 	
 run-ipc-test: $(BUILD_DIR)/ipc-test
+	./$<
+	
+#
+# TEST APPS
+#
+
+SERVER_DIR_CREATED=$(BUILD_DIR)/server/created
+$(SERVER_DIR_CREATED): $(BUILD_DIR_CREATED)
+	mkdir $(@D) && touch $@
+$(BUILD_DIR)/server/%.o: %.c | $(SERVER_DIR_CREATED)
+	$(CC) $(CFLAGS) -c $< -o $@
+$(BUILD_DIR)/server/%.o: nodes/%.c | $(SERVER_DIR_CREATED)
+	$(CC) $(CFLAGS) -c $< -o $@
+SERVER_OBJ=$(patsubst %.c, $(BUILD_DIR)/server/%.o, $(SDL_FILES) server.c)
+$(BUILD_DIR)/server/server: $(SERVER_OBJ) | $(BUILD_DIR_CREATED)
+	$(CC) $(CFLAGS) -o $@ $^
+run-server: $(BUILD_DIR)/server/server
+	./$<
+
+
+CLIENT_DIR_CREATED=$(BUILD_DIR)/client/created
+$(CLIENT_DIR_CREATED): $(BUILD_DIR_CREATED)
+	mkdir $(@D) && touch $@
+$(BUILD_DIR)/client/%.o: %.c | $(CLIENT_DIR_CREATED)
+	$(CC) $(CFLAGS) -c $< -o $@
+$(BUILD_DIR)/client/%.o: nodes/%.c | $(CLIENT_DIR_CREATED)
+	$(CC) $(CFLAGS) -c $< -o $@
+CLIENT_OBJ=$(patsubst %.c, $(BUILD_DIR)/client/%.o, $(SDL_FILES) client.c)
+$(BUILD_DIR)/client/client: $(CLIENT_OBJ) | $(BUILD_DIR_CREATED)
+	$(CC) $(CFLAGS) -o $@ $^
+run-client: $(BUILD_DIR)/client/client
 	./$<
 
 #
