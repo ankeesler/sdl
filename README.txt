@@ -7,3 +7,9 @@ SDL 01 - Network Simulator.
   - CSMA support.
   - CCA support.
   - Configurable network parameters like MTU, packet lifetime, max hosts, and bandwidth.
+
+SDL 02 - IPC Support.
+  - Interprocess communication support.
+  - Per-process interface id.
+  - Packet sequence number support.
+  - MAC packet filtering.
