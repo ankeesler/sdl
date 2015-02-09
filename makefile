@@ -29,7 +29,7 @@ $(BUILD_DIR)/%.o: test/%.c $(BUILD_DIR_CREATED)
 $(BUILD_DIR)/sdl-log-on.o: sdl-log.c $(BUILD_DIR_CREATED)
 	$(CC) -g -DSDL_LOG -DSDL_LOG_FILE=\"$(SDL_LOG_TEST_FILE)\" -I. -o $@ -c $<
 
-test: run-basic-test run-full-log-test
+test: run-basic-test run-full-log-test run-snet-test
 
 $(BUILD_DIR)/basic-test: $(BUILD_DIR)/basic.o $(BUILD_DIR)/sdl-log.o $(SDL_OBJ)
 	$(CC) -g -Wall -lmcgoo -o $@ $^
@@ -50,6 +50,12 @@ run-log-test: $(BUILD_DIR)/log-test
 run-full-log-test: run-log-test
 	./test/log-test.pl
 
+$(BUILD_DIR)/ipc-test: $(SDL_OBJ) $(BUILD_DIR)/ipc.o
+	$(CC) -g -Wall -lmcgoo -o $@ $^
+	
+run-ipc-test: $(BUILD_DIR)/ipc-test
+	./$<
+	
 #
 # TEST APPS
 #
@@ -64,9 +70,9 @@ $(BUILD_DIR)/server/%.o: nodes/%.c | $(SERVER_DIR_CREATED)
 SERVER_OBJ=$(patsubst %.c, $(BUILD_DIR)/server/%.o, $(SDL_FILES) server.c)
 $(BUILD_DIR)/server/server: $(SERVER_OBJ) | $(BUILD_DIR_CREATED)
 	$(CC) $(CFLAGS) -o $@ $^
+server-test-app: $(BUILD_DIR)/server/server
 run-server: $(BUILD_DIR)/server/server
 	./$<
-
 
 CLIENT_DIR_CREATED=$(BUILD_DIR)/client/created
 $(CLIENT_DIR_CREATED): $(BUILD_DIR_CREATED)
@@ -78,7 +84,21 @@ $(BUILD_DIR)/client/%.o: nodes/%.c | $(CLIENT_DIR_CREATED)
 CLIENT_OBJ=$(patsubst %.c, $(BUILD_DIR)/client/%.o, $(SDL_FILES) client.c)
 $(BUILD_DIR)/client/client: $(CLIENT_OBJ) | $(BUILD_DIR_CREATED)
 	$(CC) $(CFLAGS) -o $@ $^
+client-test-app: $(BUILD_DIR)/client/client
 run-client: $(BUILD_DIR)/client/client
+	./$<
+
+#
+# SNET
+#
+
+$(BUILD_DIR)/snet.o: snet/snet.c | $(BUILD_DIR_CREATED)
+	$(CC) $(CFLAGS) -o $@ -c $<
+
+$(BUILD_DIR)/snet-test: $(BUILD_DIR)/snet.o $(BUILD_DIR)/snet-test.o | $(BUILD_DIR_CREATED)
+	$(CC) $(CFLAGS) -lmcgoo -o $@ $^
+
+run-snet-test: $(BUILD_DIR)/snet-test server-test-app client-test-app
 	./$<
 
 #
