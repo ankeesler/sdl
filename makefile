@@ -50,12 +50,6 @@ run-log-test: $(BUILD_DIR)/log-test
 run-full-log-test: run-log-test
 	./test/log-test.pl
 
-$(BUILD_DIR)/ipc-test: $(SDL_OBJ) $(BUILD_DIR)/ipc.o
-	$(CC) -g -Wall -lmcgoo -o $@ $^
-	
-run-ipc-test: $(BUILD_DIR)/ipc-test
-	./$<
-	
 #
 # TEST APPS
 #
