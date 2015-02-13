@@ -35,7 +35,7 @@ static int nodesInNetwork = 0;
 
 void snetManagementInit(void)
 {
-  int i = 0;
+  int i;
   for (i = 0; i < SDL_MAX_HOSTS; i ++)
     nodePool[i].mask = 0;
   nodesInNetwork = 0;
@@ -49,8 +49,8 @@ void snetManagementDeinit(void)
 // Returns the next available node index, or -1 if there is none.
 static int nextAvailableNode(void)
 {
-  int i = 0;
-  while (i < SDL_MAX_HOSTS) {
+  int i;
+  for (i = 0; i < SDL_MAX_HOSTS; i ++) {
     if (!(nodePool[i].mask & SNET_NODE_MASK_USED)) {
       return i;
     }

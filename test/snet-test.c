@@ -48,9 +48,42 @@ int singleNodeTest(void)
   return 0;
 }
 
+int doubleNodeTest(void)
+{
+  SnetNode *client, *server;
+
+  snetManagementInit();  
+
+  // Create a client and a server.
+  expect((int)(client = snetNodeMake("build/client/client", "client")));
+  expect((int)(server = snetNodeMake("build/server/server", "server")));
+  expect(snetNodeCount() == 0);
+  
+  // Add them both to the network.
+  expect(!snetNodeAdd(client));
+  expect(!snetNodeAdd(server));
+  expect(snetNodeCount() == 2);
+
+  // Remove them both, in opposite order, from the network.
+  expect(!snetNodeRemove(server));
+  expect(!snetNodeRemove(client));
+  expect(snetNodeCount() == 0);
+
+  // Add the client, then add the server, the remove the client.
+  expect(!snetNodeAdd(client));
+  expect(!snetNodeAdd(server));
+  expect(!snetNodeRemove(client));
+  expect(snetNodeCount() == 1);
+
+  snetManagementDeinit();
+
+  return 0;
+}
+
 int main(void)
 {
   announce();
   run(singleNodeTest);
+  run(doubleNodeTest);
   return 0;
 }
