@@ -8,7 +8,7 @@
 // Client test application.
 //
 
-#include "sdl.h"
+#include "snet/snet.h"
 
 int main(void)
 {

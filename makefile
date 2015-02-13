@@ -52,10 +52,26 @@ run-full-log-test: run-log-test
 
 $(BUILD_DIR)/ipc-test: $(SDL_OBJ) $(BUILD_DIR)/ipc.o
 	$(CC) -g -Wall -lmcgoo -o $@ $^
-	
+
 run-ipc-test: $(BUILD_DIR)/ipc-test
 	./$<
-	
+
+#
+# SNET
+#
+
+SNET_CHILD_FILES=snet-main.c
+
+$(BUILD_DIR)/%.o: snet/%.c | $(BUILD_DIR_CREATED)
+	$(CC) $(CFLAGS) -o $@ -c $<
+
+SNET_TEST_OBJ=$(BUILD_DIR)/snet.o $(BUILD_DIR)/snet-test.o
+$(BUILD_DIR)/snet-test: $(SNET_TEST_OBJ) | $(BUILD_DIR_CREATED)
+	$(CC) $(CFLAGS) -lmcgoo -o $@ $^
+
+run-snet-test: $(BUILD_DIR)/snet-test server-test-app client-test-app
+	./$<
+
 #
 # TEST APPS
 #
@@ -67,11 +83,13 @@ $(BUILD_DIR)/server/%.o: %.c | $(SERVER_DIR_CREATED)
 	$(CC) $(CFLAGS) -c $< -o $@
 $(BUILD_DIR)/server/%.o: nodes/%.c | $(SERVER_DIR_CREATED)
 	$(CC) $(CFLAGS) -c $< -o $@
-SERVER_OBJ=$(patsubst %.c, $(BUILD_DIR)/server/%.o, $(SDL_FILES) server.c)
+$(BUILD_DIR)/server/%.o: snet/%.c | $(SERVER_DIR_CREATED)
+	$(CC) $(CFLAGS) -c $< -o $@
+SERVER_OBJ=$(patsubst %.c, $(BUILD_DIR)/server/%.o, $(SNET_CHILD_FILES) server.c )
 $(BUILD_DIR)/server/server: $(SERVER_OBJ) | $(BUILD_DIR_CREATED)
 	$(CC) $(CFLAGS) -o $@ $^
 server-test-app: $(BUILD_DIR)/server/server
-run-server: $(BUILD_DIR)/server/server
+run-server: server-test-app
 	./$<
 
 CLIENT_DIR_CREATED=$(BUILD_DIR)/client/created
@@ -81,24 +99,13 @@ $(BUILD_DIR)/client/%.o: %.c | $(CLIENT_DIR_CREATED)
 	$(CC) $(CFLAGS) -c $< -o $@
 $(BUILD_DIR)/client/%.o: nodes/%.c | $(CLIENT_DIR_CREATED)
 	$(CC) $(CFLAGS) -c $< -o $@
-CLIENT_OBJ=$(patsubst %.c, $(BUILD_DIR)/client/%.o, $(SDL_FILES) client.c)
+$(BUILD_DIR)/client/%.o: snet/%.c | $(CLIENT_DIR_CREATED)
+	$(CC) $(CFLAGS) -c $< -o $@
+CLIENT_OBJ=$(patsubst %.c, $(BUILD_DIR)/client/%.o, $(SNET_CHILD_FILES) client.c)
 $(BUILD_DIR)/client/client: $(CLIENT_OBJ) | $(BUILD_DIR_CREATED)
 	$(CC) $(CFLAGS) -o $@ $^
 client-test-app: $(BUILD_DIR)/client/client
-run-client: $(BUILD_DIR)/client/client
-	./$<
-
-#
-# SNET
-#
-
-$(BUILD_DIR)/snet.o: snet/snet.c | $(BUILD_DIR_CREATED)
-	$(CC) $(CFLAGS) -o $@ -c $<
-
-$(BUILD_DIR)/snet-test: $(BUILD_DIR)/snet.o $(BUILD_DIR)/snet-test.o | $(BUILD_DIR_CREATED)
-	$(CC) $(CFLAGS) -lmcgoo -o $@ $^
-
-run-snet-test: $(BUILD_DIR)/snet-test server-test-app client-test-app
+run-client: client-test-app
 	./$<
 
 #

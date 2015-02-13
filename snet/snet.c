@@ -14,8 +14,8 @@
 #include <sys/wait.h>
 #include <signal.h>
 
-#include "sdl.h"
 #include "snet.h"
+#include "snet-internal.h"
 
 // Prototypes.
 void nodeRemoveReally(SnetNode *node);
@@ -27,27 +27,27 @@ void nodeRemoveReally(SnetNode *node);
 #define SNET_NODE_MASK_ON_NETWORK (1 << 1)
 
 // Possible nodes.
-static SnetNode nodePool[SDL_MAX_HOSTS];
+static SnetNode nodePool[SNET_MAX_HOSTS];
 #define nodeIsUnknown(node)                     \
   (!(node)                                      \
    || ((node) < nodePool)                       \
-   || ((node) > (nodePool + SDL_MAX_HOSTS)))
+   || ((node) > (nodePool + SNET_MAX_HOSTS)))
 
 // The number of nodes added to the network.
 static int nodesInNetwork = 0;
 
 // Signal handler for parent.
 // When finished, the child process will send the parent the
-// SIGUSR1 signal.
+// CHILD_QUIT_SIGNAL signal.
 
 void signalHandler(int signal)
 {
   int i;
 
-  if (signal == SIGUSR1) {
+  if (signal == CHILD_QUIT_SIGNAL) {
     // For each node, check which one says that it is on the network,
     // but the process is not running.
-    for (i = 0; i < SDL_MAX_HOSTS; i ++) {
+    for (i = 0; i < SNET_MAX_HOSTS; i ++) {
       if (nodePool[i].mask & SNET_NODE_MASK_ON_NETWORK
           && kill(0, nodePool[i].pid)) {
         nodeRemoveReally(nodePool + i);        
@@ -60,12 +60,12 @@ void signalHandler(int signal)
 void snetManagementInit(void)
 {
   int i;
-  for (i = 0; i < SDL_MAX_HOSTS; i ++)
+  for (i = 0; i < SNET_MAX_HOSTS; i ++)
     nodePool[i].mask = 0;
   nodesInNetwork = 0;
 
   // Set signal handler.
-  signal(SIGUSR1, signalHandler);
+  signal(CHILD_QUIT_SIGNAL, signalHandler);
 }
 
 void snetManagementDeinit(void)
@@ -78,7 +78,7 @@ void snetManagementDeinit(void)
 static int nextAvailableNode(void)
 {
   int i;
-  for (i = 0; i < SDL_MAX_HOSTS; i ++) {
+  for (i = 0; i < SNET_MAX_HOSTS; i ++) {
     if (!(nodePool[i].mask & SNET_NODE_MASK_USED)) {
       return i;
     }
@@ -104,7 +104,6 @@ SnetNode *snetNodeMake(const char *image, const char *name)
 int snetNodeAdd(SnetNode *node)
 {
   pid_t newPid;
-  int ret;
 
   if (nodeIsUnknown(node))
     return SNET_STATUS_UNKNOWN_NODE;
@@ -122,8 +121,7 @@ int snetNodeAdd(SnetNode *node)
     node->pid = newPid;
   } else {
     // Child.
-    ret = execl(node->image, 0);
-    exit(ret);
+    execl(node->image, 0);
   }
   
   nodesInNetwork ++;
@@ -139,6 +137,7 @@ int snetNodeRemove(SnetNode *node)
   if (!(node->mask & SNET_NODE_MASK_ON_NETWORK))
     return SNET_STATUS_INVALID_NETWORK_STATE;
 
+  kill(node->pid, SIGKILL);
   nodeRemoveReally(node);
 
   return SNET_STATUS_SUCCESS;

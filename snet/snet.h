@@ -13,12 +13,22 @@
 
 #include <unistd.h>
 
+#if !defined(__SNET_C__) && !defined(__SNET_TEST_C__)
+#define main SNET_MAIN
+#else
+int SNET_MAIN(int argc, char *argv[]);
+#endif
+
 // Status.
 
 #define SNET_STATUS_SUCCESS 0
 #define SNET_STATUS_UNKNOWN_NODE 1
 #define SNET_STATUS_INVALID_NETWORK_STATE 2
 #define SNET_STATUS_CANNOT_START_NODE 3
+
+// Configuration.
+
+#define SNET_MAX_HOSTS 10
 
 // Management.
 

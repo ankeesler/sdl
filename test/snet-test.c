@@ -10,6 +10,7 @@
 
 #include <unit-test.h>
 
+#define __SNET_TEST_C__
 #include "snet/snet.h"
 
 int singleNodeTest(void)
