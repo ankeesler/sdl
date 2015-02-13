@@ -23,11 +23,25 @@ int singleNodeTest(void)
   expect((int)node);
   expect(snetNodeCount() == 0);
 
-  snetNodeAdd(node);
+  // We can't remove the node from the network since it isn't on it.
+  expect(snetNodeRemove(node));
+  expect(snetNodeCount() == 0);
+
+  // But we should be able to add it.
+  expect(!snetNodeAdd(node));
   expect(snetNodeCount() == 1);
 
-  snetNodeRemove(node);
+  // We shouldn't be able to re-add the node to the network yet.
+  expect(snetNodeAdd(node));
+  expect(snetNodeCount() == 1);
+
+  // But we should be able to remove it.
+  expect(!snetNodeRemove(node));
   expect(snetNodeCount() == 0);
+
+  // And we should be able to add it again.
+  expect(!snetNodeAdd(node));
+  expect(snetNodeCount() == 1);
 
   snetManagementDeinit();
 

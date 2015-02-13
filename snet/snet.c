@@ -25,6 +25,10 @@
 
 // Possible nodes.
 static SnetNode nodePool[SDL_MAX_HOSTS];
+#define nodeIsUnknown(node)                     \
+  (!(node)                                      \
+   || ((node) < nodePool)                       \
+   || ((node) > (nodePool + SDL_MAX_HOSTS)))
 
 // The number of nodes added to the network.
 static int nodesInNetwork = 0;
@@ -69,23 +73,21 @@ SnetNode *snetNodeMake(const char *image, const char *name)
   return node;
 }
 
-void snetNodeAdd(SnetNode *node)
+int snetNodeAdd(SnetNode *node)
 {
   pid_t newPid;
 
-  // TODO: return some error here.
-  if (!node)
-    return;
+  if (nodeIsUnknown(node))
+    return SNET_STATUS_UNKNOWN_NODE;
 
-  // TODO: return some error here too.
   if (node->mask & SNET_NODE_MASK_ON_NETWORK)
-    return;
+    return SNET_STATUS_INVALID_NETWORK_STATE;
 
   node->mask |= SNET_NODE_MASK_ON_NETWORK;
 
   if ((newPid = fork()) == -1) {
     // Failure.
-    // TODO: return error.
+    return SNET_STATUS_CANNOT_START_NODE;
   } else if (newPid) {
     // Parent.
     node->pid = newPid;
@@ -95,23 +97,25 @@ void snetNodeAdd(SnetNode *node)
   }
   
   nodesInNetwork ++;
+
+  return SNET_STATUS_SUCCESS;
 }
 
-void snetNodeRemove(SnetNode *node)
+int snetNodeRemove(SnetNode *node)
 {
-  // TODO: return some error here.
-  if (!node)
-    return;
+  if (nodeIsUnknown(node))
+    return SNET_STATUS_UNKNOWN_NODE;
 
-  // TODO: return some error here too.
   if (!(node->mask & SNET_NODE_MASK_ON_NETWORK))
-    return;
+    return SNET_STATUS_INVALID_NETWORK_STATE;
 
   node->mask &= ~SNET_NODE_MASK_ON_NETWORK;
 
   kill(node->pid, SIGKILL);
 
   nodesInNetwork --;
+
+  return SNET_STATUS_SUCCESS;
 }
 
 int snetNodeCount(void)

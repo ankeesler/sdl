@@ -13,6 +13,13 @@
 
 #include <unistd.h>
 
+// Status.
+
+#define SNET_STATUS_SUCCESS 0
+#define SNET_STATUS_UNKNOWN_NODE 1
+#define SNET_STATUS_INVALID_NETWORK_STATE 2
+#define SNET_STATUS_CANNOT_START_NODE 3
+
 // Management.
 
 // Initialize the network.
@@ -39,10 +46,12 @@ typedef struct {
 SnetNode *snetNodeMake(const char *image, const char *name);
 
 // Add a node to the simulated network.
-void snetNodeAdd(SnetNode *node);
+// Returns a SNET_STATUS_ definition.
+int snetNodeAdd(SnetNode *node);
 
 // Remove the node from the network.
-void snetNodeRemove(SnetNode *node);
+// Returns a SNET_STATUS_ definition.
+int snetNodeRemove(SnetNode *node);
 
 // Get the count of nodes in the network.
 int snetNodeCount(void);
