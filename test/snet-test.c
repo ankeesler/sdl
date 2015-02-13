@@ -14,15 +14,19 @@
 
 int singleNodeTest(void)
 {
-  SnetNode node = {
-    "build/server/server",  // image
-    "server"                // name
-  };
+  SnetNode *node;
 
+  snetManagementInit();
+
+  // Make the node.
+  node = snetNodeMake("build/server/server", "server");
+  expect((int)node);
   expect(snetNodeCount() == 0);
-  snetNodeAdd(&node);
+
+  snetNodeAdd(node);
   expect(snetNodeCount() == 1);
-  snetNodeRemove(&node);
+
+  snetNodeRemove(node);
   expect(snetNodeCount() == 0);
 
   return 0;
