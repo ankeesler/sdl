@@ -17,6 +17,7 @@
 #include "sdl.h"
 #include "snet.h"
 
+// Prototypes.
 void nodeRemoveReally(SnetNode *node);
 
 // SnetNode mask.

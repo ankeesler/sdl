@@ -84,10 +84,33 @@ int doubleNodeTest(void)
   return 0;
 }
 
+int badNodeTest(void)
+{
+  snetManagementInit();
+
+  // We should not be able to add or remove a NULL pointer.
+  expect(snetNodeAdd(NULL));
+  expect(snetNodeRemove(NULL));
+
+  // We should not be able to add or remove a pointer that is
+  // not in the nodePool.
+  int i = 1;
+  expect(snetNodeAdd((SnetNode*)&i));
+  expect(snetNodeRemove((SnetNode*)&i));
+
+  snetManagementDeinit();
+
+  return 0;
+}
+
 int main(void)
 {
   announce();
+
   run(singleNodeTest);
   run(doubleNodeTest);
+
+  run(badNodeTest);
+
   return 0;
 }
