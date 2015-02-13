@@ -17,6 +17,8 @@
 #include "sdl.h"
 #include "snet.h"
 
+void nodeRemoveReally(SnetNode *node);
+
 // SnetNode mask.
 /* is the node being used? */
 #define SNET_NODE_MASK_USED (1 << 0) 
@@ -33,17 +35,42 @@ static SnetNode nodePool[SDL_MAX_HOSTS];
 // The number of nodes added to the network.
 static int nodesInNetwork = 0;
 
+// Signal handler for parent.
+// When finished, the child process will send the parent the
+// SIGUSR1 signal.
+
+void signalHandler(int signal)
+{
+  int i;
+
+  if (signal == SIGUSR1) {
+    // For each node, check which one says that it is on the network,
+    // but the process is not running.
+    for (i = 0; i < SDL_MAX_HOSTS; i ++) {
+      if (nodePool[i].mask & SNET_NODE_MASK_ON_NETWORK
+          && kill(0, nodePool[i].pid)) {
+        nodeRemoveReally(nodePool + i);        
+        break;
+      }
+    }
+  }
+}
+
 void snetManagementInit(void)
 {
   int i;
   for (i = 0; i < SDL_MAX_HOSTS; i ++)
     nodePool[i].mask = 0;
   nodesInNetwork = 0;
+
+  // Set signal handler.
+  signal(SIGUSR1, signalHandler);
 }
 
 void snetManagementDeinit(void)
 {
-  while (wait(NULL) != -1) ;
+  int pid;
+  while ((pid = wait(NULL)) != -1) ;
 }
 
 // Returns the next available node index, or -1 if there is none.
@@ -76,6 +103,7 @@ SnetNode *snetNodeMake(const char *image, const char *name)
 int snetNodeAdd(SnetNode *node)
 {
   pid_t newPid;
+  int ret;
 
   if (nodeIsUnknown(node))
     return SNET_STATUS_UNKNOWN_NODE;
@@ -93,7 +121,8 @@ int snetNodeAdd(SnetNode *node)
     node->pid = newPid;
   } else {
     // Child.
-    exit(execl(node->image, 0));
+    ret = execl(node->image, 0);
+    exit(ret);
   }
   
   nodesInNetwork ++;
@@ -109,13 +138,15 @@ int snetNodeRemove(SnetNode *node)
   if (!(node->mask & SNET_NODE_MASK_ON_NETWORK))
     return SNET_STATUS_INVALID_NETWORK_STATE;
 
-  node->mask &= ~SNET_NODE_MASK_ON_NETWORK;
-
-  kill(node->pid, SIGKILL);
-
-  nodesInNetwork --;
+  nodeRemoveReally(node);
 
   return SNET_STATUS_SUCCESS;
+}
+
+void nodeRemoveReally(SnetNode *node)
+{
+  node->mask &= ~SNET_NODE_MASK_ON_NETWORK;
+  nodesInNetwork --;
 }
 
 int snetNodeCount(void)

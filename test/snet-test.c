@@ -74,6 +74,10 @@ int doubleNodeTest(void)
   expect(!snetNodeAdd(server));
   expect(!snetNodeRemove(client));
   expect(snetNodeCount() == 1);
+  
+  // The number of nodes should eventuall drop to 0, since the server
+  // should return.
+  //while (snetNodeCount()) ;
 
   snetManagementDeinit();
 
