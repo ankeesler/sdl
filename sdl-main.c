@@ -45,6 +45,6 @@ int main(int argc, char *argv[])
   if ((err = SDL_NETWORK_DOWN()))
     printf("Error: Could not take network down. (err : %d)\n", err);
 
-  return err;
+  exit(err);
 }
 

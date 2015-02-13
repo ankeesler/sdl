@@ -11,11 +11,17 @@
 #ifndef __SNET_H__
 #define __SNET_H__
 
+#include <unistd.h>
+
 // Management.
 
 // Initialize the network.
 // Also works for resetting the network.
 void snetManagementInit(void);
+
+// Deinitialize the network.
+// MUST BE CALLED!!!
+void snetManagementDeinit(void);
 
 // Nodes.
 
@@ -24,6 +30,7 @@ typedef struct {
   const char *image;
   const char *name;
   int mask;
+  pid_t pid;
 } SnetNode;
 
 // Create a node.

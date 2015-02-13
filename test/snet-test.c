@@ -29,6 +29,8 @@ int singleNodeTest(void)
   snetNodeRemove(node);
   expect(snetNodeCount() == 0);
 
+  snetManagementDeinit();
+
   return 0;
 }
 

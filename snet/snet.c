@@ -9,6 +9,10 @@
 //
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/wait.h>
+#include <signal.h>
 
 #include "sdl.h"
 #include "snet.h"
@@ -31,6 +35,11 @@ void snetManagementInit(void)
   for (i = 0; i < SDL_MAX_HOSTS; i ++)
     nodePool[i].mask = 0;
   nodesInNetwork = 0;
+}
+
+void snetManagementDeinit(void)
+{
+  while (wait(NULL) != -1) ;
 }
 
 // Returns the next available node index, or -1 if there is none.
@@ -62,13 +71,46 @@ SnetNode *snetNodeMake(const char *image, const char *name)
 
 void snetNodeAdd(SnetNode *node)
 {
+  pid_t newPid;
+
+  // TODO: return some error here.
+  if (!node)
+    return;
+
+  // TODO: return some error here too.
+  if (node->mask & SNET_NODE_MASK_ON_NETWORK)
+    return;
+
   node->mask |= SNET_NODE_MASK_ON_NETWORK;
+
+  if ((newPid = fork()) == -1) {
+    // Failure.
+    // TODO: return error.
+  } else if (newPid) {
+    // Parent.
+    node->pid = newPid;
+  } else {
+    // Child.
+    exit(execl(node->image, 0));
+  }
+  
   nodesInNetwork ++;
 }
 
 void snetNodeRemove(SnetNode *node)
 {
+  // TODO: return some error here.
+  if (!node)
+    return;
+
+  // TODO: return some error here too.
+  if (!(node->mask & SNET_NODE_MASK_ON_NETWORK))
+    return;
+
   node->mask &= ~SNET_NODE_MASK_ON_NETWORK;
+
+  kill(node->pid, SIGKILL);
+
   nodesInNetwork --;
 }
 
