@@ -25,6 +25,7 @@ int SNET_MAIN(int argc, char *argv[]);
 #define SNET_STATUS_UNKNOWN_NODE 1
 #define SNET_STATUS_INVALID_NETWORK_STATE 2
 #define SNET_STATUS_CANNOT_START_NODE 3
+#define SNET_STATUS_CANNOT_COMMAND_NODE 4
 
 // Configuration.
 
@@ -48,7 +49,13 @@ typedef struct {
   const char *name;
   int mask;
   pid_t pid;
+  int fd;
 } SnetNode;
+
+// A command for a node.
+typedef enum {
+  NOOP,
+} SnetNodeCommand;
 
 // Create a node.
 // The node is not yet added to the network.
@@ -65,5 +72,8 @@ int snetNodeRemove(SnetNode *node);
 
 // Get the count of nodes in the network.
 int snetNodeCount(void);
+
+// Command the node to do something.
+int snetNodeCommand(SnetNode *node, SnetNodeCommand command, ...);
 
 #endif /* __SNET_H__ */

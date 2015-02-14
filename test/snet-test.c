@@ -76,7 +76,7 @@ int doubleNodeTest(void)
   expect(!snetNodeRemove(client));
   expect(snetNodeCount() == 1);
   
-  // The number of nodes should eventuall drop to 0, since the server
+  // The number of nodes should eventually drop to 0, since the server
   // should return.
   while (snetNodeCount()) ;
 
@@ -104,6 +104,32 @@ int badNodeTest(void)
   return 0;
 }
 
+int noopTest(void)
+{
+  SnetNode *client, *server;
+
+  snetManagementInit();
+
+  // Create a client and a server.
+  expect((int)(client = snetNodeMake("build/client/client", "client")));
+  expect((int)(server = snetNodeMake("build/server/server", "server")));
+  expect(snetNodeCount() == 0);
+
+  // Can't send a command if a node is not on a network.
+  expect(snetNodeCommand(server, NOOP));
+  expect(snetNodeCommand(client, NOOP));
+  
+  // Add the nodes to the network.
+  expect(!snetNodeAdd(server));
+  expect(!snetNodeAdd(client));
+  
+  // Send a NOOP.
+  expect(!snetNodeCommand(server, NOOP));
+  expect(!snetNodeCommand(client, NOOP));
+
+  return 0;
+}
+
 int main(void)
 {
   announce();
@@ -112,6 +138,8 @@ int main(void)
   run(doubleNodeTest);
 
   run(badNodeTest);
+
+  run(noopTest);
 
   return 0;
 }
