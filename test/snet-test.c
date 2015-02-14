@@ -78,7 +78,7 @@ int doubleNodeTest(void)
   
   // The number of nodes should eventuall drop to 0, since the server
   // should return.
-  //while (snetNodeCount()) ;
+  while (snetNodeCount()) ;
 
   snetManagementDeinit();
 

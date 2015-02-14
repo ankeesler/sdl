@@ -12,8 +12,13 @@
 #include "snet.h"
 #include "snet-internal.h"
 
+#include <stdio.h>
+
 int main(int argc, char *argv[])
 {
+  // Call the child node's main function.
+  SNET_MAIN(argc, argv);
+  
   // When done, tell parent that you are done.
   snetChildQuit();
 
