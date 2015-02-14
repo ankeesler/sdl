@@ -14,12 +14,17 @@
 
 #include <stdio.h>
 #include <unit-test.h>
-#define NOTE(s) note(s)
 
 // The reading fd for the pipe.
 static int fd;
 
-void signalHandler(int signal)
+static void cleanup(void)
+{
+  // Close the read end of the pipe.
+  close(fd);
+}
+
+static void signalHandler(int signal)
 {
   if (signal == CHILD_ALERT_SIGNAL) {
     // Read the command out of the pipe.
@@ -36,6 +41,9 @@ void signalHandler(int signal)
     default:
       printf("(command:%d)", command); // TODO: report error.
     }
+  } else if (signal == CHILD_QUIT_SIGNAL) {
+    cleanup();
+    exit(0);
   }
 }
 
@@ -50,10 +58,11 @@ static void dumpLowNibbles(unsigned char buf[], int *n)
 
 int main(int argc, char *argv[])
 {
+  int ret;
+
   // The first argument past the program name is pipe fds from the
   // parent.
   if (argc < 2) {
-    snetChildQuit();
     return 1;
   } else {
     dumpLowNibbles((unsigned char *)argv[1], &fd);
@@ -63,12 +72,16 @@ int main(int argc, char *argv[])
   // This will be our parent telling us that there is data for
   // us in the pipe.
   signal(CHILD_ALERT_SIGNAL, signalHandler);
+  
+  // Also say that we want to handle the CHILD_QUIT_SIGNAL,
+  // for when our parent wants us to quit immediately.
+  signal(CHILD_QUIT_SIGNAL, signalHandler);
 
   // Call the child node's main function.
-  SNET_MAIN(argc, argv);
+  ret = SNET_MAIN(argc, argv);
 
-  // When done, tell parent that you are done.
-  snetChildQuit();
+  // When done, cleanup.
+  cleanup();
 
-  return 0;
+  exit(ret);
 }

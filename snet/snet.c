@@ -21,6 +21,7 @@
 
 // Prototypes.
 void nodeRemoveReally(SnetNode *node);
+#define processIsAlive(pid) (kill(pid, 0) == 0)
 
 // SnetNode mask.
 /* is the node being used? */
@@ -45,14 +46,16 @@ static int nodesInNetwork = 0;
 void signalHandler(int signal)
 {
   int i;
+  pid_t pid;
 
-  if (signal == CHILD_QUIT_SIGNAL) {
-    // For each node, check which one says that it is on the network,
-    // but the process is not running.
+  if (signal == SIGCHLD) {
+    // Wait to see which child process is quitting.
+    pid = wait(NULL);
+
+    // Find that child process.
     for (i = 0; i < SNET_MAX_HOSTS; i ++) {
-      if (nodePool[i].mask & SNET_NODE_MASK_ON_NETWORK
-          && kill(0, nodePool[i].pid)) {
-        nodeRemoveReally(nodePool + i);        
+      if (nodePool[i].pid == pid) {
+        nodeRemoveReally(nodePool + i);
         break;
       }
     }
@@ -66,8 +69,8 @@ void snetManagementInit(void)
     nodePool[i].mask = 0;
   nodesInNetwork = 0;
 
-  // Set signal handler.
-  signal(CHILD_QUIT_SIGNAL, signalHandler);
+  // Signal handler for child processes that die.
+  signal(SIGCHLD, signalHandler);
 }
 
 void snetManagementDeinit(void)
@@ -108,7 +111,7 @@ SnetNode *snetNodeMake(const char *image, const char *name)
 // of once of the 4 int bytes being 0. So, store a 4-byte int
 // in the lower 8 nibbles of a byte buffer, and then null
 // terminate the buffer.
-// This is bad because it assumes an int is 4 bytes!!!
+// TODO: this is bad because it assumes an int is 4 bytes!!!
 static void fillLowNibbles(unsigned char buf[], int n)
 {
   buf[0] = 0xF0 | ((0xF0000000 & n) >> 0x1C);
@@ -167,7 +170,7 @@ int snetNodeRemove(SnetNode *node)
   if (!(node->mask & SNET_NODE_MASK_ON_NETWORK))
     return SNET_STATUS_INVALID_NETWORK_STATE;
 
-  kill(node->pid, SIGKILL);
+  kill(node->pid, SIGTERM);
   nodeRemoveReally(node);
 
   return SNET_STATUS_SUCCESS;
@@ -175,8 +178,21 @@ int snetNodeRemove(SnetNode *node)
 
 void nodeRemoveReally(SnetNode *node)
 {
+  // If this bit has already been turned off, then assume that
+  // this stuff has been taken care of.
+  if (!(node->mask & SNET_NODE_MASK_ON_NETWORK))
+    return;
+
+  // Turn off the bit in the node's mask and drop the number of
+  // nodes in a network.
   node->mask &= ~SNET_NODE_MASK_ON_NETWORK;
   nodesInNetwork --;
+
+  // Close the pipe.
+  close(node->fd);
+
+  // Wait on the process.
+  waitpid(node->pid, NULL, 0);
 }
 
 int snetNodeCount(void)
@@ -224,7 +240,7 @@ int snetNodeCommand(SnetNode *node, SnetNodeCommand command, ...)
   va_end(args);
 
   // Finally, try tell the child that they have something coming for them.
-  return (snetParentAlert(node->pid)
+  return (snetChildAlert(node->pid)
           ? SNET_STATUS_CANNOT_COMMAND_NODE
           : SNET_STATUS_SUCCESS);
 }
