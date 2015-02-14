@@ -186,6 +186,9 @@ int snetNodeCount(void)
 
 int snetNodeCommand(SnetNode *node, SnetNodeCommand command, ...)
 {
+  int i;
+  va_list args;
+  
   if (nodeIsUnknown(node))
     return SNET_STATUS_UNKNOWN_NODE;
 
@@ -197,6 +200,28 @@ int snetNodeCommand(SnetNode *node, SnetNodeCommand command, ...)
     return SNET_STATUS_CANNOT_COMMAND_NODE;
 
   // Now, write the arguments to the command.
+  va_start(args, command);
+  switch (command) {
+  case NOOP:
+    break;
+  case TRANSMIT: {
+    int length;
+    unsigned char buf[SNET_MAX_PAYLOAD];
+    
+    // Length.
+    length = va_arg(args, int);
+    write(node->fd, &length, sizeof(int));
+    
+    // Payload.
+    for (i = 0; i < length; i ++)
+      buf[i] = va_arg(args, int); // why can't this be unsigned char?
+    write(node->fd, buf, length);
+  }
+    break;
+  default:
+    ; // TODO: report error.
+  }
+  va_end(args);
 
   // Finally, try tell the child that they have something coming for them.
   return (snetParentAlert(node->pid)

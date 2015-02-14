@@ -31,6 +31,9 @@ int SNET_MAIN(int argc, char *argv[]);
 
 #define SNET_MAX_HOSTS 10
 
+// PHY payload.
+#define SNET_MAX_PAYLOAD 254
+
 // Management.
 
 // Initialize the network.
@@ -54,7 +57,8 @@ typedef struct {
 
 // A command for a node.
 typedef enum {
-  NOOP,
+  NOOP,     // args: void
+  TRANSMIT, // args: int length, unsigned char *bytes
 } SnetNodeCommand;
 
 // Create a node.
