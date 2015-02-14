@@ -86,7 +86,6 @@ static void *node1BasicTask(void *data)
 {
   // tx...
   expect(!sdlTransmit(shortBuffer, SHORT_PACKET_LENGTH));
-  expectSdlNotEmpty();
   
   pthread_exit(NULL);
 }
@@ -118,6 +117,9 @@ int asynchronusRawBasicTest(void)
   // Wait for node1 (rx) to finish first, then wait for node2 (tx).
   pthread_join(node1Thread, NULL);
   pthread_join(node2Thread, NULL);
+  
+  // Network should be empty.
+  expectSdlEmpty();
 
   return 0;
 }
