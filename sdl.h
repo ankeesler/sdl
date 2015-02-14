@@ -11,7 +11,9 @@
 #ifndef __SDL_H__
 #define __SDL_H__
 
-#ifndef __SDL_MAIN_C__
+#include "sdl-protocol.h"
+
+#if  !defined(__SDL_MAIN_C__) && !defined(__SDL_TEST_C__)
 #define main SDL_USER_MAIN
 #else
 int SDL_USER_MAIN(int argc, char *argv[]);

@@ -42,11 +42,12 @@ test: run-basic-test run-full-log-test run-snet-test
 # SDL
 #
 
-SDL_FILES=sdl-main.c sdl-net.c sdl-log.c sdl-id.c
+SDL_FILES=sdl-net.c sdl-log.c sdl-id.c
+SDL_MAIN_FILE=sdl-main.c
 
 VPATH += $(dir $(SDL_FILES))
 
-BASIC_TEST_FILES=$(TEST_DIR)/basic.c $(SDL_FILES)
+BASIC_TEST_FILES=$(TEST_DIR)/basic.c $(SDL_FILES) $(SDL_MAIN_FILE)
 $(BUILD_DIR)/basic-test: $(addprefix $(BUILD_DIR)/,$(notdir $(BASIC_TEST_FILES:.c=.o)))
 	$(CC) $(CFLAGS) -lmcgoo -o $@ $^
 
@@ -71,7 +72,7 @@ run-full-log-test: run-log-test
 #
 
 SNET_PARENT_FILES=snet/snet.c
-SNET_CHILD_FILES=snet/snet-main.c
+SNET_CHILD_FILES=snet/snet-main.c $(SDL_FILES)
 
 VPATH += $(dir $(SNET_PARENT_FILES)) $(dir $(SNET_CHILD_FILES))
 

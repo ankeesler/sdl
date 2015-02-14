@@ -11,6 +11,7 @@
 #define __SNET_C__
 #include "snet.h"
 #include "snet-internal.h"
+#include "sdl-internal.h"
 
 #ifdef SNET_TEST
   #include <stdio.h>
@@ -39,6 +40,9 @@ static void signalHandler(int signal)
     switch (command) {
     case NOOP:
       printf("(noop:%d)", getpid());
+      break;
+    case RECEIVE:
+      noteInt(sdlRadioReceivedIsr(fd));
       break;
     default:
       printf("(command:%d)", command); // TODO: report error.

@@ -17,9 +17,10 @@
 
 #include "sdl.h"
 #include "sdl-log.h"
+#include "sdl-protocol.h"
 
 typedef struct {
-  unsigned char data[SDL_MTU];
+  unsigned char data[SDL_PHY_SDU_MAX];
   struct timeval birth;
 } QData;
 
@@ -32,7 +33,7 @@ static int head, tail;
 #define NETWORK_Q_INCREMENT(n) (n = (n == SDL_BANDWIDTH-1 ? 0 : n+1))
 
 // This is basically our mutex for the networkQ.
-static int maskHO;
+volatile int maskHO;
 #define HO_MASK_INIT()      HO_MASK_CLEAR_ALL()
 #define HO_MASK_READ_TX()   (maskHO & 0x01) /* hardcode these so we can get atomic ops */
 #define HO_MASK_SET_TX()    maskHO |= 0x01  /* hardcode these so we can get atomic ops */
@@ -40,8 +41,8 @@ static int maskHO;
 #define HO_MASK_READ_RX()   (maskHO & 0x02) /* hardcode these so we can get atomic ops */
 #define HO_MASK_SET_RX()    maskHO |= 0x02  /* hardcode these so we can get atomic ops */
 #define HO_MASK_CLEAR_RX()  maskHO &= 0xFD  /* hardcode these so we can get atomic ops */
-#define HO_MASK_SET_ALL()   maskHO |= 0x03  /* hardcode these so we can get atomic ops */
-#define HO_MASK_CLEAR_ALL() maskHO &= 0x00  /* hardcode these so we can get atomic ops */
+#define HO_MASK_SET_ALL()   maskHO = 0x03  /* hardcode these so we can get atomic ops */
+#define HO_MASK_CLEAR_ALL() maskHO = 0x00  /* hardcode these so we can get atomic ops */
 
 // CSMA stuff.
 int sdlCsmaOn      = SDL_CSMA_ON;
@@ -157,3 +158,39 @@ int sdlActivity(void)
   return (head > tail ? head - tail : tail - head);
 }
 
+// ----------------------------------------------------------------------------
+// Internal child API
+
+// TODO: there is work to be done to make this a safe ISR!!!
+int sdlRadioReceivedIsr(int fd)
+{
+  int length;
+  
+  // See sdl-internal.h for definition of PHY PDU.
+  
+  // LOCK.
+  HO_MASK_SET_ALL();
+  
+  // Only proceed to read out of the radio buffer if the network
+  // Q has room for data.
+  if (!NETWORK_Q_IS_FULL()) {
+    // Read the length.
+    if (read(fd, &length, sizeof(length)) != length)
+      return 1;
+  
+    // Read the PHY payload into the next networkQ slot.
+    if (read(fd, networkQ + tail, length) != length)
+      return 1;
+    
+    // Set the birth of the packet.
+    gettimeofday(&(networkQ[tail].birth), NULL);
+  
+    // Move the tail of the Q back one.
+    NETWORK_Q_INCREMENT(tail);
+  }
+    
+  // UNLOCK.
+  HO_MASK_CLEAR_ALL();
+  
+  return 0;
+}

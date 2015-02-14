@@ -166,25 +166,35 @@ int noopTest(void)
   return 0;
 }
 
-int oneWayTest(void)
+int receiveTest(void)
 {
-  SnetNode *client, *server;
+  SnetNode *server;
 
   snetManagementInit();
 
   // Create a client and a server.
-  expect((int)(client = snetNodeMake("build/client/client", "client")));
   expect((int)(server = snetNodeMake("build/server/server", "server")));
   expect(snetNodeCount() == 0);
 
   // Add the nodes to the network.
   expect(!snetNodeAdd(server));
-  expect(!snetNodeAdd(client));
+  expect(snetNodeCount() == 1);
+  expect(RUNNING(server));
   
-  // Tell the client to send the server something.
-  unsigned char macHeader[] = {0xFF, 0xFF, 0xFF, 0xFF,  // destination address
-                               0x00, 0x00, 0x00, 0x00}; // sequence
-  expect(!snetNodeCommand(server, TRANSMIT, 8, macHeader));
+  // Tell the server to receive something
+  unsigned char macHeader[] = {0x00, 0x00,             // frame control
+                               0x00, 0x01,             // sequence number
+                               0x00, 0x00, 0x00, 0x01, // source address
+                               0x00, 0x00, 0x00, 0x02, // destination address
+                             };
+  expect(!snetNodeCommand(server, RECEIVE, 8, macHeader));
+  
+  // Expect that the server has those bytes.
+  
+  // Tell the server to stop and wait for it.
+  STOP(server);
+  while (RUNNING(server)) ;
+  while (snetNodeCount()) ;
   
   snetManagementDeinit();
   
@@ -201,7 +211,7 @@ int main(void)
   
   run(noopTest);
   
-  run(oneWayTest);
+  run(receiveTest);
 
   return 0;
 }

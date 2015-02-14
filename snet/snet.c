@@ -244,6 +244,14 @@ int snetNodeCommand(SnetNode *node, SnetNodeCommand command, ...)
     write(node->fd, buf, length);
   }
     break;
+  case RECEIVE: {
+    int length;
+    
+    // Length.
+    length = va_arg(args, int);
+    write(node->fd, &length, sizeof(int));
+  }
+    break;
   default:
     ; // TODO: report error.
   }

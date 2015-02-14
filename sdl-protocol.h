@@ -20,8 +20,11 @@
   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 */
 
+// Header size.
+#define SDL_PHY_PDU_LENGTH 1
+
 // Max payload.
-#define SDL_MAX_PAYLOAD 254
+#define SDL_PHY_SDU_MAX (0xFF - SDL_PHY_PDU_LENGTH)
 
 // ----------------------------------------------------------------------------
 // MAC
@@ -50,3 +53,9 @@
   |                        ...                                                |
   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 */
+
+// Header size.
+#define SDL_MAC_PDU_LENGTH 12
+
+// Max payload.
+#define SDL_MAC_SDU_MAX (SDL_PHY_SDU_MAX - SDL_MAC_PDU_LENGTH)
