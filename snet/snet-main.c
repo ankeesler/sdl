@@ -12,8 +12,10 @@
 #include "snet.h"
 #include "snet-internal.h"
 
-#include <stdio.h>
-#include <unit-test.h>
+#ifdef SNET_TEST
+  #include <stdio.h>
+  #include <unit-test.h>
+#endif
 
 // The reading fd for the pipe.
 static int fd;

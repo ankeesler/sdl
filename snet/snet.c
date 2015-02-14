@@ -14,14 +14,22 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <signal.h>
-#include <unit-test.h>
+
+#ifdef SNET_TEST
+  #include <unit-test.h>
+#endif
 
 #include "snet.h"
 #include "snet-internal.h"
 
+// ----------------------------------------------------------------------------
 // Prototypes.
+
 void nodeRemoveReally(SnetNode *node);
 #define processIsAlive(pid) (kill(pid, 0) == 0)
+
+// ----------------------------------------------------------------------------
+// Definitions.
 
 // SnetNode mask.
 /* is the node being used? */
@@ -38,10 +46,14 @@ static SnetNode nodePool[SNET_MAX_HOSTS];
 
 // The number of nodes added to the network.
 static int nodesInNetwork = 0;
+  
+int snetNodeCount(void)
+{
+  return nodesInNetwork;
+}
 
-// Signal handler for parent.
-// When finished, the child process will send the parent the
-// CHILD_QUIT_SIGNAL signal.
+// ----------------------------------------------------------------------------
+// Management.
 
 void signalHandler(int signal)
 {
@@ -105,6 +117,9 @@ SnetNode *snetNodeMake(const char *image, const char *name)
 
   return node;
 }
+
+// ----------------------------------------------------------------------------
+// Nodes.
 
 // If we copy an int to an argument list, the argument
 // list might think it ends sooner than it does because
@@ -192,10 +207,8 @@ void nodeRemoveReally(SnetNode *node)
   waitpid(node->pid, NULL, 0);
 }
 
-int snetNodeCount(void)
-{
-  return nodesInNetwork;
-}
+// ----------------------------------------------------------------------------
+// Commands.
 
 int snetNodeCommand(SnetNode *node, SnetNodeCommand command, ...)
 {

@@ -6,6 +6,7 @@ all:test
 
 CC=cc
 CFLAGS=-g -Wall -Werror
+DEFINES=
 LIBFLAGS=-shared
 SHELL=sh
 
@@ -30,7 +31,7 @@ $(BUILD_DIR_CREATED):
 	mkdir -p $(BUILD_DIR); touch $(BUILD_DIR_CREATED)
 
 $(BUILD_DIR)/%.o: %.c $(BUILD_DIR_CREATED)
-	$(CC) $(CFLAGS) -I. -o $@ -c $<
+	$(CC) $(CFLAGS) $(DEFINES) -I. -o $@ -c $<
 
 $(BUILD_DIR)/sdl-log-on.o: sdl-log.c $(BUILD_DIR_CREATED)
 	$(CC) -g -DSDL_LOG -DSDL_LOG_FILE=\"$(SDL_LOG_TEST_FILE)\" -I. -o $@ -c $<
@@ -74,6 +75,10 @@ SNET_CHILD_FILES=snet/snet-main.c
 
 VPATH += $(dir $(SNET_PARENT_FILES)) $(dir $(SNET_CHILD_FILES))
 
+$(BUILD_DIR)/client/client \
+$(BUILD_DIR)/server/server \
+$(BUILD_DIR)/snet-test: DEFINES += -DSNET_TEST
+
 SNET_TEST_FILES=$(SNET_PARENT_FILES) $(TEST_DIR)/snet-test.c
 SNET_TEST_OBJ=$(addprefix $(BUILD_DIR)/,$(notdir $(SNET_TEST_FILES:.c=.o)))
 $(BUILD_DIR)/snet-test: $(SNET_TEST_OBJ) | $(BUILD_DIR_CREATED)
@@ -92,7 +97,7 @@ SERVER_DIR_CREATED=$(BUILD_DIR)/server/created
 $(SERVER_DIR_CREATED): $(BUILD_DIR_CREATED)
 	mkdir $(@D) && touch $@
 $(BUILD_DIR)/server/%.o: %.c | $(SERVER_DIR_CREATED)
-	$(CC) $(CFLAGS) -I. -o $@ -c $<
+	$(CC) $(CFLAGS) $(DEFINES) -I. -o $@ -c $<
 SERVER_FILES=$(SNET_CHILD_FILES) $(TEST_APPS_DIR)/server.c
 SERVER_OBJ=$(addprefix $(BUILD_DIR)/server/,$(notdir $(SERVER_FILES:.c=.o)))
 $(BUILD_DIR)/server/server: $(SERVER_OBJ) | $(BUILD_DIR_CREATED)
@@ -104,7 +109,7 @@ CLIENT_DIR_CREATED=$(BUILD_DIR)/client/created
 $(CLIENT_DIR_CREATED): $(BUILD_DIR_CREATED)
 	mkdir $(@D) && touch $@
 $(BUILD_DIR)/client/%.o: %.c | $(CLIENT_DIR_CREATED)
-	$(CC) $(CFLAGS) -I. -o $@ -c $<
+	$(CC) $(CFLAGS) $(DEFINES) -I. -o $@ -c $<
 CLIENT_FILES=$(SNET_CHILD_FILES) $(TEST_APPS_DIR)/client.c
 CLIENT_OBJ=$(addprefix $(BUILD_DIR)/client/,$(notdir $(CLIENT_FILES:.c=.o)))
 $(BUILD_DIR)/client/client: $(CLIENT_OBJ) | $(BUILD_DIR_CREATED)
