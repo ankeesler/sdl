@@ -187,6 +187,9 @@ static void *clientTask(void *data)
 {
   // First, we ask the server if he can connect.
   expect(!sdlTransmit(shortPacket, SHORT_PACKET_LENGTH));
+  
+  // Wait for the server to receive.
+  while (sdlActivity()) ;
 
   // Then, the server will respond.
   while (sdlReceive(longBuffer, LONG_PACKET_LENGTH))
@@ -208,6 +211,9 @@ static void *serverTask(void *data)
 
   // Then, the server will respond.
   expect(!sdlTransmit(longBuffer, LONG_PACKET_LENGTH));
+  
+  // Wait for the client to receive.
+  while (sdlActivity()) ;
   
   // Then, the client will respond back for the last time.
   while (sdlReceive(shortBuffer, SHORT_PACKET_LENGTH))
