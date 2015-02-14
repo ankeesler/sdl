@@ -111,19 +111,16 @@ SnetNode *snetNodeMake(const char *image, const char *name)
 // of once of the 4 int bytes being 0. So, store a 4-byte int
 // in the lower 8 nibbles of a byte buffer, and then null
 // terminate the buffer.
-// TODO: this is bad because it assumes an int is 4 bytes!!!
+// This is not endian-safe!
 static void fillLowNibbles(unsigned char buf[], int n)
 {
-  buf[0] = 0xF0 | ((0xF0000000 & n) >> 0x1C);
-  buf[1] = 0xF0 | ((0x0F000000 & n) >> 0x18);
-  buf[2] = 0xF0 | ((0x00F00000 & n) >> 0x14);
-  buf[3] = 0xF0 | ((0x000F0000 & n) >> 0x10);
-  buf[4] = 0xF0 | ((0x0000F000 & n) >> 0x0C);
-  buf[5] = 0xF0 | ((0x00000F00 & n) >> 0x08);
-  buf[6] = 0xF0 | ((0x000000F0 & n) >> 0x04);
-  buf[7] = 0xF0 | ((0x0000000F & n) >> 0x00);
+  long mask = (0xF << (sizeof(int) * 2));
+  int i;
   
-  buf[8] = 0; // null terminator
+  for (i = 0; i < sizeof(int) * 2; i ++)
+    buf[i] = 0xF0 | ((mask >>= 4) & n) >> (0x1C - (i<<2));
+  
+  buf[sizeof(int)] = 0; // null terminator
 }
 
 int snetNodeAdd(SnetNode *node)
