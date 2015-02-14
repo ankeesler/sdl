@@ -1,41 +1,61 @@
 all:test
 
+#
+# VARS
+#
+
 CC=cc
-CFLAGS=-g -Wall -Werror -fpic -I.
+CFLAGS=-g -Wall -Werror
 LIBFLAGS=-shared
 SHELL=sh
 
 BUILD_DIR=build
 BUILD_DIR_CREATED=$(BUILD_DIR)/created
-OBJ_FILES=$(BUILD_DIR)/unit-test.o
 
-$(BUILD_DIR_CREATED):
-	mkdir -p $(BUILD_DIR); touch $(BUILD_DIR_CREATED)
+SDL_LOG_TEST_FILE=tuna.sdl
+
+TEST_APPS_DIR=nodes
+TEST_DIR=test
+
+VPATH=$(dir SDL_FILES) \
+      $(dir SNET_PARENT_FILES) \
+			$(dir SNET_CHILD_FILES) \
+			$(TEST_DIR) \
+			$(TEST_APPS_DIR)
+
+#
+# BUILD STUFF
+#
 
 clean: clean-cap
 	rm -frd ./*.o $(SDL_LIB) $(BUILD_DIR) $(SDL_LOG_TEST_FILE)
 
-SDL_FILES=sdl-main.c sdl-net.c sdl-log.c sdl-id.c
-SDL_OBJ=$(patsubst %.c,$(BUILD_DIR)/%.o,$(SDL_FILES))
-
-SDL_LOG_TEST_FILE=tuna.sdl
+$(BUILD_DIR_CREATED):
+	mkdir -p $(BUILD_DIR); touch $(BUILD_DIR_CREATED)
 
 $(BUILD_DIR)/%.o: %.c $(BUILD_DIR_CREATED)
-	$(CC) -g -Wall -Werror -o $@ -c $<
+	$(CC) $(CFLAGS) -o $@ -c $<
 
-$(BUILD_DIR)/%.o: test/%.c $(BUILD_DIR_CREATED)
-	$(CC) -g -I. -o $@ -c $<
+$(BUILD_DIR)/%.o: $(TEST_DIR)/%.c $(BUILD_DIR_CREATED)
+	$(CC) $(CFLAGS) -I. -o $@ -c $<
 
 $(BUILD_DIR)/sdl-log-on.o: sdl-log.c $(BUILD_DIR_CREATED)
 	$(CC) -g -DSDL_LOG -DSDL_LOG_FILE=\"$(SDL_LOG_TEST_FILE)\" -I. -o $@ -c $<
 
 test: run-basic-test run-full-log-test run-snet-test
 
-$(BUILD_DIR)/basic-test: $(BUILD_DIR)/basic.o $(BUILD_DIR)/sdl-log.o $(SDL_OBJ)
-	$(CC) -g -Wall -lmcgoo -o $@ $^
+#
+# SDL
+#
+
+SDL_FILES=sdl-main.c sdl-net.c sdl-log.c sdl-id.c
+
+BASIC_TEST_FILES=$(TEST_DIR)/basic.c $(SDL_FILES)
+$(BUILD_DIR)/basic-test: $(addprefix $(BUILD_DIR)/,$(notdir $(BASIC_TEST_FILES:.c=.o)))
+	$(CC) $(CFLAGS) -lmcgoo -o $@ $^
 
 run-basic-test: $(BUILD_DIR)/basic-test
-	./$< -n 2
+	./$<
 
 $(BUILD_DIR)/log-test: $(BUILD_DIR)/log.o \
 											 $(BUILD_DIR)/sdl-log-on.o \
@@ -50,22 +70,15 @@ run-log-test: $(BUILD_DIR)/log-test
 run-full-log-test: run-log-test
 	./test/log-test.pl
 
-$(BUILD_DIR)/ipc-test: $(SDL_OBJ) $(BUILD_DIR)/ipc.o
-	$(CC) -g -Wall -lmcgoo -o $@ $^
-
-run-ipc-test: $(BUILD_DIR)/ipc-test
-	./$<
-
 #
 # SNET
 #
 
-SNET_CHILD_FILES=snet-main.c
+SNET_PARENT_FILES=snet/snet.c
+SNET_CHILD_FILES=snet/snet.c snet/snet-main.c
 
-$(BUILD_DIR)/%.o: snet/%.c | $(BUILD_DIR_CREATED)
-	$(CC) $(CFLAGS) -o $@ -c $<
-
-SNET_TEST_OBJ=$(BUILD_DIR)/snet.o $(BUILD_DIR)/snet-test.o
+SNET_TEST_FILES=$(SNET_PARENT_FILES) $(TEST_DIR)/snet-test.c
+SNET_TEST_OBJ=$(addprefix $(BUILD_DIR)/,$(notdir $(SNET_TEST_FILES:.c=.o)))
 $(BUILD_DIR)/snet-test: $(SNET_TEST_OBJ) | $(BUILD_DIR_CREATED)
 	$(CC) $(CFLAGS) -lmcgoo -o $@ $^
 
@@ -76,16 +89,18 @@ run-snet-test: $(BUILD_DIR)/snet-test server-test-app client-test-app
 # TEST APPS
 #
 
+VPATH=. nodes snet
+
+$(BUILD_DIR)/%.o: $(notdir %.c)
+	echo $@
+
 SERVER_DIR_CREATED=$(BUILD_DIR)/server/created
 $(SERVER_DIR_CREATED): $(BUILD_DIR_CREATED)
 	mkdir $(@D) && touch $@
 $(BUILD_DIR)/server/%.o: %.c | $(SERVER_DIR_CREATED)
-	$(CC) $(CFLAGS) -c $< -o $@
-$(BUILD_DIR)/server/%.o: nodes/%.c | $(SERVER_DIR_CREATED)
-	$(CC) $(CFLAGS) -c $< -o $@
-$(BUILD_DIR)/server/%.o: snet/%.c | $(SERVER_DIR_CREATED)
-	$(CC) $(CFLAGS) -c $< -o $@
-SERVER_OBJ=$(patsubst %.c, $(BUILD_DIR)/server/%.o, $(SNET_CHILD_FILES) server.c )
+	$(CC) $(CFLAGS) -I. -o $@ -c $<
+SERVER_FILES=$(SNET_CHILD_FILES) $(TEST_APPS_DIR)/server.c
+SERVER_OBJ=$(addprefix $(BUILD_DIR)/server/,$(notdir $(SERVER_FILES:.c=.o)))
 $(BUILD_DIR)/server/server: $(SERVER_OBJ) | $(BUILD_DIR_CREATED)
 	$(CC) $(CFLAGS) -o $@ $^
 server-test-app: $(BUILD_DIR)/server/server
@@ -96,12 +111,9 @@ CLIENT_DIR_CREATED=$(BUILD_DIR)/client/created
 $(CLIENT_DIR_CREATED): $(BUILD_DIR_CREATED)
 	mkdir $(@D) && touch $@
 $(BUILD_DIR)/client/%.o: %.c | $(CLIENT_DIR_CREATED)
-	$(CC) $(CFLAGS) -c $< -o $@
-$(BUILD_DIR)/client/%.o: nodes/%.c | $(CLIENT_DIR_CREATED)
-	$(CC) $(CFLAGS) -c $< -o $@
-$(BUILD_DIR)/client/%.o: snet/%.c | $(CLIENT_DIR_CREATED)
-	$(CC) $(CFLAGS) -c $< -o $@
-CLIENT_OBJ=$(patsubst %.c, $(BUILD_DIR)/client/%.o, $(SNET_CHILD_FILES) client.c)
+	$(CC) $(CFLAGS) -I. -o $@ -c $<
+CLIENT_FILES=$(SNET_CHILD_FILES) $(TEST_APPS_DIR)/client.c
+CLIENT_OBJ=$(addprefix $(BUILD_DIR)/client/,$(notdir $(CLIENT_FILES:.c=.o)))
 $(BUILD_DIR)/client/client: $(CLIENT_OBJ) | $(BUILD_DIR_CREATED)
 	$(CC) $(CFLAGS) -o $@ $^
 client-test-app: $(BUILD_DIR)/client/client
