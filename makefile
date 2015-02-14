@@ -17,11 +17,7 @@ SDL_LOG_TEST_FILE=tuna.sdl
 TEST_APPS_DIR=nodes
 TEST_DIR=test
 
-VPATH=$(dir SDL_FILES) \
-      $(dir SNET_PARENT_FILES) \
-			$(dir SNET_CHILD_FILES) \
-			$(TEST_DIR) \
-			$(TEST_APPS_DIR)
+VPATH=$(TEST_DIR) $(TEST_APPS_DIR)
 
 #
 # BUILD STUFF
@@ -34,9 +30,6 @@ $(BUILD_DIR_CREATED):
 	mkdir -p $(BUILD_DIR); touch $(BUILD_DIR_CREATED)
 
 $(BUILD_DIR)/%.o: %.c $(BUILD_DIR_CREATED)
-	$(CC) $(CFLAGS) -o $@ -c $<
-
-$(BUILD_DIR)/%.o: $(TEST_DIR)/%.c $(BUILD_DIR_CREATED)
 	$(CC) $(CFLAGS) -I. -o $@ -c $<
 
 $(BUILD_DIR)/sdl-log-on.o: sdl-log.c $(BUILD_DIR_CREATED)
@@ -50,6 +43,8 @@ test: run-basic-test run-full-log-test run-snet-test
 
 SDL_FILES=sdl-main.c sdl-net.c sdl-log.c sdl-id.c
 
+VPATH += $(dir $(SDL_FILES))
+
 BASIC_TEST_FILES=$(TEST_DIR)/basic.c $(SDL_FILES)
 $(BUILD_DIR)/basic-test: $(addprefix $(BUILD_DIR)/,$(notdir $(BASIC_TEST_FILES:.c=.o)))
 	$(CC) $(CFLAGS) -lmcgoo -o $@ $^
@@ -58,10 +53,10 @@ run-basic-test: $(BUILD_DIR)/basic-test
 	./$<
 
 $(BUILD_DIR)/log-test: $(BUILD_DIR)/log.o \
-											 $(BUILD_DIR)/sdl-log-on.o \
-	                     $(BUILD_DIR)/sdl-main.o \
+                       $(BUILD_DIR)/sdl-log-on.o \
+                       $(BUILD_DIR)/sdl-main.o \
                        $(BUILD_DIR)/sdl-net.o \
-											 $(BUILD_DIR)/sdl-id.o
+                       $(BUILD_DIR)/sdl-id.o
 	$(CC) -g -Wall -lmcgoo -o $@ $^
 
 run-log-test: $(BUILD_DIR)/log-test
@@ -75,24 +70,23 @@ run-full-log-test: run-log-test
 #
 
 SNET_PARENT_FILES=snet/snet.c
-SNET_CHILD_FILES=snet/snet.c snet/snet-main.c
+SNET_CHILD_FILES=snet/snet-main.c
+
+VPATH += $(dir $(SNET_PARENT_FILES)) $(dir $(SNET_CHILD_FILES))
 
 SNET_TEST_FILES=$(SNET_PARENT_FILES) $(TEST_DIR)/snet-test.c
 SNET_TEST_OBJ=$(addprefix $(BUILD_DIR)/,$(notdir $(SNET_TEST_FILES:.c=.o)))
 $(BUILD_DIR)/snet-test: $(SNET_TEST_OBJ) | $(BUILD_DIR_CREATED)
 	$(CC) $(CFLAGS) -lmcgoo -o $@ $^
 
-run-snet-test: $(BUILD_DIR)/snet-test server-test-app client-test-app
+run-snet-test: $(BUILD_DIR)/snet-test \
+               $(BUILD_DIR)/server/server \
+               $(BUILD_DIR)/client/client
 	./$<
 
 #
 # TEST APPS
 #
-
-VPATH=. nodes snet
-
-$(BUILD_DIR)/%.o: $(notdir %.c)
-	echo $@
 
 SERVER_DIR_CREATED=$(BUILD_DIR)/server/created
 $(SERVER_DIR_CREATED): $(BUILD_DIR_CREATED)
@@ -103,9 +97,8 @@ SERVER_FILES=$(SNET_CHILD_FILES) $(TEST_APPS_DIR)/server.c
 SERVER_OBJ=$(addprefix $(BUILD_DIR)/server/,$(notdir $(SERVER_FILES:.c=.o)))
 $(BUILD_DIR)/server/server: $(SERVER_OBJ) | $(BUILD_DIR_CREATED)
 	$(CC) $(CFLAGS) -o $@ $^
-server-test-app: $(BUILD_DIR)/server/server
-run-server: server-test-app
-	./$<
+run-server: $(BUILD_DIR)/server/server
+	./$< $(ARGS)
 
 CLIENT_DIR_CREATED=$(BUILD_DIR)/client/created
 $(CLIENT_DIR_CREATED): $(BUILD_DIR_CREATED)
@@ -116,9 +109,8 @@ CLIENT_FILES=$(SNET_CHILD_FILES) $(TEST_APPS_DIR)/client.c
 CLIENT_OBJ=$(addprefix $(BUILD_DIR)/client/,$(notdir $(CLIENT_FILES:.c=.o)))
 $(BUILD_DIR)/client/client: $(CLIENT_OBJ) | $(BUILD_DIR_CREATED)
 	$(CC) $(CFLAGS) -o $@ $^
-client-test-app: $(BUILD_DIR)/client/client
-run-client: client-test-app
-	./$<
+run-client: $(BUILD_DIR)/client/client
+	./$< $(ARGS)
 
 #
 # CAPTURE FRAMEWORK
