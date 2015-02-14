@@ -1,0 +1,33 @@
+# sdl-snet.txt
+# February 14, 2015
+# Andrew Keesler
+# Plan for future of SNET/SDL integration.
+
+GOALS:
+  - 1 test, two nodes, able to command then from script.
+  - Port logging to SNET layer.
+
+MILESTONES:
+  - Command API = a way for users to define their own commands.
+    - I need this so that I can use it in tests.
+  - 1 client sends command to server, the server sends command back.
+  - MAC packet filtering.
+    - Interface ids become the process ID, unless there are multiple threads.
+  - MAC packet sequence numbering.
+  - MAC packet types.
+    - Commands, data.
+    
+# NWK
+#      interface upwards sdlTransmit(length, data) sdlReceive(*length, data)
+#    /
+# SDL  - network Q for received messages
+#    \
+#      interface downwards sdlRadioReceivedIsr(fd)
+#
+#      interfaces upwards sdlPhyTransmit(length, data)
+#     /
+# SNET
+
+LONGTERM:
+  - The sdlTransmit() API has one higher layer API where dest address can be provided.
+   
