@@ -10,6 +10,7 @@
 
 #include <unit-test.h>
 #include <signal.h>
+#include <sys/wait.h>
 
 #define __SNET_TEST_C__
 #include "snet/snet.h"
@@ -17,51 +18,67 @@
 #define RUNNING(node) (kill(node->pid, 0) == 0)
 #define STOP(server) kill(server->pid, SIGUSR2)
 
+SnetNode *server = NULL, *client = NULL;
+SnetNode *server1 = NULL, *server2 = NULL;
+
+static void failureHandler(void)
+{
+  if (server)
+    kill(server->pid, SIGTERM);
+  if (client)
+    kill(client->pid, SIGTERM);
+  if (server1)
+    kill(server1->pid, SIGTERM);
+  if (server2)
+    kill(server2->pid, SIGTERM);
+
+  while (wait(NULL) != -1) ;
+}
+
 int singleNodeTest(void)
 {
-  SnetNode *node;
-
+  server = client = NULL;
   snetManagementInit();
 
   // Make the node.
-  node = snetNodeMake("build/server/server", "server");
-  expect((int)node);
+  server = snetNodeMake("build/server/server", "server");
+  expect((int)server);
   expect(snetNodeCount() == 0);
 
   // We can't remove the node from the network since it isn't on it.
-  expect(snetNodeRemove(node));
+  expect(snetNodeRemove(server));
   expect(snetNodeCount() == 0);
 
   // But we should be able to add it.
-  expect(!snetNodeAdd(node));
+  expect(!snetNodeAdd(server));
   expect(snetNodeCount() == 1);
   
   // The node should be running.
-  expect(RUNNING(node));
+  expect(RUNNING(server));
   
   // We shouldn't be able to re-add the node to the network yet.
-  expect(snetNodeAdd(node));
+  expect(snetNodeAdd(server));
   expect(snetNodeCount() == 1);
   
-  // The node should still be running.
-  expect(RUNNING(node));
+  // The server should still be running.
+  expect(RUNNING(server));
   
   // But we should be able to remove it.
-  expect(!snetNodeRemove(node));
+  expect(!snetNodeRemove(server));
   expect(snetNodeCount() == 0);
   
-  // The node should not be running.
-  expect(!RUNNING(node));
+  // The server should not be running.
+  expect(!RUNNING(server));
 
   // And we should be able to add it again.
-  expect(!snetNodeAdd(node));
+  expect(!snetNodeAdd(server));
   expect(snetNodeCount() == 1);
   
-  // The node should be running.
-  expect(RUNNING(node));
+  // The server should be running.
+  expect(RUNNING(server));
   
   // And with the server, we should be able to stop it.
-  STOP(node);
+  STOP(server);
 
   snetManagementDeinit();
 
@@ -70,8 +87,7 @@ int singleNodeTest(void)
 
 int doubleNodeTest(void)
 {
-  SnetNode *server1, *server2;
-
+  server1 = server2 = NULL;
   snetManagementInit();  
 
   // Create a client and a server.
@@ -140,8 +156,7 @@ int badNodeTest(void)
 
 int noopTest(void)
 {
-  SnetNode *client, *server;
-
+  client = server = NULL;
   snetManagementInit();
 
   // Create a client and a server.
@@ -168,8 +183,7 @@ int noopTest(void)
 
 int receiveTest(void)
 {
-  SnetNode *server;
-
+  server = NULL;
   snetManagementInit();
 
   // Create a client and a server.
@@ -190,6 +204,7 @@ int receiveTest(void)
   expect(!snetNodeCommand(server, RECEIVE, 8, macHeader));
   
   // Expect that the server has those bytes.
+  expect(0);
   
   // Tell the server to stop and wait for it.
   STOP(server);
@@ -204,6 +219,8 @@ int receiveTest(void)
 int main(void)
 {
   announce();
+
+  setFailureHandler(failureHandler);
 
   run(singleNodeTest);
   run(doubleNodeTest);
