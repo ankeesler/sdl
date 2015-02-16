@@ -203,9 +203,6 @@ int receiveTest(void)
                              };
   expect(!snetNodeCommand(server, RECEIVE, 8, macHeader));
   
-  // Expect that the server has those bytes.
-  expect(0);
-  
   // Tell the server to stop and wait for it.
   STOP(server);
   while (RUNNING(server)) ;
