@@ -59,7 +59,7 @@ static void dumpLowNibbles(unsigned char buf[], int *n)
 {
   int i;
   for (*n = i = 0; i < (sizeof(int) * 2); i ++)
-    *n |= (0x0F & buf[i]);
+    *n |= (0x0F & buf[i]) << (i<<2);
 }
 
 int main(int argc, char *argv[])
