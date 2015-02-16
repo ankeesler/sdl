@@ -10,6 +10,8 @@
 
 #include "snet/snet.h"
 
+int nodeState = 0;
+
 int main(void)
 {
   usleep(10000);

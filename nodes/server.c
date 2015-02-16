@@ -15,6 +15,8 @@
 
 static int spin = 1;
 
+int nodeState = 0;
+
 void handler(int signal)
 {
   if (signal == SIGUSR2) {
@@ -26,7 +28,9 @@ int main(void)
 {
   signal(SIGUSR2, handler);
 
-  while (spin) ;
+  while (spin) {
+    usleep(500000);
+  }
 
   return 0;
 }
