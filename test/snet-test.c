@@ -78,7 +78,7 @@ int singleNodeTest(void)
   expect(RUNNING(server));
   
   // And with the server, we should be able to stop it.
-  STOP(server);
+  expect(!STOP(server));
 
   snetManagementDeinit();
 

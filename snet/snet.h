@@ -19,7 +19,9 @@
 int SNET_MAIN(int argc, char *argv[]);
 #endif
 
+//
 // Status.
+//
 
 #define SNET_STATUS_SUCCESS 0
 #define SNET_STATUS_UNKNOWN_NODE 1
@@ -27,14 +29,18 @@ int SNET_MAIN(int argc, char *argv[]);
 #define SNET_STATUS_CANNOT_START_NODE 3
 #define SNET_STATUS_CANNOT_COMMAND_NODE 4
 
+//
 // Configuration.
+//
 
 #define SNET_MAX_HOSTS 10
 
 // PHY payload.
 #define SNET_MAX_PAYLOAD 254
 
+//
 // Management.
+//
 
 // Initialize the network.
 // Also works for resetting the network.
@@ -44,7 +50,9 @@ void snetManagementInit(void);
 // MUST BE CALLED!!!
 void snetManagementDeinit(void);
 
+//
 // Nodes.
+//
 
 // A node in the network.
 typedef struct {
