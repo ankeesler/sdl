@@ -9,3 +9,5 @@
 //
 
 #define SERVER_DUTY_CYCLE_US (500000)
+
+#define SERVER_OFF_SIGNAL (SIGUSR2)

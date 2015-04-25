@@ -17,7 +17,7 @@
 #include "nodes/server.h"
 
 #define RUNNING(node) (kill(node->pid, 0) == 0)
-#define STOP(server) kill(server->pid, SIGUSR2)
+#define STOP(server) kill(server->pid, SERVER_OFF_SIGNAL)
 
 SnetNode *server = NULL, *client = NULL;
 SnetNode *server1 = NULL, *server2 = NULL;

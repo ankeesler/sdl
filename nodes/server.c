@@ -20,14 +20,14 @@ int nodeState = 0;
 
 void handler(int signal)
 {
-  if (signal == SIGUSR2) {
+  if (signal == SERVER_OFF_SIGNAL) {
     spin = 0;
   }
 }
 
 int main(void)
 {
-  signal(SIGUSR2, handler);
+  signal(SERVER_OFF_SIGNAL, handler);
 
   while (spin) {
     usleep(SERVER_DUTY_CYCLE_US);
