@@ -14,6 +14,7 @@
 
 #define __SNET_TEST_C__
 #include "snet/snet.h"
+#include "nodes/server.h"
 
 #define RUNNING(node) (kill(node->pid, 0) == 0)
 #define STOP(server) kill(server->pid, SIGUSR2)
@@ -79,6 +80,10 @@ int singleNodeTest(void)
   
   // And with the server, we should be able to stop it.
   expect(!STOP(server));
+
+  // Then, the server should stop running after some time.
+  usleep(SERVER_DUTY_CYCLE_US);
+  expect(!RUNNING(server));
 
   snetManagementDeinit();
 

@@ -76,18 +76,19 @@ SNET_CHILD_FILES=snet/snet-main.c $(SDL_FILES)
 
 VPATH += $(dir $(SNET_PARENT_FILES)) $(dir $(SNET_CHILD_FILES))
 
-$(BUILD_DIR)/client/client \
-$(BUILD_DIR)/server/server \
-$(BUILD_DIR)/snet-test: DEFINES += -DSNET_TEST
+SNET_TEST_EXES=              \
+  $(BUILD_DIR)/snet-test     \
+  $(BUILD_DIR)/client/client \
+  $(BUILD_DIR)/server/server
 
-SNET_TEST_FILES=$(SNET_PARENT_FILES) $(TEST_DIR)/snet-test.c
+$(SNET_TEST_EXES): DEFINES += -DSNET_TEST
+
+SNET_TEST_FILES=$(SNET_PARENT_FILES) $(TEST_DIR)/snet-test.c sdl-log.c
 SNET_TEST_OBJ=$(addprefix $(BUILD_DIR)/,$(notdir $(SNET_TEST_FILES:.c=.o)))
 $(BUILD_DIR)/snet-test: $(SNET_TEST_OBJ) | $(BUILD_DIR_CREATED)
 	$(CC) $(CFLAGS) -lmcgoo -o $@ $^
 
-run-snet-test: $(BUILD_DIR)/snet-test \
-               $(BUILD_DIR)/server/server \
-               $(BUILD_DIR)/client/client
+run-snet-test: $(SNET_TEST_EXES)
 	./$<
 
 #

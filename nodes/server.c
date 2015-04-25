@@ -12,6 +12,7 @@
 #include <signal.h>
 
 #include "snet/snet.h"
+#include "server.h"
 
 static int spin = 1;
 
@@ -29,7 +30,7 @@ int main(void)
   signal(SIGUSR2, handler);
 
   while (spin) {
-    usleep(500000);
+    usleep(SERVER_DUTY_CYCLE_US);
   }
 
   return 0;
