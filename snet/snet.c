@@ -14,6 +14,7 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <signal.h>
+#include <errno.h>
 
 #ifdef SNET_TEST
   #include <unit-test.h>
@@ -85,10 +86,19 @@ void snetManagementInit(void)
   signal(SIGCHLD, signalHandler);
 }
 
-void snetManagementDeinit(void)
+int snetManagementDeinit(void)
 {
-  int pid;
-  while ((pid = wait(NULL)) != -1) ;
+  int count = 0, i = 0;
+
+  while (i < SNET_MAX_HOSTS) {
+    if ((nodePool[i].mask & SNET_NODE_MASK_USED)
+        && (snetNodeRemove(nodePool + i) == SNET_STATUS_SUCCESS)) {
+      count ++;
+    }
+    i ++;
+  }
+
+  return count;
 }
 
 // Returns the next available node index, or -1 if there is none.

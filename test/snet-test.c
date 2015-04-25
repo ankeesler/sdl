@@ -85,7 +85,8 @@ int singleNodeTest(void)
   usleep(SERVER_DUTY_CYCLE_US);
   expect(!RUNNING(server));
 
-  snetManagementDeinit();
+  // There should not have been any nodes left on the network.
+  expect(snetManagementDeinit() == 0);
 
   return 0;
 }
@@ -135,7 +136,7 @@ int doubleNodeTest(void)
   while (RUNNING(server2)) ;
   while (snetNodeCount()) ;
 
-  snetManagementDeinit();
+  expect(snetManagementDeinit() == 0);;
 
   return 0;
 }
@@ -154,7 +155,8 @@ int badNodeTest(void)
   expect(snetNodeAdd((SnetNode*)&i));
   expect(snetNodeRemove((SnetNode*)&i));
 
-  snetManagementDeinit();
+  expect(snetManagementDeinit() == 0);
+  expect(!snetNodeCount());
 
   return 0;
 }
@@ -176,12 +178,23 @@ int noopTest(void)
   // Add the nodes to the network.
   expect(!snetNodeAdd(server));
   expect(!snetNodeAdd(client));
+
+  // Check that they are running.
+  expect(snetNodeCount() == 2);
+  expect(RUNNING(server));
+  expect(RUNNING(client));
   
   // Send a NOOP.
   expect(!snetNodeCommand(server, NOOP));
   expect(!snetNodeCommand(client, NOOP));
+
+  // Since the command does nothing, the nodes should both still be running.
+  expect(snetNodeCount() == 2);
+  expect(RUNNING(server));
+  expect(RUNNING(client));
   
-  snetManagementDeinit();
+  expect(snetManagementDeinit() == 2);
+  expect(!snetNodeCount());
 
   return 0;
 }
@@ -213,7 +226,8 @@ int receiveTest(void)
   while (RUNNING(server)) ;
   while (snetNodeCount()) ;
   
-  snetManagementDeinit();
+  expect(snetManagementDeinit() == 0);
+  expect(!snetNodeCount());
   
   return 0;
 }

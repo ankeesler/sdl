@@ -47,8 +47,9 @@ int SNET_MAIN(int argc, char *argv[]);
 void snetManagementInit(void);
 
 // Deinitialize the network.
+// Returns the number of nodes that were active in the network.
 // MUST BE CALLED!!!
-void snetManagementDeinit(void);
+int snetManagementDeinit(void);
 
 //
 // Nodes.
