@@ -96,7 +96,7 @@ int doubleNodeTest(void)
   server1 = server2 = NULL;
   snetManagementInit();  
 
-  // Create a client and a server.
+  // Create two servers.
   expect((int)(server1 = snetNodeMake("build/server/server", "server1")));
   expect((int)(server2 = snetNodeMake("build/server/server", "server2")));
   expect(snetNodeCount() == 0);
@@ -127,16 +127,16 @@ int doubleNodeTest(void)
   expect(RUNNING(server2));
 
   // Turn off the servers.
-  STOP(server1);
-  STOP(server2);
+  expect(!STOP(server1));
+  expect(!STOP(server2));
 
   // Both of the servers should stop running, and the number
   // of nodes in the network should drop to 0.
   while (RUNNING(server1)) ;
   while (RUNNING(server2)) ;
-  while (snetNodeCount()) ;
+  expect(!snetNodeCount());
 
-  expect(snetManagementDeinit() == 0);;
+  expect(snetManagementDeinit() == 0);
 
   return 0;
 }
