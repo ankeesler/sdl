@@ -232,7 +232,7 @@ int snetNodeCommand(SnetNode *node, SnetNodeCommand command, ...)
     return SNET_STATUS_INVALID_NETWORK_STATE;
 
   // First write the command to the pipe.
-  if (write(node->fd, &command, sizeof(command) != sizeof(command)))
+  if (write(node->fd, &command, sizeof(command)) != sizeof(command))
     return SNET_STATUS_CANNOT_COMMAND_NODE;
 
   // Now, write the arguments to the command.
