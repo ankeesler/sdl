@@ -19,8 +19,8 @@
 static SdlAddress source;
 static SdlAddress destination = 0x00000000;
 
-#define dataLength (10)
-static uint8_t data[dataLength];
+#define dataBufferLength (10)
+static uint8_t data[dataBufferLength];
 
 static SdlPacket packet;
 
@@ -30,7 +30,7 @@ int sanityCheck(void)
   // if we have not initialized.
   expect(sdlAddress(&source)
          == SDL_UNINITIALIZED);
-  expect(sdlTransmit(SDL_PACKET_TYPE_DATA, destination, data, dataLength)
+  expect(sdlTransmit(SDL_PACKET_TYPE_DATA, destination, data, dataBufferLength)
          == SDL_UNINITIALIZED);
   expect(sdlReceive(&packet)
          == SDL_UNINITIALIZED);
@@ -45,7 +45,7 @@ int sanityCheck(void)
   expect(source == getpid());
   
   // Should be able to transmit.
-  expect(sdlTransmit(SDL_PACKET_TYPE_DATA, destination, data, dataLength)
+  expect(sdlTransmit(SDL_PACKET_TYPE_DATA, destination, data, dataBufferLength)
          == SDL_SUCCESS);
 
   // Receiving something right now should return SDL_EMPTY.
@@ -61,7 +61,7 @@ int loopbackTest(void)
          == SDL_SUCCESS);
 
   // If we send something to ourself...
-  expect(sdlTransmit(SDL_PACKET_TYPE_DATA, source, data, dataLength)
+  expect(sdlTransmit(SDL_PACKET_TYPE_DATA, source, data, dataBufferLength)
          == SDL_SUCCESS);
 
   // ...then we should be able to receive it...right?
@@ -70,7 +70,7 @@ int loopbackTest(void)
   expect(packet.type == SDL_PACKET_TYPE_DATA);
   expect(packet.source == source);
   expect(packet.destination == source);
-  expect(!memcmp(packet.data, data, dataLength));
+  expect(!memcmp(packet.data, data, dataBufferLength));
 
   // After, the SDL should be empty.
   expect(sdlReceive(&packet)
@@ -112,11 +112,47 @@ int broadcastTest(void)
   return 0;
 }
 
+int utilitiesTest(void)
+{
+  uint8_t flatPacket[SDL_MAC_SDU_MAX];
+
+  packet.type = SDL_PACKET_TYPE_DATA;
+  packet.sequence = 0xABCD;
+  packet.source = 0x01234567;
+  packet.destination = 0x89ABCDEF;
+  memcpy(packet.data, data, dataBufferLength);
+  packet.dataLength = dataBufferLength;
+
+  sdlPacketToFlatBuffer(&packet, flatPacket);
+
+  expect(flatPacket[0] == SDL_PACKET_TYPE_DATA);
+  expect(flatPacket[2] == 0xAB);
+  expect(flatPacket[3] == 0xCD);
+
+  expect(flatPacket[4] == 0x01);
+  expect(flatPacket[5] == 0x23);
+  expect(flatPacket[6] == 0x45);
+  expect(flatPacket[7] == 0x67);
+
+  expect(flatPacket[8] == 0x89);
+  expect(flatPacket[9] == 0xAB);
+  expect(flatPacket[10] == 0xCD);
+  expect(flatPacket[11] == 0xEF);
+
+  expect(!memcmp(flatPacket + 12, data, dataBufferLength));
+
+  return 0;
+}
+
 int main(void)
 {
   run(sanityCheck);
+
   run(loopbackTest);
   run(broadcastTest);
+
+  run(utilitiesTest);
+
   return 0;
 }
 

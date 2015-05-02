@@ -61,4 +61,11 @@ extern uint8_t sdlCsmaRetries;
 #define sdlCsmaSetRetries(r) (sdlCsmaRetries = r)
 #define sdlCsmaGetRetries()  (sdlCsmaRetries)
 
+//
+// Utilities
+//
+
+// Takes an SdlPacket struct and converts it to a flat buffer.
+void sdlPacketToFlatBuffer(SdlPacket *packet, uint8_t *buffer);
+
 #endif /* __SDL_H__ */

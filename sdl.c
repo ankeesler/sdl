@@ -40,6 +40,27 @@ static void getAddressFromBuffer(SdlAddress *address, uint8_t *buffer)
               | (buffer[3] << 0x00));
 }
 
+void sdlPacketToFlatBuffer(SdlPacket *packet, uint8_t *buffer)
+{
+  // Big endian (see sdl-protocol.h).
+  
+  // Frame control.
+  buffer[0] = packet->type;
+
+  // Sequence number.
+  buffer[2] = HIGH_BYTE(packet->sequence);
+  buffer[3] = LOW_BYTE(packet->sequence);
+
+  // Source address.
+  putAddressInBuffer(packet->source, buffer + 4);
+  
+  // Destination address.
+  putAddressInBuffer(packet->destination, buffer + 8);
+
+  // Data.
+  memcpy(buffer + 12, packet->data, packet->dataLength);
+}
+
 // -----------------------------------------------------------------------------
 // Management
 
@@ -100,25 +121,18 @@ SdlStatus sdlTransmit(SdlPacketType type,
                       uint8_t *data,
                       uint8_t dataLength)
 {
+  SdlPacket packet;
+
   if (!(state & STATE_INITIALIZED)) return SDL_UNINITIALIZED;
 
-  // Big endian (see sdl-protocol.h).
-  
-  // Frame control.
-  txBuffer[0] |= type;
+  packet.type = type;
+  packet.sequence = sequence;
+  packet.source = ourAddress;
+  packet.destination = destination;
+  memcpy(packet.data, data, dataLength);
+  packet.dataLength = dataLength;
 
-  // Sequence number.
-  txBuffer[2] = HIGH_BYTE(sequence);
-  txBuffer[3] = LOW_BYTE(sequence);
-
-  // Source address.
-  putAddressInBuffer(ourAddress, txBuffer + 4);
-  
-  // Destination address.
-  putAddressInBuffer(destination, txBuffer + 8);
-
-  // Data.
-  memcpy(txBuffer + 12, data, dataLength);
+  sdlPacketToFlatBuffer(&packet, txBuffer);
 
   // If this is for us, put it in the receive queue.
   // TODO: this is agressive to call the ISR...but it is OK, right?
