@@ -155,7 +155,8 @@ void sdlRadioReceiveIsr(uint8_t *data, uint8_t length)
 
   // Filter this packet immediately if it is not for us.
   getAddressFromBuffer(&(rxBuffer[rxTail].destination), data + 8);
-  if (rxBuffer[rxTail].destination != ourAddress)
+  if (rxBuffer[rxTail].destination != ourAddress
+      && rxBuffer[rxTail].destination != SDL_MAC_ADDRESS_BROADCAST)
     return;
   
   // Frame control.

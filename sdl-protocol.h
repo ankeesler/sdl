@@ -66,4 +66,7 @@
 // Types.
 #define SDL_MAC_SDU_TYPE_DATA (0)
 
+// Addresses.
+#define SDL_MAC_ADDRESS_BROADCAST (0xFFFFFFFF)
+
 #endif /* __SDL_PROTOCOL_H__ */
