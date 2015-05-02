@@ -8,6 +8,9 @@
 // SDL protocol definitions.
 //
 
+#ifndef __SDL_PROTOCOL_H__
+#define __SDL_PROTOCOL_H__
+
 // ----------------------------------------------------------------------------
 // PHY
 
@@ -29,7 +32,7 @@
 // ----------------------------------------------------------------------------
 // MAC
 
-// Header.
+// Header (big endian).
 /*
   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
   |  frame control                       |        sequence number             |
@@ -59,3 +62,8 @@
 
 // Max payload.
 #define SDL_MAC_SDU_MAX (SDL_PHY_SDU_MAX - SDL_MAC_PDU_LENGTH)
+
+// Types.
+#define SDL_MAC_SDU_TYPE_DATA (0)
+
+#endif /* __SDL_PROTOCOL_H__ */

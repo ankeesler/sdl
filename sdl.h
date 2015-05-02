@@ -12,6 +12,7 @@
 #define __SDL_H__
 
 #include "sdl-protocol.h"
+#include "sdl-types.h"
 
 #if  !defined(__SDL_MAIN_C__) && !defined(__SDL_TEST_C__)
 #define main SDL_USER_MAIN
@@ -58,12 +59,14 @@ extern int sdlCsmaRetries;
 // Management.
 //
 
-// Pass a positive integer for a key. If it hasn't seen it yet,
-// it will give you a new id. If it has seen it, it will
-// give you the id that was given before.
-// Returns -1 on failure. This can happen if a negative key is passed
-// or the network is full.
-int sdlInterfaceId(int key);
+// Initialize the simulated data link layer.
+// Address is meant to be a completely unique address for the node.
+// Returns a sdl status value with the result of the initialization routine.
+SdlStatus sdlInit(SdlAddress address);
+
+// Returns the address of this node.
+// This address is meant to be completely unique.
+SdlStatus sdlAddress(SdlAddress *address);
 
 //
 // Communication.
@@ -71,11 +74,16 @@ int sdlInterfaceId(int key);
 
 // Does not block.
 // Length is in bytes.
-int sdlTransmit(unsigned char *data, int length);
+//int sdlTransmit(unsigned char *data, int length);
+SdlStatus sdlTransmit(SdlPacketType type,
+                      SdlAddress destination,
+                      uint8_t *data,
+                      uint8_t dataLength);
 
 // Does not block.
 // Length is in bytes.
-int sdlReceive(unsigned char *buffer, int length);
+//int sdlReceive(unsigned char *buffer, int length);
+SdlStatus sdlReceive(SdlPacket *packet);
 
 // Do something kinda like a CCA.
 int sdlActivity(void);

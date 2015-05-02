@@ -54,6 +54,13 @@ $(BUILD_DIR)/basic-test: $(addprefix $(BUILD_DIR)/,$(notdir $(BASIC_TEST_FILES:.
 run-basic-test: $(BUILD_DIR)/basic-test
 	./$<
 
+SDL_TEST_FILES=$(TEST_DIR)/sdl-test.c sdl.c
+$(BUILD_DIR)/sdl-test: $(addprefix $(BUILD_DIR)/,$(notdir $(SDL_TEST_FILES:.c=.o)))
+	$(CC) -lmcgoo -o $@ $^
+
+run-sdl-test: $(BUILD_DIR)/sdl-test
+	./$<
+
 $(BUILD_DIR)/log-test: $(BUILD_DIR)/log.o \
                        $(BUILD_DIR)/sdl-log-on.o \
                        $(BUILD_DIR)/sdl-main.o \
