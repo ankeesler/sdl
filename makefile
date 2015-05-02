@@ -36,13 +36,13 @@ $(BUILD_DIR)/%.o: %.c $(BUILD_DIR_CREATED)
 $(BUILD_DIR)/sdl-log-on.o: sdl-log.c $(BUILD_DIR_CREATED)
 	$(CC) -g -DSDL_LOG -DSDL_LOG_FILE=\"$(SDL_LOG_TEST_FILE)\" -I. -o $@ -c $<
 
-test: run-basic-test run-full-log-test run-snet-test
+test: run-sdl-test
 
 #
 # SDL
 #
 
-SDL_FILES=sdl-net.c sdl-log.c sdl-id.c
+SDL_FILES=sdl.c
 SDL_MAIN_FILE=sdl-main.c
 
 VPATH += $(dir $(SDL_FILES))
@@ -54,7 +54,7 @@ $(BUILD_DIR)/basic-test: $(addprefix $(BUILD_DIR)/,$(notdir $(BASIC_TEST_FILES:.
 run-basic-test: $(BUILD_DIR)/basic-test
 	./$<
 
-SDL_TEST_FILES=$(TEST_DIR)/sdl-test.c sdl.c
+SDL_TEST_FILES=$(TEST_DIR)/sdl-test.c $(SDL_FILES)
 $(BUILD_DIR)/sdl-test: $(addprefix $(BUILD_DIR)/,$(notdir $(SDL_TEST_FILES:.c=.o)))
 	$(CC) -lmcgoo -o $@ $^
 
