@@ -14,47 +14,6 @@
 #include "sdl-protocol.h"
 #include "sdl-types.h"
 
-#if  !defined(__SDL_MAIN_C__) && !defined(__SDL_TEST_C__)
-#define main SDL_USER_MAIN
-#else
-int SDL_USER_MAIN(int argc, char *argv[]);
-#endif
-
-// Return values.
-#define SDL_SUCCESS 0x00
-#define SDL_ERROR_NETWORK_SATURATED 0x01
-#define SDL_ERROR_COLLISION 0x02
-#define SDL_ERROR_NETWORK_EMPTY 0x03
-#define SDL_STATUS_DATA_MTU_EXCEEDED 0x04
-
-// Network 'bandwidth' in packets.
-#define SDL_BANDWIDTH 10
-
-// Network packet lifetime in microseconds.
-#define SDL_PACKET_LIFETIME_US 1000000 /* 1 second */
-
-// A MTU for the link...yeah its fake.
-// In bytes.
-#define SDL_MTU 255
-
-// The maximum number of hosts for one network.
-#define SDL_MAX_HOSTS 10
-
-// CSMA.
-
-// Whether or not to use CSMA mechanism per transmit.
-extern int sdlCsmaOn;
-#define SDL_CSMA_ON 1
-#define sdlCsmaIsOn()   (sdlCsmaOn)
-#define sdlCsmaSetOn()  (sdlCsmaOn = 1)
-#define sdlCsmaSetOff() (sdlCsmaOn = 0)
-
-// CSMA parameters.
-extern int sdlCsmaRetries;
-#define SDL_CSMA_RETRIES 3
-#define sdlCsmaSetRetries(r) (sdlCsmaRetries = r)
-#define sdlCsmaGetRetries()  (sdlCsmaRetries)
-
 //
 // Management.
 //
@@ -74,7 +33,6 @@ SdlStatus sdlAddress(SdlAddress *address);
 
 // Does not block.
 // Length is in bytes.
-//int sdlTransmit(unsigned char *data, int length);
 SdlStatus sdlTransmit(SdlPacketType type,
                       SdlAddress destination,
                       uint8_t *data,
@@ -82,10 +40,25 @@ SdlStatus sdlTransmit(SdlPacketType type,
 
 // Does not block.
 // Length is in bytes.
-//int sdlReceive(unsigned char *buffer, int length);
+// TODO: what should this argument be?
 SdlStatus sdlReceive(SdlPacket *packet);
 
 // Do something kinda like a CCA.
+// FIXME:
 uint8_t sdlActivity(void);
+
+// Whether or not to use CSMA mechanism per transmit.
+extern uint8_t sdlCsmaOn;
+#define SDL_CSMA_ON  (1)
+#define SDL_CSMA_OFF (0)
+#define sdlCsmaIsOn()   (sdlCsmaOn)
+#define sdlCsmaSetOn()  (sdlCsmaOn = SDL_CSMA_ON)
+#define sdlCsmaSetOff() (sdlCsmaOn = SDL_CSMA_OFF)
+
+// CSMA parameters.
+extern uint8_t sdlCsmaRetries;
+#define SDL_CSMA_RETRIES 0
+#define sdlCsmaSetRetries(r) (sdlCsmaRetries = r)
+#define sdlCsmaGetRetries()  (sdlCsmaRetries)
 
 #endif /* __SDL_H__ */

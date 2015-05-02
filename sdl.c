@@ -73,6 +73,9 @@ SdlStatus sdlAddress(SdlAddress *address)
 // -----------------------------------------------------------------------------
 // Communication
 
+uint8_t sdlCsmaOn = SDL_CSMA_OFF;
+uint8_t sdlCsmaRetries = SDL_CSMA_RETRIES;
+
 #define TX_BUFFER_SIZE SDL_PHY_SDU_MAX
 static uint8_t txBuffer[TX_BUFFER_SIZE];
 
