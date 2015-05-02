@@ -169,3 +169,8 @@ void sdlRadioReceiveIsr(uint8_t *data, uint8_t length)
 
   rxTail = nextRxBufferIndex(rxTail);
 }
+
+uint8_t sdlActivity(void)
+{
+  return 0;
+}

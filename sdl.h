@@ -86,6 +86,6 @@ SdlStatus sdlTransmit(SdlPacketType type,
 SdlStatus sdlReceive(SdlPacket *packet);
 
 // Do something kinda like a CCA.
-int sdlActivity(void);
+uint8_t sdlActivity(void);
 
 #endif /* __SDL_H__ */
