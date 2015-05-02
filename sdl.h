@@ -73,7 +73,7 @@ int sdlInterfaceId(int key);
 // Length is in bytes.
 int sdlTransmit(unsigned char *data, int length);
 
-// Does block.
+// Does not block.
 // Length is in bytes.
 int sdlReceive(unsigned char *buffer, int length);
 
