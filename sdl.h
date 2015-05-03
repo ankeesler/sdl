@@ -25,6 +25,7 @@ SdlStatus sdlInit(SdlAddress address);
 
 // Returns the address of this node.
 // This address is meant to be completely unique.
+// This will return SDL_UNINITIALIZED if the SDL layer has not been initialized.
 SdlStatus sdlAddress(SdlAddress *address);
 
 //
@@ -32,15 +33,17 @@ SdlStatus sdlAddress(SdlAddress *address);
 //
 
 // Does not block.
-// Length is in bytes.
+// Argument dataLength is in bytes.
+// Will return SDL_UNINITIALIZED if the SDL has not been initialized yet.
 SdlStatus sdlTransmit(SdlPacketType type,
                       SdlAddress destination,
                       uint8_t *data,
                       uint8_t dataLength);
 
 // Does not block.
-// Length is in bytes.
-// TODO: what should this argument be?
+// Creates a deep copy of a packet to receive.
+// If there is nothing to receive, this will return SDL_EMPTY.
+// If the SDL layer is not initialized yet, this will return SDL_UNINITIALIZED.
 SdlStatus sdlReceive(SdlPacket *packet);
 
 // Do something kinda like a CCA.

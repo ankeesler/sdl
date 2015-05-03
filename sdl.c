@@ -135,7 +135,7 @@ SdlStatus sdlTransmit(SdlPacketType type,
   sdlPacketToFlatBuffer(&packet, txBuffer);
 
   // If this is for us, put it in the receive queue.
-  // TODO: this is agressive to call the ISR...but it is OK, right?
+  // This is agressive to call the ISR...but it is OK, right.
   if (destination == ourAddress) {
     sdlRadioReceiveIsr(txBuffer, SDL_MAC_PDU_LENGTH + dataLength);
   } else {
@@ -151,6 +151,7 @@ SdlStatus sdlReceive(SdlPacket *packet)
 
   if (rxBufferIsEmpty()) return SDL_EMPTY;
 
+  // Deep copy.
   *packet = rxBuffer[rxHead];
   rxHead = nextRxBufferIndex(rxHead);
   
