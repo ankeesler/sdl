@@ -42,7 +42,7 @@ test: run-sdl-test
 # SDL
 #
 
-SDL_FILES=sdl.c
+SDL_FILES=sdl.c sdl-log.c
 SDL_MAIN_FILE=sdl-main.c
 
 VPATH += $(dir $(SDL_FILES))
@@ -90,7 +90,7 @@ SNET_TEST_EXES=              \
 
 $(SNET_TEST_EXES): DEFINES += -DSNET_TEST
 
-SNET_TEST_FILES=$(SNET_PARENT_FILES) $(TEST_DIR)/snet-test.c sdl-log.c
+SNET_TEST_FILES=$(SNET_PARENT_FILES) $(TEST_DIR)/snet-test.c $(SDL_FILES)
 SNET_TEST_OBJ=$(addprefix $(BUILD_DIR)/,$(notdir $(SNET_TEST_FILES:.c=.o)))
 $(BUILD_DIR)/snet-test: $(SNET_TEST_OBJ) | $(BUILD_DIR_CREATED)
 	$(CC) $(CFLAGS) -lmcgoo -o $@ $^
