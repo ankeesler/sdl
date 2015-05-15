@@ -1,11 +1,11 @@
 //
-// snet-main.c
+// nit.c
 //
 // Andrew Keesler
 //
 // February 13, 2015
 //
-// Main code for node on a SNET.
+// Main code for node (Network InTerface) on a SNET.
 //
 
 #define __SNET_C__
