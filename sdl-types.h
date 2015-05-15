@@ -8,6 +8,9 @@
 // SDL types.
 //
 
+#ifndef __SDL_TYPES_H__
+#define __SDL_TYPES_H__
+
 #include <stdint.h>
 #include "sdl-protocol.h"
 
@@ -42,3 +45,5 @@ typedef struct {
   uint8_t data[SDL_PHY_SDU_MAX];
   uint8_t dataLength;
 } SdlPacket;
+
+#endif /* __SDL_TYPES_H__ */

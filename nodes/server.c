@@ -11,6 +11,7 @@
 #include <unit-test.h>
 #include <signal.h>
 
+#include "sdl.h"
 #include "snet/snet.h"
 #include "server.h"
 
@@ -27,10 +28,21 @@ void handler(int signal)
 
 int main(void)
 {
-  signal(SERVER_OFF_SIGNAL, handler);
+  SdlPacket packet;
 
+  sdlInit(getpid());
+
+  signal(SERVER_OFF_SIGNAL, handler);
+  fprintf(stderr, "ok here we go...\n"); fflush(stderr);
   while (spin) {
+    fprintf(stderr, "sleep...\n"); fflush(stderr);
     usleep(SERVER_DUTY_CYCLE_US);
+    fprintf(stderr, "receive...\n"); fflush(stderr);
+    // Try to receive something.
+    if (sdlReceive(&packet) == SDL_SUCCESS) {
+      printf("got it! command: 0x%02X\n", packet.data[0]);
+      spin = (packet.data[0] != SERVER_OFF_COMMAND);
+    }
   }
 
   return 0;

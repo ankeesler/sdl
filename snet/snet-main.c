@@ -12,6 +12,7 @@
 #include "snet.h"
 #include "snet-internal.h"
 #include "sdl-internal.h"
+#include "sdl-protocol.h"
 
 #ifdef SNET_TEST
   #include <stdio.h>
@@ -41,8 +42,13 @@ static void signalHandler(int signal)
     case NOOP:
       printf("(noop:%d)", getpid());
       break;
-    case RECEIVE:
-      noteInt(sdlRadioReceivedIsr(fd));
+    case RECEIVE: {
+      int length;
+      uint8_t data[SDL_PHY_SDU_MAX];
+      read(fd, &length, sizeof(int));
+      read(fd, data, length);
+      sdlRadioReceiveIsr(data, length);
+    }
       break;
     default:
       printf("(command:%d)", command); // TODO: report error.
