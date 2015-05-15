@@ -1,11 +1,11 @@
 //
-// sdl-internal.h
+// mac-internal.h
 //
 // Andrew Keesler
 //
 // December 5, 2014
 //
-// Internal definitions for SDL.
+// Internal definitions for the SDL MAC.
 
 #include <stdint.h>
 

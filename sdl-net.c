@@ -15,9 +15,9 @@
 #include <sys/time.h>
 #include "unistd.h"
 
-#include "sdl.h"
+#include "mac.h"
 #include "sdl-log.h"
-#include "sdl-protocol.h"
+#include "mac-protocol.h"
 
 typedef struct {
   unsigned char data[SDL_PHY_SDU_MAX];

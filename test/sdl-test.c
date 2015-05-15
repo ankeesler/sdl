@@ -11,8 +11,8 @@
 #include <unit-test.h>
 
 #define __SDL_MAIN_C__
-#include "sdl.h"
-#include "sdl-internal.h"
+#include "mac.h"
+#include "mac-internal.h"
 
 #include <unistd.h> // getpid()
 

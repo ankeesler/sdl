@@ -10,7 +10,7 @@
 #include <unit-test.h>
 #include <string.h>
 
-#include "sdl.h"
+#include "mac.h"
 #include "sdl-log.h"
 
 int logOnTest(void)

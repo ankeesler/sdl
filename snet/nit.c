@@ -9,9 +9,9 @@
 //
 
 #define __SNET_C__
-#include "snet.h"
+#include "mac.h"
 #include "snet-internal.h"
-#include "sdl-internal.h"
+#include "mac-internal.h"
 #include "sdl-protocol.h"
 
 #ifdef SNET_TEST

@@ -7,7 +7,7 @@
 //
 // SDL interface ID management.
 
-#include "sdl.h"
+#include "mac.h"
 
 typedef struct {
   int key;

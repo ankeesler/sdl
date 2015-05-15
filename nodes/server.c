@@ -11,7 +11,7 @@
 #include <unit-test.h>
 #include <signal.h>
 
-#include "sdl.h"
+#include "mac.h"
 #include "snet/snet.h"
 #include "server.h"
 

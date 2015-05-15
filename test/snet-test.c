@@ -15,7 +15,7 @@
 #define __SNET_TEST_C__
 #include "snet/snet.h"
 #include "nodes/server.h"
-#include "sdl.h"
+#include "mac.h"
 
 #define RUNNING(node) (kill(node->pid, 0) == 0)
 #define STOP(server) kill(server->pid, SERVER_OFF_SIGNAL)

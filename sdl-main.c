@@ -12,9 +12,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "sdl.h"
+#include "mac.h"
 #include "sdl-log.h"
-#include "sdl-internal.h"
+#include "mac-internal.h"
 
 int main(int argc, char *argv[])
 {

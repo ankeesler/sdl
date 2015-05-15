@@ -1,15 +1,15 @@
 //
-// sdl.c
+// mac.c
 //
 // Andrew Keesler
 //
 // May 2, 2015
 //
-// SDL implementations.
+// SDL MAC layer.
 //
 
-#include "sdl.h"
-#include "sdl-internal.h"
+#include "mac.h"
+#include "mac-internal.h"
 
 #include <string.h> // memcpy()
 

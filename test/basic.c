@@ -12,7 +12,7 @@
 
 #include <pthread.h>
 
-#include "sdl.h"
+#include "mac.h"
 #include "sdl-log.h"
 
 #define SHORT_PACKET {0x01, 0x02, 0x03, 0x04}

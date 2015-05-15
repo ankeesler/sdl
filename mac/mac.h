@@ -1,11 +1,11 @@
 //
-// sdl.h
+// mac.h
 //
 // Andrew Keesler
 //
 // November 16, 2014
 //
-// Simulated data link layer interface.
+// SDL MAC layer interface.
 //
 
 #ifndef __SDL_H__
