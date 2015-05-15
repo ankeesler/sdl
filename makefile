@@ -79,7 +79,7 @@ run-full-log-test: run-log-test
 #
 
 SNET_PARENT_FILES=snet/snet.c
-SNET_CHILD_FILES=snet/nit.c $(SDL_FILES)
+SNET_CHILD_FILES=snet/phy.c $(SDL_FILES)
 
 VPATH += $(dir $(SNET_PARENT_FILES)) $(dir $(SNET_CHILD_FILES))
 

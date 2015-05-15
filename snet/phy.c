@@ -1,5 +1,5 @@
 //
-// nit.c
+// phy.c
 //
 // Andrew Keesler
 //
