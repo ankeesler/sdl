@@ -68,9 +68,9 @@ typedef struct {
 typedef enum {
   /* No operation */
   NOOP,     // args: void
-  /* Tell the radio to transmit length amount of supplied bytes */
+  /* Tell the phy to transmit length amount of supplied bytes */
   TRANSMIT, // args: int length, unsigned char *bytes
-  /* Tell the radio that there is length amount of bytes of incoming RF */
+  /* Tell the phy that there is length amount of bytes of incoming RF */
   RECEIVE,  // args: int length, unsigned char *bytes
 } SnetNodeCommand;
 

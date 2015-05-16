@@ -5,11 +5,12 @@
 //
 // February 13, 2015
 //
-// Main code for node (Network InTerface) on a SNET.
+// Main code for node communicating using SDL.
 //
 
 #define __SNET_C__
 #include "mac.h"
+#include "phy.h"
 #include "snet-internal.h"
 #include "mac-internal.h"
 #include "sdl-protocol.h"
@@ -47,7 +48,7 @@ static void signalHandler(int signal)
       uint8_t data[SDL_PHY_SDU_MAX];
       read(fd, &length, sizeof(int));
       read(fd, data, length);
-      sdlRadioReceiveIsr(data, length);
+      sdlPhyReceiveIsr(data, length);
     }
       break;
     default:

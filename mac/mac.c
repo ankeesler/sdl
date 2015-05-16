@@ -9,6 +9,7 @@
 //
 
 #include "mac.h"
+#include "phy.h"
 #include "mac-internal.h"
 
 #include <string.h> // memcpy()
@@ -137,9 +138,9 @@ SdlStatus sdlTransmit(SdlPacketType type,
   // If this is for us, put it in the receive queue.
   // This is agressive to call the ISR...but it is OK, right.
   if (destination == ourAddress) {
-    sdlRadioReceiveIsr(txBuffer, SDL_MAC_PDU_LENGTH + dataLength);
+    sdlPhyReceiveIsr(txBuffer, SDL_MAC_PDU_LENGTH + dataLength);
   } else {
-    // TODO: hand it to the radio.
+    // TODO: hand it to the phy.
   }
 
   return SDL_SUCCESS;
@@ -158,7 +159,7 @@ SdlStatus sdlReceive(SdlPacket *packet)
   return SDL_SUCCESS;
 }
 
-void sdlRadioReceiveIsr(uint8_t *data, uint8_t length)
+void sdlPhyReceiveIsr(uint8_t *data, uint8_t length)
 {
   uint8_t dataLength = length - SDL_MAC_PDU_LENGTH;
 

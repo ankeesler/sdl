@@ -5,7 +5,7 @@ all:test
 #
 
 CC=cc
-CFLAGS=-g -Wall -Werror -I. -Imac -Isnet
+CFLAGS=-g -Wall -Werror -I. -Iphy -Imac -Isnet
 DEFINES=
 LIBFLAGS=-shared
 SHELL=sh
@@ -79,7 +79,7 @@ run-full-log-test: run-log-test
 #
 
 SNET_PARENT_FILES=snet/snet.c
-SNET_CHILD_FILES=snet/phy.c $(SDL_FILES)
+SNET_CHILD_FILES=phy/phy.c $(SDL_FILES)
 
 VPATH += $(dir $(SNET_PARENT_FILES)) $(dir $(SNET_CHILD_FILES))
 
