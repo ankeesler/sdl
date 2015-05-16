@@ -21,12 +21,12 @@
 // Initialize the simulated data link layer.
 // Address is meant to be a completely unique address for the node.
 // Returns a sdl status value with the result of the initialization routine.
-SdlStatus sdlInit(SdlAddress address);
+SdlStatus sdlMacInit(SdlAddress address);
 
 // Returns the address of this node.
 // This address is meant to be completely unique.
 // This will return SDL_UNINITIALIZED if the SDL layer has not been initialized.
-SdlStatus sdlAddress(SdlAddress *address);
+SdlStatus sdlMacAddress(SdlAddress *address);
 
 //
 // Communication.
@@ -35,34 +35,34 @@ SdlStatus sdlAddress(SdlAddress *address);
 // Does not block.
 // Argument dataLength is in bytes.
 // Will return SDL_UNINITIALIZED if the SDL has not been initialized yet.
-SdlStatus sdlTransmit(SdlPacketType type,
-                      SdlAddress destination,
-                      uint8_t *data,
-                      uint8_t dataLength);
+SdlStatus sdlMacTransmit(SdlPacketType type,
+                         SdlAddress destination,
+                         uint8_t *data,
+                         uint8_t dataLength);
 
 // Does not block.
 // Creates a deep copy of a packet to receive.
 // If there is nothing to receive, this will return SDL_EMPTY.
 // If the SDL layer is not initialized yet, this will return SDL_UNINITIALIZED.
-SdlStatus sdlReceive(SdlPacket *packet);
+SdlStatus sdlMacReceive(SdlPacket *packet);
 
 // Do something kinda like a CCA.
 // FIXME:
-uint8_t sdlActivity(void);
+uint8_t sdlMacActivity(void);
 
 // Whether or not to use CSMA mechanism per transmit.
-extern uint8_t sdlCsmaOn;
+extern uint8_t sdlMacCsmaOn;
 #define SDL_CSMA_ON  (1)
 #define SDL_CSMA_OFF (0)
-#define sdlCsmaIsOn()   (sdlCsmaOn)
-#define sdlCsmaSetOn()  (sdlCsmaOn = SDL_CSMA_ON)
-#define sdlCsmaSetOff() (sdlCsmaOn = SDL_CSMA_OFF)
+#define sdlMacCsmaIsOn()   (sdlCsmaOn)
+#define sdlMacCsmaSetOn()  (sdlCsmaOn = SDL_CSMA_ON)
+#define sdlMacCsmaSetOff() (sdlCsmaOn = SDL_CSMA_OFF)
 
 // CSMA parameters.
-extern uint8_t sdlCsmaRetries;
+extern uint8_t sdlMacCsmaRetries;
 #define SDL_CSMA_RETRIES 0
-#define sdlCsmaSetRetries(r) (sdlCsmaRetries = r)
-#define sdlCsmaGetRetries()  (sdlCsmaRetries)
+#define sdlMacCsmaSetRetries(r) (sdlMacCsmaRetries = r)
+#define sdlMacCsmaGetRetries()  (sdlMacCsmaRetries)
 
 //
 // Utilities

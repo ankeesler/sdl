@@ -72,7 +72,7 @@ static SdlAddress ourAddress;
 
 static uint16_t sequence;
 
-SdlStatus sdlInit(SdlAddress address)
+SdlStatus sdlMacInit(SdlAddress address)
 {
   ourAddress = address;
 
@@ -83,7 +83,7 @@ SdlStatus sdlInit(SdlAddress address)
   return SDL_SUCCESS;
 }
 
-SdlStatus sdlAddress(SdlAddress *address)
+SdlStatus sdlMacAddress(SdlAddress *address)
 {
   if (!(state & STATE_INITIALIZED)) return SDL_UNINITIALIZED;
 
@@ -117,10 +117,10 @@ static void communicationInit(void)
   rxHead = rxTail = 0;
 }
 
-SdlStatus sdlTransmit(SdlPacketType type,
-                      SdlAddress destination,
-                      uint8_t *data,
-                      uint8_t dataLength)
+SdlStatus sdlMacTransmit(SdlPacketType type,
+                         SdlAddress destination,
+                         uint8_t *data,
+                         uint8_t dataLength)
 {
   SdlPacket packet;
 
@@ -146,7 +146,7 @@ SdlStatus sdlTransmit(SdlPacketType type,
   return SDL_SUCCESS;
 }
                     
-SdlStatus sdlReceive(SdlPacket *packet)
+SdlStatus sdlMacReceive(SdlPacket *packet)
 {
   if (!(state & STATE_INITIALIZED)) return SDL_UNINITIALIZED;
 

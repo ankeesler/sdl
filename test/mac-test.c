@@ -29,28 +29,28 @@ int sanityCheck(void)
 {
   // We shouldn't be able to check out ID, transmit, or receive
   // if we have not initialized.
-  expect(sdlAddress(&source)
+  expect(sdlMacAddress(&source)
          == SDL_UNINITIALIZED);
-  expect(sdlTransmit(SDL_PACKET_TYPE_DATA, destination, data, dataBufferLength)
+  expect(sdlMacTransmit(SDL_PACKET_TYPE_DATA, destination, data, dataBufferLength)
          == SDL_UNINITIALIZED);
-  expect(sdlReceive(&packet)
+  expect(sdlMacReceive(&packet)
          == SDL_UNINITIALIZED);
 
   // Initialization should go fine.
-  expect(sdlInit(getpid())
+  expect(sdlMacInit(getpid())
          == SDL_SUCCESS);
 
   // Now we can get our address.
-  expect(sdlAddress(&source)
+  expect(sdlMacAddress(&source)
          == SDL_SUCCESS);
   expect(source == getpid());
   
   // Should be able to transmit.
-  expect(sdlTransmit(SDL_PACKET_TYPE_DATA, destination, data, dataBufferLength)
+  expect(sdlMacTransmit(SDL_PACKET_TYPE_DATA, destination, data, dataBufferLength)
          == SDL_SUCCESS);
 
   // Receiving something right now should return SDL_EMPTY.
-  expect(sdlReceive(&packet)
+  expect(sdlMacReceive(&packet)
          == SDL_EMPTY);
 
   return 0;
@@ -58,15 +58,15 @@ int sanityCheck(void)
 
 int loopbackTest(void)
 {
-  expect(sdlAddress(&source)
+  expect(sdlMacAddress(&source)
          == SDL_SUCCESS);
 
   // If we send something to ourself...
-  expect(sdlTransmit(SDL_PACKET_TYPE_DATA, source, data, dataBufferLength)
+  expect(sdlMacTransmit(SDL_PACKET_TYPE_DATA, source, data, dataBufferLength)
          == SDL_SUCCESS);
 
   // ...then we should be able to receive it...right?
-  expect(sdlReceive(&packet)
+  expect(sdlMacReceive(&packet)
          == SDL_SUCCESS);
   expect(packet.type == SDL_PACKET_TYPE_DATA);
   expect(packet.source == source);
@@ -74,7 +74,7 @@ int loopbackTest(void)
   expect(!memcmp(packet.data, data, dataBufferLength));
 
   // After, the SDL should be empty.
-  expect(sdlReceive(&packet)
+  expect(sdlMacReceive(&packet)
          == SDL_EMPTY);
 
   return 0;
@@ -94,11 +94,11 @@ int broadcastTest(void)
   sdlPhyReceiveIsr(flatPacket, SDL_MAC_PDU_LENGTH);
 
   // ...then we should be able to receive it.
-  expect(sdlReceive(&packet)
+  expect(sdlMacReceive(&packet)
          == SDL_SUCCESS);
 
   // After, the SDL should be empty.
-  expect(sdlReceive(&packet)
+  expect(sdlMacReceive(&packet)
          == SDL_EMPTY);
 
   // Destination address of almost SDL_MAC_ADDRESS_BROADCAST.
@@ -107,7 +107,7 @@ int broadcastTest(void)
   flatPacket[10] = 0xF3;
   flatPacket[11] = 0xF4;
   sdlPhyReceiveIsr(flatPacket, SDL_MAC_PDU_LENGTH);
-  expect(sdlReceive(&packet)
+  expect(sdlMacReceive(&packet)
          == SDL_EMPTY);
 
   return 0;
