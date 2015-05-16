@@ -5,29 +5,33 @@
 
 GOALS:
   - 1 test, two nodes, able to command then from script.
-  - Port logging to SNET layer.
+  - Port logging to PHY.
 
 MILESTONES:
-  - Command API = a way for users to define their own commands.
-    - I need this so that I can use it in tests.
-  - 1 client sends command to server, the server sends command back.
-  - MAC packet filtering.
-    - Interface ids become the process ID, unless there are multiple threads.
-  - MAC packet sequence numbering.
-  - MAC packet types.
-    - Commands, data.
+  DONE:
+    - MAC INTERFACE: init, address, transmit, receive
+    - MAC PROTOCOL: sequence numbering
+    - MAC PROTOCOL: data packets
+    - PHY INTERFACE: received ISR
+  TODO:
+    - SDL LOG: Put logging back in
+    - PHY INTERFACE: transmit (this is done in junction with SNET development)
+    - SNET INTERFACE: add a way for users to define their own commands
+  BACKLOG:
+    - MAC PROTOCOL: packet filtering
+    - MAC PROTOCOL: command packets
     
 # NWK
-#      interface upwards sdlTransmit(length, data) sdlReceive(*length, data)
+#      interface upwards sdlMacTransmit, sdlReceive
 #    /
-# SDL  - network Q for received messages
+# MAC
 #    \
-#      interface downwards sdlRadioReceivedIsr(fd)
+#      interface downwards sdlPhyReceivedIsr
 #
-#      interfaces upwards sdlPhyTransmit(length, data)
+#      interfaces upwards sdlPhyTransmit
+#     /
+# PHY
+#    \
+#     interface downwards snetNodeCommand(TRANSMIT)
 #     /
 # SNET
-
-LONGTERM:
-  - The sdlTransmit() API has one higher layer API where dest address can be provided.
-   
