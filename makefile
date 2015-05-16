@@ -1,13 +1,27 @@
-all:test
+#
+# TEST
+#
+
+all: test
 
 #
 # VARS
 #
 
-CC=cc
-CFLAGS=-g -Wall -Werror -I. -Iinc -Iphy -Imac -Isnet
+INC_DIR=inc
+SNET_DIR=snet
+PHY_DIR=phy
+MAC_DIR=mac
+TEST_APPS_DIR=nodes
+TEST_DIR=test
+CAP_DIR=cap
+
+INCLUDES=-I. -I$(INC_DIR) -I$(PHY_DIR) -I$(MAC_DIR) -I$(SNET_DIR)
 DEFINES=
-LIBFLAGS=-shared
+
+CC=gcc
+CFLAGS=-g -O0 -Wall -Werror $(INCLUDES) $(DEFINES)
+LDFLAGS=-lmcgoo
 SHELL=sh
 
 BUILD_DIR=build
@@ -15,51 +29,58 @@ BUILD_DIR_CREATED=$(BUILD_DIR)/created
 
 SDL_LOG_TEST_FILE=tuna.sdl
 
-TEST_APPS_DIR=nodes
-TEST_DIR=test
-
-VPATH=$(TEST_DIR) $(TEST_APPS_DIR)
+VPATH=$(SNET_DIR) $(PHY_DIR) $(MAC_DIR) $(TEST_APPS_DIR) $(TEST_DIR) $(CAP_DIR)
 
 #
-# BUILD STUFF
+# UTIL
+#
+
+run-%: $(BUILD_DIR)/%
+	./$<
+
+#
+# BUILD
 #
 
 clean: clean-cap
-	rm -frd ./*.o $(SDL_LIB) $(BUILD_DIR) $(SDL_LOG_TEST_FILE)
+	rm -frd ./*.o $(BUILD_DIR) $(SDL_LOG_TEST_FILE)
 
 $(BUILD_DIR_CREATED):
-	mkdir -p $(BUILD_DIR); touch $(BUILD_DIR_CREATED)
+	mkdir -p $(BUILD_DIR) && touch $(BUILD_DIR_CREATED)
 
 $(BUILD_DIR)/%.o: %.c $(BUILD_DIR_CREATED)
-	$(CC) $(CFLAGS) $(DEFINES) -I. -o $@ -c $<
+	$(CC) $(CFLAGS) -o $@ -c $<
 
 $(BUILD_DIR)/sdl-log-on.o: sdl-log.c $(BUILD_DIR_CREATED)
 	$(CC) -g -DSDL_LOG -DSDL_LOG_FILE=\"$(SDL_LOG_TEST_FILE)\" -I. -o $@ -c $<
 
-test: run-sdl-test
+#
+# TEST
+#
+
+test: run-mac-test
+
+#
+# PHY
+#
+
+PHY_FILES=$(PHY_DIR)/phy.c
+
+#
+# MAC
+#
+
+MAC_FILES=$(MAC_DIR)/mac.c
+
+MAC_TEST_FILES=$(TEST_DIR)/mac-test.c $(MAC_FILES)
+$(BUILD_DIR)/mac-test: $(addprefix $(BUILD_DIR)/,$(notdir $(MAC_TEST_FILES:.c=.o)))
+	$(CC) -lmcgoo -o $@ $^
 
 #
 # SDL
 #
 
-SDL_FILES=mac/mac.c cap/sdl-log.c
-SDL_MAIN_FILE=sdl-main.c
-
-VPATH += $(dir $(SDL_FILES))
-
-BASIC_TEST_FILES=$(TEST_DIR)/basic.c $(SDL_FILES) $(SDL_MAIN_FILE)
-$(BUILD_DIR)/basic-test: $(addprefix $(BUILD_DIR)/,$(notdir $(BASIC_TEST_FILES:.c=.o)))
-	$(CC) $(CFLAGS) -lmcgoo -o $@ $^
-
-run-basic-test: $(BUILD_DIR)/basic-test
-	./$<
-
-SDL_TEST_FILES=$(TEST_DIR)/sdl-test.c $(SDL_FILES)
-$(BUILD_DIR)/sdl-test: $(addprefix $(BUILD_DIR)/,$(notdir $(SDL_TEST_FILES:.c=.o)))
-	$(CC) -lmcgoo -o $@ $^
-
-run-sdl-test: $(BUILD_DIR)/sdl-test
-	./$<
+SDL_FILES=$(PHY_FILES) $(MAC_FILES)
 
 $(BUILD_DIR)/log-test: $(BUILD_DIR)/log.o \
                        $(BUILD_DIR)/sdl-log-on.o \
@@ -78,10 +99,8 @@ run-full-log-test: run-log-test
 # SNET
 #
 
-SNET_PARENT_FILES=snet/snet.c
-SNET_CHILD_FILES=phy/phy.c $(SDL_FILES)
-
-VPATH += $(dir $(SNET_PARENT_FILES)) $(dir $(SNET_CHILD_FILES))
+SNET_PARENT_FILES=$(SNET_DIR)/snet.c
+SNET_CHILD_FILES=$(SDL_FILES)
 
 SNET_TEST_EXES=              \
   $(BUILD_DIR)/snet-test     \
@@ -93,7 +112,7 @@ $(SNET_TEST_EXES): DEFINES += -DSNET_TEST
 SNET_TEST_FILES=$(SNET_PARENT_FILES) $(TEST_DIR)/snet-test.c $(SDL_FILES)
 SNET_TEST_OBJ=$(addprefix $(BUILD_DIR)/,$(notdir $(SNET_TEST_FILES:.c=.o)))
 $(BUILD_DIR)/snet-test: $(SNET_TEST_OBJ) | $(BUILD_DIR_CREATED)
-	$(CC) $(CFLAGS) -lmcgoo -o $@ $^
+	$(CC) $(LDFLAGS) -o $@ $^
 
 run-snet-test: $(SNET_TEST_EXES)
 	./$<
@@ -106,7 +125,7 @@ SERVER_DIR_CREATED=$(BUILD_DIR)/server/created
 $(SERVER_DIR_CREATED): $(BUILD_DIR_CREATED)
 	mkdir $(@D) && touch $@
 $(BUILD_DIR)/server/%.o: %.c | $(SERVER_DIR_CREATED)
-	$(CC) $(CFLAGS) $(DEFINES) -I. -o $@ -c $<
+	$(CC) $(CFLAGS) -I. -o $@ -c $<
 SERVER_FILES=$(SNET_CHILD_FILES) $(TEST_APPS_DIR)/server.c
 SERVER_OBJ=$(addprefix $(BUILD_DIR)/server/,$(notdir $(SERVER_FILES:.c=.o)))
 $(BUILD_DIR)/server/server: $(SERVER_OBJ) | $(BUILD_DIR_CREATED)
@@ -138,16 +157,16 @@ MANIFEST_FILE=manifest.txt
 grammar:
 	java -jar $(ANTLR_JAR) cap/SdlLog.g4
 
-.PHONY: cap
-cap: grammar
+.PHONY: $(CAP_DIR)
+$(CAP_DIR): grammar
 	javac -cp $(ANTLR_JAR):$@:$(SNAKE_YAML_JAR) $@/*.java
 
 .PHONY: cap/Decode.jar
-cap/Decode.jar: cap
+$(CAP_DIR)/Decode.jar: $(CAP_DIR)
 	cd $<; jar cfm $(@F) $(MANIFEST_FILE) *.class $(IPV6_YAML_FILE)
 
-decoder: cap/Decode.jar
+decoder: $(CAP_DIR)/Decode.jar
 	java -jar $<
 
 clean-cap:
-	rm -f cap/*.class cap/*.jar cap/Decode.jar
+	rm -f $(CAP_DIR)/*.class $(CAP_DIR)/*.jar $(CAP_DIR)/Decode.jar
