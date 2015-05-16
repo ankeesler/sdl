@@ -42,7 +42,7 @@ test: run-sdl-test
 # SDL
 #
 
-SDL_FILES=mac/mac.c sdl-log.c
+SDL_FILES=mac/mac.c cap/sdl-log.c
 SDL_MAIN_FILE=sdl-main.c
 
 VPATH += $(dir $(SDL_FILES))
