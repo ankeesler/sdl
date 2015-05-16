@@ -5,7 +5,7 @@ all:test
 #
 
 CC=cc
-CFLAGS=-g -Wall -Werror -I. -Iphy -Imac -Isnet
+CFLAGS=-g -Wall -Werror -I. -Iinc -Iphy -Imac -Isnet
 DEFINES=
 LIBFLAGS=-shared
 SHELL=sh
