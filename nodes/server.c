@@ -30,17 +30,13 @@ int main(void)
 {
   SdlPacket packet;
 
-  sdlInit(getpid());
+  sdlMacInit(getpid());
 
   signal(SERVER_OFF_SIGNAL, handler);
-  fprintf(stderr, "ok here we go...\n"); fflush(stderr);
   while (spin) {
-    fprintf(stderr, "sleep...\n"); fflush(stderr);
     usleep(SERVER_DUTY_CYCLE_US);
-    fprintf(stderr, "receive...\n"); fflush(stderr);
     // Try to receive something.
-    if (sdlReceive(&packet) == SDL_SUCCESS) {
-      printf("got it! command: 0x%02X\n", packet.data[0]);
+    if (sdlMacReceive(&packet) == SDL_SUCCESS) {
       spin = (packet.data[0] != SERVER_OFF_COMMAND);
     }
   }

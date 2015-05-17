@@ -11,8 +11,8 @@
 #include <unit-test.h>
 #include <signal.h>
 #include <sys/wait.h>
+#include <stdbool.h>
 
-#define __SNET_TEST_C__
 #include "snet/snet.h"
 #include "nodes/server.h"
 #include "mac.h"
@@ -164,38 +164,32 @@ int badNodeTest(void)
 
 int noopTest(void)
 {
-  client = server = NULL;
+  server = NULL;
   snetManagementInit();
 
-  // Create a client and a server.
-  expect((int)(client = snetNodeMake("build/client/client", "client")));
+  // Create a server.
   expect((int)(server = snetNodeMake("build/server/server", "server")));
   expect(snetNodeCount() == 0);
 
   // Can't send a command if a node is not on a network.
   expect(snetNodeCommand(server, NOOP));
-  expect(snetNodeCommand(client, NOOP));
   
-  // Add the nodes to the network.
+  // Add the node to the network.
   expect(!snetNodeAdd(server));
-  expect(!snetNodeAdd(client));
 
   // Check that they are running.
-  expect(snetNodeCount() == 2);
+  expect(snetNodeCount() == 1);
   expect(RUNNING(server));
-  expect(RUNNING(client));
   
   // Send a NOOP.
   expect(!snetNodeCommand(server, NOOP));
-  expect(!snetNodeCommand(client, NOOP));
 
   // Since the command does nothing, the nodes should both still be running.
-  expect(snetNodeCount() == 2);
+  expect(snetNodeCount() == 1);
   expect(RUNNING(server));
-  expect(RUNNING(client));
   
   // The client may have stopped by now.
-  expect(snetManagementDeinit() > 0);
+  expect(snetManagementDeinit() == 1);
   expect(!snetNodeCount());
 
   return 0;
@@ -267,7 +261,7 @@ int main(void)
   
   run(noopTest);
   
-  run(receiveTest);
+  //run(receiveTest);
 
   return 0;
 }

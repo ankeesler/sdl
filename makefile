@@ -53,7 +53,7 @@ $(BUILD_DIR)/%.o: %.c $(BUILD_DIR_CREATED)
 # TEST
 #
 
-test: run-mac-test run-log-test
+test: run-mac-test run-log-test run-snet-test
 
 #
 # PHY
@@ -107,7 +107,7 @@ $(SNET_TEST_EXES): DEFINES += -DSNET_TEST
 
 SNET_TEST_FILES=$(SNET_PARENT_FILES) $(TEST_DIR)/snet-test.c $(SDL_FILES)
 SNET_TEST_OBJ=$(addprefix $(BUILD_DIR)/,$(notdir $(SNET_TEST_FILES:.c=.o)))
-$(BUILD_DIR)/snet-test: $(SNET_TEST_OBJ) | $(BUILD_DIR_CREATED)
+$(BUILD_DIR)/snet-test: $(SNET_TEST_OBJ)
 	$(CC) $(LDFLAGS) -o $@ $^
 
 run-snet-test: $(SNET_TEST_EXES)
