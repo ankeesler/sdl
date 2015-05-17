@@ -59,6 +59,8 @@ int grepTest(void)
 
 int main(void)
 {
+  announce();
+
   run(writeBytes);
   
   run(grepTest);

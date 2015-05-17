@@ -150,6 +150,8 @@ int utilitiesTest(void)
 
 int main(void)
 {
+  announce();
+
   run(sanityCheck);
 
   run(loopbackTest);
