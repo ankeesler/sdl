@@ -117,26 +117,26 @@ run-snet-test: $(SNET_TEST_EXES)
 # TEST APPS
 #
 
-SERVER_DIR_CREATED=$(BUILD_DIR)/server/created
-$(SERVER_DIR_CREATED): $(BUILD_DIR_CREATED)
-	mkdir $(@D) && touch $@
-$(BUILD_DIR)/server/%.o: %.c | $(SERVER_DIR_CREATED)
-	$(CC) $(CFLAGS) -I. -o $@ -c $<
+SERVER_DIR=$(BUILD_DIR)/server
+$(SERVER_DIR): $(BUILD_DIR_CREATED)
+	mkdir $@
+$(BUILD_DIR)/server/%.o: %.c $(SERVER_DIR)
+	$(CC) $(CFLAGS) -o $@ -c $<
 SERVER_FILES=$(SNET_CHILD_FILES) $(TEST_APPS_DIR)/server.c
-SERVER_OBJ=$(addprefix $(BUILD_DIR)/server/,$(notdir $(SERVER_FILES:.c=.o)))
-$(BUILD_DIR)/server/server: $(SERVER_OBJ) | $(BUILD_DIR_CREATED)
+SERVER_OBJ=$(addprefix $(SERVER_DIR)/,$(notdir $(SERVER_FILES:.c=.o)))
+$(BUILD_DIR)/server/server: $(SERVER_OBJ)
 	$(CC) $(CFLAGS) -o $@ $^
 run-server: $(BUILD_DIR)/server/server
 	./$< $(ARGS)
 
-CLIENT_DIR_CREATED=$(BUILD_DIR)/client/created
-$(CLIENT_DIR_CREATED): $(BUILD_DIR_CREATED)
-	mkdir $(@D) && touch $@
-$(BUILD_DIR)/client/%.o: %.c | $(CLIENT_DIR_CREATED)
-	$(CC) $(CFLAGS) $(DEFINES) -I. -o $@ -c $<
+CLIENT_DIR=$(BUILD_DIR)/client
+$(CLIENT_DIR): $(BUILD_DIR_CREATED)
+	mkdir $@
+$(BUILD_DIR)/client/%.o: %.c $(CLIENT_DIR)
+	$(CC) $(CFLAGS) -o $@ -c $<
 CLIENT_FILES=$(SNET_CHILD_FILES) $(TEST_APPS_DIR)/client.c
-CLIENT_OBJ=$(addprefix $(BUILD_DIR)/client/,$(notdir $(CLIENT_FILES:.c=.o)))
-$(BUILD_DIR)/client/client: $(CLIENT_OBJ) | $(BUILD_DIR_CREATED)
+CLIENT_OBJ=$(addprefix $(CLIENT_DIR)/,$(notdir $(CLIENT_FILES:.c=.o)))
+$(BUILD_DIR)/client/client: $(CLIENT_OBJ)
 	$(CC) $(CFLAGS) -o $@ $^
 run-client: $(BUILD_DIR)/client/client
 	./$< $(ARGS)
