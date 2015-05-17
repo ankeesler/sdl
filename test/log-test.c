@@ -14,6 +14,9 @@
 #include "snet.h"
 #include "phy.h"
 
+// TODO: remove me when child process dumps to the log itself.
+#include "cap/sdl-log.h"
+
 // Stub.
 void sdlPhyReceiveIsr(uint8_t *data, uint8_t length) {}
 
@@ -38,6 +41,9 @@ int writeBytes(void)
 
 int grepTest(void)
 {
+  // TODO: remove this thing and let the child process call it when it exits.
+  sdlLogDump();
+
   // Sanity check.
   expect(!system("grep -q CAPTURE " SDL_LOG_FILE));
   expect( system("grep -q TUNA    " SDL_LOG_FILE));

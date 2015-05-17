@@ -80,9 +80,15 @@ SDL_LOG_FILES=$(CAP_DIR)/sdl-log.c
 SDL_FILES=$(PHY_FILES) $(MAC_FILES) $(SDL_LOG_FILES)
 
 SDL_LOG_TEST_FILE=tuna.sdl
-LOG_TEST_FILES=$(PHY_FILES) $(SDL_LOG_FILES) test/log-test.c
-$(BUILD_DIR)/log-test: DEFINES += -DSDL_LOG -DSDL_LOG_FILE=\"$(SDL_LOG_TEST_FILE)\" -DSNET_TEST
-$(BUILD_DIR)/log-test: $(addprefix $(BUILD_DIR)/,$(notdir $(LOG_TEST_FILES:.c=.o)))
+
+# So that we can compile in logging for this test.
+$(BUILD_DIR)/sdl-log-on.o: $(CAP_DIR)/sdl-log.c $(BUILD_DIR_CREATED)
+	$(CC) $(CFLAGS) -o $@ -c $<
+
+LOG_TEST_OBJ=$(addprefix $(BUILD_DIR)/, phy.o log-test.o sdl-log-on.o)
+
+$(BUILD_DIR)/log-test: DEFINES += -DSNET_TEST -DSDL_LOG -DSDL_LOG_FILE=\"$(SDL_LOG_TEST_FILE)\"
+$(BUILD_DIR)/log-test: $(LOG_TEST_OBJ)
 	$(CC) $(LDFLAGS) -o $@ $^
 
 #
