@@ -22,6 +22,8 @@ enum {
   SDL_EMPTY         = 0x01,
   // The SDL layer is uninitialized.
   SDL_UNINITIALIZED = 0x02,
+  // A fatal failure has occured.
+  SDL_FATAL         = 0x03,
 };
 typedef uint8_t SdlStatus;
 
