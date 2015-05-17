@@ -27,8 +27,6 @@ SHELL=sh
 BUILD_DIR=build
 BUILD_DIR_CREATED=$(BUILD_DIR)/created
 
-SDL_LOG_TEST_FILE=tuna.sdl
-
 VPATH=$(SNET_DIR) $(PHY_DIR) $(MAC_DIR) $(TEST_APPS_DIR) $(TEST_DIR) $(CAP_DIR)
 
 #
@@ -58,7 +56,7 @@ $(BUILD_DIR)/sdl-log-on.o: sdl-log.c $(BUILD_DIR_CREATED)
 # TEST
 #
 
-test: run-mac-test
+test: run-mac-test run-log-test
 
 #
 # PHY
@@ -80,20 +78,15 @@ $(BUILD_DIR)/mac-test: $(addprefix $(BUILD_DIR)/,$(notdir $(MAC_TEST_FILES:.c=.o
 # SDL
 #
 
-SDL_FILES=$(PHY_FILES) $(MAC_FILES)
+SDL_LOG_FILES=$(CAP_DIR)/sdl-log.c
 
-$(BUILD_DIR)/log-test: $(BUILD_DIR)/log.o \
-                       $(BUILD_DIR)/sdl-log-on.o \
-                       $(BUILD_DIR)/sdl-main.o \
-                       $(BUILD_DIR)/sdl-net.o \
-                       $(BUILD_DIR)/sdl-id.o
-	$(CC) -g -Wall -lmcgoo -o $@ $^
+SDL_FILES=$(PHY_FILES) $(MAC_FILES) $(SDL_LOG_FILES)
 
-run-log-test: $(BUILD_DIR)/log-test
-	./$< -n 2
-
-run-full-log-test: run-log-test
-	./test/log-test.pl
+SDL_LOG_TEST_FILE=tuna.sdl
+LOG_TEST_FILES=$(PHY_FILES) $(SDL_LOG_FILES) test/log-test.c
+$(BUILD_DIR)/log-test: DEFINES += -DSDL_LOG -DSDL_LOG_FILE=\"$(SDL_LOG_TEST_FILE)\" -DSNET_TEST
+$(BUILD_DIR)/log-test: $(addprefix $(BUILD_DIR)/,$(notdir $(LOG_TEST_FILES:.c=.o)))
+	$(CC) $(LDFLAGS) -o $@ $^
 
 #
 # SNET
