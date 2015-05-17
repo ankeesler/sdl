@@ -12,6 +12,7 @@
 #define __SNET_H__
 
 #include <unistd.h>
+#include <stdint.h>
 
 #if !defined(__SNET_C__) && !defined(__SNET_TEST_C__)
 #define main SNET_MAIN
@@ -27,7 +28,9 @@ int SNET_MAIN(int argc, char *argv[]);
 #define SNET_STATUS_UNKNOWN_NODE 1
 #define SNET_STATUS_INVALID_NETWORK_STATE 2
 #define SNET_STATUS_CANNOT_START_NODE 3
-#define SNET_STATUS_CANNOT_COMMAND_NODE 4
+#define SNET_STATUS_BAD_NODE_COM 4
+#define SNET_STATUS_CANNOT_COMMAND_NODE 5
+#define SNET_STATUS_UNKNOWN_COMMAND 6
 
 //
 // Configuration.
@@ -65,14 +68,14 @@ typedef struct {
 } SnetNode;
 
 // A command for a node.
-typedef enum {
+enum {
   /* No operation */
-  NOOP,     // args: void
-  /* Tell the phy to transmit length amount of supplied bytes */
-  TRANSMIT, // args: int length, unsigned char *bytes
-  /* Tell the phy that there is length amount of bytes of incoming RF */
-  RECEIVE,  // args: int length, unsigned char *bytes
-} SnetNodeCommand;
+  NOOP     = 0x01, // args: void
+
+  /* Tell the PHY that there is incoming SDL data */
+  RECEIVE  = 0x02, // args: uint8_t *bytes
+};
+typedef uint8_t SnetNodeCommand;
 
 // Create a node.
 // The node is not yet added to the network.

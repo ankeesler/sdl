@@ -25,11 +25,16 @@
 // -----------------------------------------------------------------------------
 // SIGNALS
 
+FILE *childLogFile = NULL;
+
 // The reading fd for the pipe.
 static int fd;
 
 static void cleanup(void)
 {
+  // Close our log file.
+  fclose(childLogFile);
+
   // Close the read end of the pipe.
   close(fd);
   
@@ -39,29 +44,28 @@ static void cleanup(void)
 
 static void signalHandler(int signal)
 {
+  uint8_t rxBuffer[SDL_PHY_SDU_MAX + SDL_PHY_PDU_LEN];
+  SnetNodeCommand command = NOOP;
+
   if (signal == CHILD_ALERT_SIGNAL) {
     // Read the command out of the pipe.
-    int command, readSize;
-    if ((readSize = read(fd, &command, sizeof(command))) != sizeof(command))
-      printf("(readSize:%d)", readSize); // TODO: report error.
+    // TODO: report bad read.
+    //read(fd, &command, sizeof(command));
 
     // Handle the command, remembering that this is
     // called in an interupt context.
     switch (command) {
     case NOOP:
-      printf("(noop:%d)", getpid());
       break;
-    case RECEIVE: {
-      int length;
-      uint8_t data[SDL_PHY_SDU_MAX];
-      read(fd, &length, sizeof(int));
-      read(fd, data, length);
-      sdlLogRx(data, length);
-      sdlPhyReceiveIsr(data, length);
-    }
+    case RECEIVE:
+      // First byte is the PHY PDU, i.e., the length of the whole packet.
+      read(fd, rxBuffer, sizeof(uint8_t));
+      read(fd, rxBuffer + 1, rxBuffer[0] - 1);
+      sdlLogRx(rxBuffer, rxBuffer[0]);
+      sdlPhyReceiveIsr(rxBuffer + 1, rxBuffer[0] - 1);
       break;
     default:
-      printf("(command:%d)", command); // TODO: report error.
+      ; // TODO: report bad command.
     }
   } else if (signal == CHILD_QUIT_SIGNAL) {
     cleanup();
@@ -78,31 +82,40 @@ int main(int argc, char *argv[])
 
   // The first argument past the program name is pipe fds from the
   // parent.
-#ifndef SNET_TEST
+#ifndef SDL_LOG_TEST
   if (argc < 2) {
     return 1;
   } else {
+    // See fillLogNibbles in snet.c. This is our file descriptor for
+    // communicating with our parent.
     uint8_t i;
     for (fd = i = 0; i < (sizeof(int) * 2); i ++)
       fd |= (0x0F & argv[1][i]) << (i<<2);
   }
 #endif
 
+  // Log file.
+  childLogFile = fopen(".child", "w");
+  fprintf(childLogFile, "HELLO\n");
+  fprintf(childLogFile, "I am %s and my fd is %d\n", argv[0], fd);
+
   // Say that we want to handle the CHILD_ALERT_SIGNAL signal.
   // This will be our parent telling us that there is data for
   // us in the pipe.
   signal(CHILD_ALERT_SIGNAL, signalHandler);
+  fprintf(childLogFile, "registering CHILD_ALERT_SIGNAL\n");
   
   // Also say that we want to handle the CHILD_QUIT_SIGNAL,
   // for when our parent wants us to quit immediately.
   signal(CHILD_QUIT_SIGNAL, signalHandler);
+  fprintf(childLogFile, "registering CHILD_QUIT_SIGNAL\n");
 
   // Call the child node's main function.
   ret = SNET_MAIN(argc, argv);
 
   // When done, cleanup.
   cleanup();
-
+ 
   exit(ret);
 }
 

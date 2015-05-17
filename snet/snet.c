@@ -15,20 +15,19 @@
 #include <sys/wait.h>
 #include <signal.h>
 #include <errno.h>
-
-#ifdef SNET_TEST
-  #include <unit-test.h>
-#endif
+#include <stdint.h>
 
 #include "snet.h"
 #include "snet-internal.h"
+#include "sdl-types.h"
 
 #include "sdl-protocol.h"
 
 // ----------------------------------------------------------------------------
 // Prototypes.
 
-void nodeRemoveReally(SnetNode *node);
+static void nodeRemoveReally(SnetNode *node);
+static SnetNode *findNodeForPid(pid_t pid);
 #define processIsAlive(pid) (kill(pid, 0) == 0)
 
 // ----------------------------------------------------------------------------
@@ -51,25 +50,113 @@ static SnetNode nodePool[SNET_MAX_HOSTS];
 static int nodesInNetwork = 0;
 
 // ----------------------------------------------------------------------------
+// Testing.
+
+#ifdef SNET_TEST
+
+  #include <sys/time.h> // gettimeofday()
+
+  typedef struct {
+    pid_t pid;
+    const char *nodeName;
+    struct timeval time;
+    int signal;
+  } SignalData;
+  
+  #define SIGNAL_DATA_SIZE (32)
+  static SignalData signalData[SIGNAL_DATA_SIZE];
+  static uint8_t signalDataIndex = 0;
+
+  #define MAX_SIG SIGIO
+  static const char *signalNames[] = {
+    "NONE",
+    "SIGHUP",
+    "SIGINT",
+    "SIGQUIT",
+    "SIGILL",
+    "SIGTRAP",
+    "SIGABRT",
+    "SIGPOLL/SIGEMT",
+    "SIGFPE",
+    "SIGKILL",
+    "SIGBUS",
+    "SIGSEGV",
+    "SIGSYS",
+    "SIGPIPE",
+    "SIGALRM",
+    "SIGTERM",
+    "SIGURG",
+    "SIGSTOP",
+    "SIGTSTP",
+    "SIGCONT",
+    "SIGCHLD",
+    "SIGTTIN",
+    "SIGTTOU",
+    "SIGIO",
+  };
+  
+  static void logSignalData(pid_t pid, int signal)
+  {
+    SnetNode *node;
+
+    if (signalDataIndex < SIGNAL_DATA_SIZE) {
+      node = findNodeForPid(pid);
+      signalData[signalDataIndex].pid = pid;
+      signalData[signalDataIndex].signal = signal;
+      signalData[signalDataIndex].nodeName = (node ? node->name : "???");
+      gettimeofday(&(signalData[signalDataIndex].time), NULL);
+      signalDataIndex ++;
+    }
+  }
+  
+  void printSignalData(void)
+  {
+    uint8_t i;
+
+    printf("\n");
+    for (i = 0; i < signalDataIndex; i ++) {
+      printf("(signalData[%d] = {pid=%d(%s), time=%ld us, signal=%d(%s)})\n",
+             i,
+             signalData[i].pid,
+             signalData[i].nodeName,
+             ((signalData[i].time.tv_sec * 1000000)
+               + signalData[i].time.tv_usec),
+             signalData[i].signal,
+             signalNames[signalData[i].signal]);
+    }
+  }  
+#else
+  #define logSignalData(...)
+  void printSignalData(void) {}
+#endif
+
+// ----------------------------------------------------------------------------
 // Management.
+
+static SnetNode *findNodeForPid(pid_t pid)
+{
+  uint8_t i;
+  for (i = 0; i < SNET_MAX_HOSTS; i ++) {
+    if (nodePool[i].pid == pid) {
+      return nodePool + i;
+    }
+  }
+  return NULL;
+}
 
 void signalHandler(int signal)
 {
-  int i;
-  pid_t pid;
+  pid_t pid = 0;
 
   if (signal == SIGCHLD) {
     // Wait to see which child process is quitting.
     pid = wait(NULL);
 
-    // Find that child process.
-    for (i = 0; i < SNET_MAX_HOSTS; i ++) {
-      if (nodePool[i].pid == pid) {
-        nodeRemoveReally(nodePool + i);
-        break;
-      }
-    }
+    // Find that child process and really remove it.
+    nodeRemoveReally(findNodeForPid(pid));
   }
+
+  logSignalData(pid, signal);
 }
 
 void snetManagementInit(void)
@@ -146,7 +233,7 @@ static void fillLowNibbles(unsigned char buf[], int n)
   
   for (i = 0; i < sizeof(int) * 2; i ++)
     buf[i] = 0xF0 | ((mask >>= 4) & n) >> (0x1C - (i<<2));
-  
+
   buf[sizeof(int)] = 0; // null terminator
 }
 
@@ -200,8 +287,12 @@ int snetNodeKill(SnetNode *node)
   return SNET_STATUS_SUCCESS;
 }
 
-void nodeRemoveReally(SnetNode *node)
+static void nodeRemoveReally(SnetNode *node)
 {
+  // For safety.
+  if (!node)
+    return;
+    
   // If this bit has already been turned off, then assume that
   // this stuff has been taken care of.
   if (!(node->mask & SNET_NODE_MASK_ON_NETWORK))
@@ -224,8 +315,9 @@ void nodeRemoveReally(SnetNode *node)
 
 int snetNodeCommand(SnetNode *node, SnetNodeCommand command, ...)
 {
-  int i;
+  uint8_t *data;
   va_list args;
+  SdlStatus status;
   
   if (nodeIsUnknown(node))
     return SNET_STATUS_UNKNOWN_NODE;
@@ -241,36 +333,25 @@ int snetNodeCommand(SnetNode *node, SnetNodeCommand command, ...)
   va_start(args, command);
   switch (command) {
   case NOOP:
+    status = SDL_SUCCESS;
     break;
-  case TRANSMIT: {
-    int length;
-    unsigned char buf[SDL_PHY_SDU_MAX];
-    
-    // Length.
-    length = va_arg(args, int);
-    write(node->fd, &length, sizeof(int));
-    
-    // Payload.
-    for (i = 0; i < length; i ++)
-      buf[i] = va_arg(args, int); // why can't this be unsigned char?
-    write(node->fd, buf, length);
-  }
-    break;
-  case RECEIVE: {
-    int length;
-    
-    // Length.
-    length = va_arg(args, int);
-    write(node->fd, &length, sizeof(int));
-  }
+  case RECEIVE:
+    // Get the pointer to the raw SDL packet.
+    // The first byte is the length of the whole packet.
+    data = va_arg(args, void *);
+    status = (write(node->fd, data, data[0]) == data[0]
+              ? SNET_STATUS_SUCCESS
+              : SNET_STATUS_CANNOT_COMMAND_NODE);
     break;
   default:
-    ; // TODO: report error.
+    status = SNET_STATUS_UNKNOWN_COMMAND;
   }
   va_end(args);
 
   // Finally, try tell the child that they have something coming for them.
-  return (snetChildAlert(node->pid)
-          ? SNET_STATUS_CANNOT_COMMAND_NODE
-          : SNET_STATUS_SUCCESS);
+  return (status == SDL_SUCCESS
+          ? (snetChildAlert(node->pid)
+             ? SNET_STATUS_BAD_NODE_COM
+             : SNET_STATUS_SUCCESS)
+          : status);
 }

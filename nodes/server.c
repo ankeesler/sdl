@@ -10,6 +10,7 @@
 
 #include <unit-test.h>
 #include <signal.h>
+#include <errno.h>
 
 #include "mac.h"
 #include "snet/snet.h"
@@ -28,19 +29,23 @@ void handler(int signal)
 
 int main(void)
 {
+  extern FILE *childLogFile;
   SdlPacket packet;
 
   sdlMacInit(getpid());
 
   signal(SERVER_OFF_SIGNAL, handler);
+
+  fprintf(childLogFile, "server: up\n");
   while (spin) {
     usleep(SERVER_DUTY_CYCLE_US);
     // Try to receive something.
     if (sdlMacReceive(&packet) == SDL_SUCCESS) {
       spin = (packet.data[0] != SERVER_OFF_COMMAND);
     }
+    fprintf(childLogFile, "errno: %d\n", errno);
   }
 
-  return 0;
+  exit(0);
 }
 
