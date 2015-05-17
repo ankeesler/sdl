@@ -17,6 +17,9 @@
 
 #include <unistd.h> // getpid()
 
+// Stub.
+SdlStatus sdlPhyTransmit(uint8_t *data, uint8_t length) { return SDL_SUCCESS; }
+
 static SdlAddress source;
 static SdlAddress destination = 0x00000000;
 

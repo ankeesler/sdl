@@ -11,6 +11,7 @@
 #define __SNET_C__
 #include "mac.h"
 #include "phy.h"
+#include "sdl-types.h"
 #include "snet-internal.h"
 #include "mac-internal.h"
 #include "sdl-protocol.h"
@@ -19,6 +20,9 @@
   #include <stdio.h>
   #include <unit-test.h>
 #endif
+
+// -----------------------------------------------------------------------------
+// SIGNALS
 
 // The reading fd for the pipe.
 static int fd;
@@ -69,6 +73,9 @@ static void dumpLowNibbles(unsigned char buf[], int *n)
     *n |= (0x0F & buf[i]) << (i<<2);
 }
 
+// -----------------------------------------------------------------------------
+// MAIN
+
 int main(int argc, char *argv[])
 {
   int ret;
@@ -97,4 +104,13 @@ int main(int argc, char *argv[])
   cleanup();
 
   exit(ret);
+}
+
+// -----------------------------------------------------------------------------
+// PHY INTERFACE
+
+SdlStatus sdlPhyTransmit(uint8_t *data, uint8_t length)
+{
+  // TODO:
+  return SDL_SUCCESS;
 }

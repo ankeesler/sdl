@@ -123,6 +123,7 @@ SdlStatus sdlMacTransmit(SdlPacketType type,
                          uint8_t dataLength)
 {
   SdlPacket packet;
+  SdlStatus status = SDL_SUCCESS;
 
   if (!(state & STATE_INITIALIZED)) return SDL_UNINITIALIZED;
 
@@ -140,10 +141,10 @@ SdlStatus sdlMacTransmit(SdlPacketType type,
   if (destination == ourAddress) {
     sdlPhyReceiveIsr(txBuffer, SDL_MAC_PDU_LENGTH + dataLength);
   } else {
-    // TODO: hand it to the phy.
+    status = sdlPhyTransmit(txBuffer, SDL_MAC_PDU_LENGTH + dataLength);
   }
 
-  return SDL_SUCCESS;
+  return status;
 }
                     
 SdlStatus sdlMacReceive(SdlPacket *packet)
@@ -159,6 +160,8 @@ SdlStatus sdlMacReceive(SdlPacket *packet)
   return SDL_SUCCESS;
 }
 
+// The data points to the first byte past the PHY PDU.
+// The length is the length of the data vector.
 void sdlPhyReceiveIsr(uint8_t *data, uint8_t length)
 {
   uint8_t dataLength = length - SDL_MAC_PDU_LENGTH;
