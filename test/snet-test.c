@@ -48,32 +48,32 @@ int singleNodeTest(void)
   expect(snetNodeCount() == 0);
 
   // We can't remove the node from the network since it isn't on it.
-  expect(snetNodeRemove(server));
+  expect(snetNodeKill(server));
   expect(snetNodeCount() == 0);
 
   // But we should be able to add it.
-  expect(!snetNodeAdd(server));
+  expect(!snetNodeBoot(server));
   expect(snetNodeCount() == 1);
   
   // The node should be running.
   expect(RUNNING(server));
   
   // We shouldn't be able to re-add the node to the network yet.
-  expect(snetNodeAdd(server));
+  expect(snetNodeBoot(server));
   expect(snetNodeCount() == 1);
   
   // The server should still be running.
   expect(RUNNING(server));
   
   // But we should be able to remove it.
-  expect(!snetNodeRemove(server));
+  expect(!snetNodeKill(server));
   expect(snetNodeCount() == 0);
   
   // The server should not be running.
   expect(!RUNNING(server));
 
   // And we should be able to add it again.
-  expect(!snetNodeAdd(server));
+  expect(!snetNodeBoot(server));
   expect(snetNodeCount() == 1);
   
   // The server should be running.
@@ -103,8 +103,8 @@ int doubleNodeTest(void)
   expect(snetNodeCount() == 0);
   
   // Add the servers to the network. They will spin.
-  expect(!snetNodeAdd(server1));
-  expect(!snetNodeAdd(server2));
+  expect(!snetNodeBoot(server1));
+  expect(!snetNodeBoot(server2));
   expect(snetNodeCount() == 2);
   
   // Both of the servers should be running.
@@ -112,8 +112,8 @@ int doubleNodeTest(void)
   expect(RUNNING(server2));
 
   // Remove them both, in opposite order, from the network.
-  expect(!snetNodeRemove(server2));
-  expect(!snetNodeRemove(server1));
+  expect(!snetNodeKill(server2));
+  expect(!snetNodeKill(server1));
   expect(snetNodeCount() == 0);
   
   // Both of the servers should not be running.
@@ -121,8 +121,8 @@ int doubleNodeTest(void)
   expect(!RUNNING(server2));
   
   // Add both of the servers again. They should both start running.
-  expect(!snetNodeAdd(server1));
-  expect(!snetNodeAdd(server2));
+  expect(!snetNodeBoot(server1));
+  expect(!snetNodeBoot(server2));
   expect(snetNodeCount() == 2);
   expect(RUNNING(server1));
   expect(RUNNING(server2));
@@ -147,14 +147,14 @@ int badNodeTest(void)
   snetManagementInit();
 
   // We should not be able to add or remove a NULL pointer.
-  expect(snetNodeAdd(NULL));
-  expect(snetNodeRemove(NULL));
+  expect(snetNodeBoot(NULL));
+  expect(snetNodeKill(NULL));
 
   // We should not be able to add or remove a pointer that is
   // not in the nodePool.
   int i = 1;
-  expect(snetNodeAdd((SnetNode*)&i));
-  expect(snetNodeRemove((SnetNode*)&i));
+  expect(snetNodeBoot((SnetNode*)&i));
+  expect(snetNodeKill((SnetNode*)&i));
 
   expect(snetManagementDeinit() == 0);
   expect(!snetNodeCount());
@@ -175,7 +175,7 @@ int noopTest(void)
   expect(snetNodeCommand(server, NOOP));
   
   // Add the node to the network.
-  expect(!snetNodeAdd(server));
+  expect(!snetNodeBoot(server));
 
   // Check that they are running.
   expect(snetNodeCount() == 1);
@@ -215,7 +215,7 @@ int receiveTest(void)
   expect(snetNodeCount() == 0);
 
   // Add the node to the network.
-  expect(!snetNodeAdd(server));
+  expect(!snetNodeBoot(server));
   expect(snetNodeCount() == 1);
   expect(RUNNING(server));
 

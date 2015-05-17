@@ -92,7 +92,7 @@ int snetManagementDeinit(void)
 
   while (i < SNET_MAX_HOSTS) {
     if ((nodePool[i].mask & SNET_NODE_MASK_USED)
-        && (snetNodeRemove(nodePool + i) == SNET_STATUS_SUCCESS)) {
+        && (snetNodeKill(nodePool + i) == SNET_STATUS_SUCCESS)) {
       count ++;
     }
     i ++;
@@ -148,7 +148,7 @@ static void fillLowNibbles(unsigned char buf[], int n)
   buf[sizeof(int)] = 0; // null terminator
 }
 
-int snetNodeAdd(SnetNode *node)
+int snetNodeBoot(SnetNode *node)
 {
   pid_t newPid;
   int fd[2];
@@ -184,7 +184,7 @@ int snetNodeAdd(SnetNode *node)
   return SNET_STATUS_SUCCESS;
 }
 
-int snetNodeRemove(SnetNode *node)
+int snetNodeKill(SnetNode *node)
 {
   if (nodeIsUnknown(node))
     return SNET_STATUS_UNKNOWN_NODE;

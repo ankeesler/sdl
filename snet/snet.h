@@ -79,13 +79,15 @@ typedef enum {
 // Returns NULL if the node could not be created.
 SnetNode *snetNodeMake(const char *image, const char *name);
 
-// Add a node to the simulated network.
+// Bootload a node with its image.
+// A node can be turned off with snetNodeKill.
 // Returns a SNET_STATUS_ definition.
-int snetNodeAdd(SnetNode *node);
+int snetNodeBoot(SnetNode *node);
 
-// Remove the node from the network.
+// Cut the power to a node.
+// In order to turn the node back on, snetNodeBoot should be called.
 // Returns a SNET_STATUS_ definition.
-int snetNodeRemove(SnetNode *node);
+int snetNodeKill(SnetNode *node);
 
 // Get the count of nodes in the network.
 int snetNodeCount(void);
