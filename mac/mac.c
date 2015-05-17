@@ -70,8 +70,6 @@ static uint32_t state = 0;
 
 static SdlAddress ourAddress;
 
-static uint16_t sequence;
-
 SdlStatus sdlMacInit(SdlAddress address)
 {
   ourAddress = address;
@@ -110,6 +108,8 @@ static uint8_t rxHead, rxTail;
   (nextRxBufferIndex(rxTail) == rxHead)
 #define rxBufferIsEmpty()                       \
   (rxHead == rxTail)
+
+static uint16_t sequence;
 
 static void communicationInit(void)
 { 
