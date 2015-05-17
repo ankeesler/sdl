@@ -25,7 +25,6 @@ LDFLAGS=-lmcgoo
 SHELL=sh
 
 BUILD_DIR=build
-BUILD_DIR_CREATED=$(BUILD_DIR)/created
 
 VPATH=$(SNET_DIR) $(PHY_DIR) $(MAC_DIR) $(TEST_APPS_DIR) $(TEST_DIR) $(CAP_DIR)
 
@@ -43,10 +42,10 @@ run-%: $(BUILD_DIR)/%
 clean: clean-cap
 	rm -frd ./*.o $(BUILD_DIR) $(SDL_LOG_TEST_FILE)
 
-$(BUILD_DIR_CREATED):
-	mkdir -p $(BUILD_DIR) && touch $(BUILD_DIR_CREATED)
+$(BUILD_DIR):
+	mkdir $@
 
-$(BUILD_DIR)/%.o: %.c $(BUILD_DIR_CREATED)
+$(BUILD_DIR)/%.o: %.c $(BUILD_DIR)
 	$(CC) $(CFLAGS) -o $@ -c $<
 
 #
@@ -82,7 +81,7 @@ SDL_FILES=$(PHY_FILES) $(MAC_FILES) $(SDL_LOG_FILES)
 SDL_LOG_TEST_FILE=tuna.sdl
 
 # So that we can compile in logging for this test.
-$(BUILD_DIR)/sdl-log-on.o: $(CAP_DIR)/sdl-log.c $(BUILD_DIR_CREATED)
+$(BUILD_DIR)/sdl-log-on.o: $(CAP_DIR)/sdl-log.c $(BUILD_DIR)
 	$(CC) $(CFLAGS) -o $@ -c $<
 
 LOG_TEST_OBJ=$(addprefix $(BUILD_DIR)/, phy.o log-test.o sdl-log-on.o)
@@ -118,7 +117,7 @@ run-snet-test: $(SNET_TEST_EXES)
 #
 
 SERVER_DIR=$(BUILD_DIR)/server
-$(SERVER_DIR): $(BUILD_DIR_CREATED)
+$(SERVER_DIR): $(BUILD_DIR)
 	mkdir $@
 $(BUILD_DIR)/server/%.o: %.c $(SERVER_DIR)
 	$(CC) $(CFLAGS) -o $@ -c $<
@@ -130,7 +129,7 @@ run-server: $(BUILD_DIR)/server/server
 	./$< $(ARGS)
 
 CLIENT_DIR=$(BUILD_DIR)/client
-$(CLIENT_DIR): $(BUILD_DIR_CREATED)
+$(CLIENT_DIR): $(BUILD_DIR)
 	mkdir $@
 $(BUILD_DIR)/client/%.o: %.c $(CLIENT_DIR)
 	$(CC) $(CFLAGS) -o $@ -c $<
