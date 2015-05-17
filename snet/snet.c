@@ -23,6 +23,8 @@
 #include "snet.h"
 #include "snet-internal.h"
 
+#include "sdl-protocol.h"
+
 // ----------------------------------------------------------------------------
 // Prototypes.
 
@@ -242,7 +244,7 @@ int snetNodeCommand(SnetNode *node, SnetNodeCommand command, ...)
     break;
   case TRANSMIT: {
     int length;
-    unsigned char buf[SNET_MAX_PAYLOAD];
+    unsigned char buf[SDL_PHY_SDU_MAX];
     
     // Length.
     length = va_arg(args, int);

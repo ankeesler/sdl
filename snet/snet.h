@@ -35,9 +35,6 @@ int SNET_MAIN(int argc, char *argv[]);
 
 #define SNET_MAX_HOSTS 10
 
-// PHY payload.
-#define SNET_MAX_PAYLOAD 254
-
 //
 // Management.
 //
