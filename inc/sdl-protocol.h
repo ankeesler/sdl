@@ -17,9 +17,9 @@
 // Packet.
 /*
   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-  | PHY HEADER |                 PHY PAYLOAD                                  |
-  | length     |                  payload                                     |
-  | 1 byte     |                  variable                                    |
+  | PHY HEADER    |                 PHY PAYLOAD                               |
+  | packet length |                  payload                                  |
+  | 1 byte        |                  variable                                 |
   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 */
 
