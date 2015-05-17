@@ -94,7 +94,7 @@ int broadcastTest(void)
   flatPacket[11] = 0xFF;
   
   // If we receive something broadcasted...
-  sdlPhyReceiveIsr(flatPacket, SDL_MAC_PDU_LENGTH);
+  sdlPhyReceiveIsr(flatPacket, SDL_MAC_PDU_LEN);
 
   // ...then we should be able to receive it.
   expect(sdlMacReceive(&packet)
@@ -109,7 +109,7 @@ int broadcastTest(void)
   flatPacket[9] = 0xF2;
   flatPacket[10] = 0xF3;
   flatPacket[11] = 0xF4;
-  sdlPhyReceiveIsr(flatPacket, SDL_MAC_PDU_LENGTH);
+  sdlPhyReceiveIsr(flatPacket, SDL_MAC_PDU_LEN);
   expect(sdlMacReceive(&packet)
          == SDL_EMPTY);
 

@@ -109,11 +109,11 @@ int main(int argc, char *argv[])
 // -----------------------------------------------------------------------------
 // PHY INTERFACE
 
-static uint8_t realTxBuffer[SDL_PHY_SDU_MAX + SDL_PHY_PDU_LENGTH];
+static uint8_t realTxBuffer[SDL_PHY_SDU_MAX + SDL_PHY_PDU_LEN];
 
 SdlStatus sdlPhyTransmit(uint8_t *data, uint8_t length)
 {
-  uint8_t realLength = length + SDL_PHY_PDU_LENGTH;
+  uint8_t realLength = length + SDL_PHY_PDU_LEN;
   
   // Copy to real tx buffer.
   realTxBuffer[0] = realLength;

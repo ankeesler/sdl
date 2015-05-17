@@ -139,9 +139,9 @@ SdlStatus sdlMacTransmit(SdlPacketType type,
   // If this is for us, put it in the receive queue.
   // This is agressive to call the ISR...but it is OK, right.
   if (destination == ourAddress) {
-    sdlPhyReceiveIsr(txBuffer, SDL_MAC_PDU_LENGTH + dataLength);
+    sdlPhyReceiveIsr(txBuffer, SDL_MAC_PDU_LEN + dataLength);
   } else {
-    status = sdlPhyTransmit(txBuffer, SDL_MAC_PDU_LENGTH + dataLength);
+    status = sdlPhyTransmit(txBuffer, SDL_MAC_PDU_LEN + dataLength);
   }
 
   return status;
@@ -164,7 +164,7 @@ SdlStatus sdlMacReceive(SdlPacket *packet)
 // The length is the length of the data vector.
 void sdlPhyReceiveIsr(uint8_t *data, uint8_t length)
 {
-  uint8_t dataLength = length - SDL_MAC_PDU_LENGTH;
+  uint8_t dataLength = length - SDL_MAC_PDU_LEN;
 
   // If the queue is full, then we can't receive anymore.
   // TODO: report this.

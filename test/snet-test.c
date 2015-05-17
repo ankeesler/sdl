@@ -198,7 +198,7 @@ int noopTest(void)
 int receiveTest(void)
 {
   SdlPacket packet;
-  uint8_t serverOffCommand[SDL_MAC_PDU_LENGTH + 1];
+  uint8_t serverOffCommand[SDL_MAC_PDU_LEN + 1];
 
   // The basic SDL header used for this test.
   packet.type = SDL_PACKET_TYPE_DATA;
