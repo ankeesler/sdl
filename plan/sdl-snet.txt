@@ -13,25 +13,26 @@ MILESTONES:
     - MAC PROTOCOL: sequence numbering
     - MAC PROTOCOL: data packets
     - PHY INTERFACE: received ISR
+    - SDL LOG TX: Put logging back in
   TODO:
-    - SDL LOG: Put logging back in
     - PHY INTERFACE: transmit (this is done in junction with SNET development)
+    - SDL LOG RX: test with parent alert signal
     - SNET INTERFACE: add a way for users to define their own commands
   BACKLOG:
     - MAC PROTOCOL: packet filtering
     - MAC PROTOCOL: command packets
     
 # NWK
-#      interface upwards sdlMacTransmit, sdlReceive
+#      sdlMacTransmit, sdlReceive
 #    /
 # MAC
 #    \
-#      interface downwards sdlPhyReceivedIsr
+#      sdlPhyReceivedIsr(data, length)
 #
-#      interfaces upwards sdlPhyTransmit
+#      sdlPhyTransmit(data, length)
 #     /
 # PHY
 #    \
-#     interface downwards snetNodeCommand(TRANSMIT)
+#     snetNodeCommand(TRANSMIT)
 #     /
 # SNET
