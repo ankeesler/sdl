@@ -47,11 +47,6 @@ static SnetNode nodePool[SNET_MAX_HOSTS];
 
 // The number of nodes added to the network.
 static int nodesInNetwork = 0;
-  
-int snetNodeCount(void)
-{
-  return nodesInNetwork;
-}
 
 // ----------------------------------------------------------------------------
 // Management.
@@ -100,6 +95,11 @@ int snetManagementDeinit(void)
 
   return count;
 }
+  
+int snetManagementSize(void)
+{
+  return nodesInNetwork;
+}
 
 // Returns the next available node index, or -1 if there is none.
 static int nextAvailableNode(void)
@@ -112,6 +112,9 @@ static int nextAvailableNode(void)
   }
   return -1;
 }
+
+// ----------------------------------------------------------------------------
+// Nodes.
 
 SnetNode *snetNodeMake(const char *image, const char *name)
 {
@@ -127,9 +130,6 @@ SnetNode *snetNodeMake(const char *image, const char *name)
 
   return node;
 }
-
-// ----------------------------------------------------------------------------
-// Nodes.
 
 // If we copy an int to an argument list, the argument
 // list might think it ends sooner than it does because

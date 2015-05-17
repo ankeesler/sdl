@@ -45,36 +45,36 @@ int singleNodeTest(void)
   // Make the node.
   server = snetNodeMake("build/server/server", "server");
   expect((int)server);
-  expect(snetNodeCount() == 0);
+  expect(snetManagementSize() == 0);
 
   // We can't remove the node from the network since it isn't on it.
   expect(snetNodeKill(server));
-  expect(snetNodeCount() == 0);
+  expect(snetManagementSize() == 0);
 
   // But we should be able to add it.
   expect(!snetNodeBoot(server));
-  expect(snetNodeCount() == 1);
+  expect(snetManagementSize() == 1);
   
   // The node should be running.
   expect(RUNNING(server));
   
   // We shouldn't be able to re-add the node to the network yet.
   expect(snetNodeBoot(server));
-  expect(snetNodeCount() == 1);
+  expect(snetManagementSize() == 1);
   
   // The server should still be running.
   expect(RUNNING(server));
   
   // But we should be able to remove it.
   expect(!snetNodeKill(server));
-  expect(snetNodeCount() == 0);
+  expect(snetManagementSize() == 0);
   
   // The server should not be running.
   expect(!RUNNING(server));
 
   // And we should be able to add it again.
   expect(!snetNodeBoot(server));
-  expect(snetNodeCount() == 1);
+  expect(snetManagementSize() == 1);
   
   // The server should be running.
   expect(RUNNING(server));
@@ -100,12 +100,12 @@ int doubleNodeTest(void)
   // Create two servers.
   expect((int)(server1 = snetNodeMake("build/server/server", "server1")));
   expect((int)(server2 = snetNodeMake("build/server/server", "server2")));
-  expect(snetNodeCount() == 0);
+  expect(snetManagementSize() == 0);
   
   // Add the servers to the network. They will spin.
   expect(!snetNodeBoot(server1));
   expect(!snetNodeBoot(server2));
-  expect(snetNodeCount() == 2);
+  expect(snetManagementSize() == 2);
   
   // Both of the servers should be running.
   expect(RUNNING(server1));
@@ -114,7 +114,7 @@ int doubleNodeTest(void)
   // Remove them both, in opposite order, from the network.
   expect(!snetNodeKill(server2));
   expect(!snetNodeKill(server1));
-  expect(snetNodeCount() == 0);
+  expect(snetManagementSize() == 0);
   
   // Both of the servers should not be running.
   expect(!RUNNING(server1));
@@ -123,7 +123,7 @@ int doubleNodeTest(void)
   // Add both of the servers again. They should both start running.
   expect(!snetNodeBoot(server1));
   expect(!snetNodeBoot(server2));
-  expect(snetNodeCount() == 2);
+  expect(snetManagementSize() == 2);
   expect(RUNNING(server1));
   expect(RUNNING(server2));
 
@@ -135,7 +135,7 @@ int doubleNodeTest(void)
   // of nodes in the network should drop to 0.
   while (RUNNING(server1)) ;
   while (RUNNING(server2)) ;
-  expect(!snetNodeCount());
+  expect(!snetManagementSize());
 
   expect(snetManagementDeinit() == 0);
 
@@ -157,7 +157,7 @@ int badNodeTest(void)
   expect(snetNodeKill((SnetNode*)&i));
 
   expect(snetManagementDeinit() == 0);
-  expect(!snetNodeCount());
+  expect(!snetManagementSize());
 
   return 0;
 }
@@ -169,7 +169,7 @@ int noopTest(void)
 
   // Create a server.
   expect((int)(server = snetNodeMake("build/server/server", "server")));
-  expect(snetNodeCount() == 0);
+  expect(snetManagementSize() == 0);
 
   // Can't send a command if a node is not on a network.
   expect(snetNodeCommand(server, NOOP));
@@ -178,19 +178,19 @@ int noopTest(void)
   expect(!snetNodeBoot(server));
 
   // Check that they are running.
-  expect(snetNodeCount() == 1);
+  expect(snetManagementSize() == 1);
   expect(RUNNING(server));
   
   // Send a NOOP.
   expect(!snetNodeCommand(server, NOOP));
 
   // Since the command does nothing, the nodes should both still be running.
-  expect(snetNodeCount() == 1);
+  expect(snetManagementSize() == 1);
   expect(RUNNING(server));
   
   // The client may have stopped by now.
   expect(snetManagementDeinit() == 1);
-  expect(!snetNodeCount());
+  expect(!snetManagementSize());
 
   return 0;
 }
@@ -212,11 +212,11 @@ int receiveTest(void)
 
   // Create a server.
   expect((int)(server = snetNodeMake("build/server/server", "server")));
-  expect(snetNodeCount() == 0);
+  expect(snetManagementSize() == 0);
 
   // Add the node to the network.
   expect(!snetNodeBoot(server));
-  expect(snetNodeCount() == 1);
+  expect(snetManagementSize() == 1);
   expect(RUNNING(server));
 
   // MEH.
@@ -243,7 +243,7 @@ int receiveTest(void)
   usleep(SERVER_DUTY_CYCLE_US);
   expect(!RUNNING(server));
   */  
-  expect(!snetNodeCount());
+  expect(!snetManagementSize());
   expect(snetManagementDeinit() == 0);
 
   return 0;

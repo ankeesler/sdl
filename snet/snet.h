@@ -51,6 +51,9 @@ void snetManagementInit(void);
 // MUST BE CALLED!!!
 int snetManagementDeinit(void);
 
+// Get the count of nodes in the network.
+int snetManagementSize(void);
+
 //
 // Nodes.
 //
@@ -88,9 +91,6 @@ int snetNodeBoot(SnetNode *node);
 // In order to turn the node back on, snetNodeBoot should be called.
 // Returns a SNET_STATUS_ definition.
 int snetNodeKill(SnetNode *node);
-
-// Get the count of nodes in the network.
-int snetNodeCount(void);
 
 // Command the node to do something.
 int snetNodeCommand(SnetNode *node, SnetNodeCommand command, ...);
