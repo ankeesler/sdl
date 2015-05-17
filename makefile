@@ -49,9 +49,6 @@ $(BUILD_DIR_CREATED):
 $(BUILD_DIR)/%.o: %.c $(BUILD_DIR_CREATED)
 	$(CC) $(CFLAGS) -o $@ -c $<
 
-$(BUILD_DIR)/sdl-log-on.o: sdl-log.c $(BUILD_DIR_CREATED)
-	$(CC) -g -DSDL_LOG -DSDL_LOG_FILE=\"$(SDL_LOG_TEST_FILE)\" -I. -o $@ -c $<
-
 #
 # TEST
 #
@@ -72,7 +69,7 @@ MAC_FILES=$(MAC_DIR)/mac.c
 
 MAC_TEST_FILES=$(TEST_DIR)/mac-test.c $(MAC_FILES)
 $(BUILD_DIR)/mac-test: $(addprefix $(BUILD_DIR)/,$(notdir $(MAC_TEST_FILES:.c=.o)))
-	$(CC) -lmcgoo -o $@ $^
+	$(CC) $(LDFLAGS) -o $@ $^
 
 #
 # SDL
