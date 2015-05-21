@@ -45,7 +45,7 @@ clean: clean-cap
 $(BUILD_DIR):
 	mkdir $@
 
-$(BUILD_DIR)/%.o: %.c $(BUILD_DIR)
+$(BUILD_DIR)/%.o: %.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -o $@ -c $<
 
 #
@@ -81,7 +81,7 @@ SDL_FILES=$(PHY_FILES) $(MAC_FILES) $(SDL_LOG_FILES)
 SDL_LOG_TEST_FILE=tuna.sdl
 
 # So that we can compile in logging for this test.
-$(BUILD_DIR)/sdl-log-on.o: $(CAP_DIR)/sdl-log.c $(BUILD_DIR)
+$(BUILD_DIR)/sdl-log-on.o: $(CAP_DIR)/sdl-log.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -o $@ -c $<
 
 LOG_TEST_OBJ=$(addprefix $(BUILD_DIR)/, phy.o log-test.o sdl-log-on.o)
@@ -124,26 +124,26 @@ $(BUILD_DIR)/client/client $(BUILD_DIR)/server/server: \
     DEFINES += -DSDL_LOG -DSDL_LOG_FILE=\"$(SDL_LOG_TEST_FILE)\"
 
 SERVER_DIR=$(BUILD_DIR)/server
-$(SERVER_DIR): $(BUILD_DIR) # FIXME:
-	if [ ! -d $(SERVER_DIR) ]; then mkdir $@; fi
-$(BUILD_DIR)/server/%.o: %.c $(SERVER_DIR)
+$(SERVER_DIR): | $(BUILD_DIR)
+	mkdir $@
+$(BUILD_DIR)/server/%.o: %.c | $(SERVER_DIR)
 	$(CC) $(CFLAGS) -o $@ -c $<
 SERVER_FILES=$(SNET_CHILD_FILES) $(TEST_APPS_DIR)/server.c
 SERVER_OBJ=$(addprefix $(SERVER_DIR)/,$(notdir $(SERVER_FILES:.c=.o)))
 $(BUILD_DIR)/server/server: $(SERVER_OBJ)
-	$(CC) $(CFLAGS) -o $@ $^
+	$(CC) $(LDFLAGS) -o $@ $^
 run-server: $(BUILD_DIR)/server/server
 	./$< $(ARGS)
 
 CLIENT_DIR=$(BUILD_DIR)/client
-$(CLIENT_DIR): $(BUILD_DIR) # FIXME:
-	if [ ! -d $(CLIENT_DIR) ]; then mkdir $@; fi
-$(BUILD_DIR)/client/%.o: %.c $(CLIENT_DIR)
+$(CLIENT_DIR): | $(BUILD_DIR)
+	mkdir $@
+$(BUILD_DIR)/client/%.o: %.c | $(CLIENT_DIR)
 	$(CC) $(CFLAGS) -o $@ -c $<
 CLIENT_FILES=$(SNET_CHILD_FILES) $(TEST_APPS_DIR)/client.c
 CLIENT_OBJ=$(addprefix $(CLIENT_DIR)/,$(notdir $(CLIENT_FILES:.c=.o)))
 $(BUILD_DIR)/client/client: $(CLIENT_OBJ)
-	$(CC) $(CFLAGS) -o $@ $^
+	$(CC) $(LDFLAGS) -o $@ $^
 run-client: $(BUILD_DIR)/client/client
 	./$< $(ARGS)
 
