@@ -82,13 +82,13 @@ typedef uint8_t SnetNodeCommand;
 // Returns NULL if the node could not be created.
 SnetNode *snetNodeMake(const char *image, const char *name);
 
-// Bootload a node with its image.
-// A node can be turned off with snetNodeKill.
+// Start a node with its image.
+// A node can be turned off with snetNodeStop.
 // Returns a SNET_STATUS_ definition.
-int snetNodeBoot(SnetNode *node);
+int snetNodeStart(SnetNode *node);
 
 // Cut the power to a node.
-// In order to turn the node back on, snetNodeBoot should be called.
+// In order to turn the node back on, snetNodeAdd should be called.
 // Returns a SNET_STATUS_ definition.
 int snetNodeKill(SnetNode *node);
 

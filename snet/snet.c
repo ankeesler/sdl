@@ -237,7 +237,7 @@ static void fillLowNibbles(unsigned char buf[], int n)
   buf[sizeof(int)] = 0; // null terminator
 }
 
-int snetNodeBoot(SnetNode *node)
+int snetNodeStart(SnetNode *node)
 {
   pid_t newPid;
   int fd[2];
