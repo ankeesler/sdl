@@ -176,7 +176,7 @@ int snetManagementDeinit(void)
 
   while (i < SNET_MAX_HOSTS) {
     if ((nodePool[i].mask & SNET_NODE_MASK_USED)
-        && (snetNodeKill(nodePool + i) == SNET_STATUS_SUCCESS)) {
+        && (snetNodeStop(nodePool + i) == SNET_STATUS_SUCCESS)) {
       count ++;
     }
     i ++;
@@ -273,7 +273,7 @@ int snetNodeStart(SnetNode *node)
   return SNET_STATUS_SUCCESS;
 }
 
-int snetNodeKill(SnetNode *node)
+int snetNodeStop(SnetNode *node)
 {
   if (nodeIsUnknown(node))
     return SNET_STATUS_UNKNOWN_NODE;

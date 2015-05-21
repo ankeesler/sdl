@@ -55,7 +55,7 @@ int singleNodeTest(void)
   expect(snetManagementSize() == 0);
 
   // We can't remove the node from the network since it isn't on it.
-  expect(snetNodeKill(server));
+  expect(snetNodeStop(server));
   expect(snetManagementSize() == 0);
 
   // But we should be able to add it.
@@ -73,7 +73,7 @@ int singleNodeTest(void)
   expect(RUNNING(server));
   
   // But we should be able to remove it.
-  expect(!snetNodeKill(server));
+  expect(!snetNodeStop(server));
   expect(snetManagementSize() == 0);
   
   // The server should not be running.
@@ -119,8 +119,8 @@ int doubleNodeTest(void)
   expect(RUNNING(server2));
 
   // Remove them both, in opposite order, from the network.
-  expect(!snetNodeKill(server2));
-  expect(!snetNodeKill(server1));
+  expect(!snetNodeStop(server2));
+  expect(!snetNodeStop(server1));
   expect(snetManagementSize() == 0);
   
   // Both of the servers should not be running.
@@ -155,13 +155,13 @@ int badNodeTest(void)
 
   // We should not be able to add or remove a NULL pointer.
   expect(snetNodeStart(NULL));
-  expect(snetNodeKill(NULL));
+  expect(snetNodeStop(NULL));
 
   // We should not be able to add or remove a pointer that is
   // not in the nodePool.
   int i = 1;
   expect(snetNodeStart((SnetNode*)&i));
-  expect(snetNodeKill((SnetNode*)&i));
+  expect(snetNodeStop((SnetNode*)&i));
 
   expect(snetManagementDeinit() == 0);
   expect(!snetManagementSize());
