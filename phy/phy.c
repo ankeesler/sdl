@@ -60,9 +60,9 @@ static void signalHandler(int signal)
     case RECEIVE:
       // First byte is the PHY PDU, i.e., the length of the whole packet.
       read(fd, rxBuffer, sizeof(uint8_t));
-      read(fd, rxBuffer + 1, rxBuffer[0] - 1);
+      read(fd, rxBuffer + 1, rxBuffer[0] - SDL_PHY_PDU_LEN);
       sdlLogRx(rxBuffer, rxBuffer[0]);
-      sdlPhyReceiveIsr(rxBuffer + 1, rxBuffer[0] - 1);
+      sdlPhyReceiveIsr(rxBuffer + 1, rxBuffer[0] - SDL_PHY_PDU_LEN);
       break;
     default:
       ; // TODO: report bad command.
