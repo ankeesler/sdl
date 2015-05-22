@@ -206,9 +206,6 @@ int receiveTest(void)
 {
   SdlPacket packet;
   uint8_t serverCommand[SDL_PHY_SDU_MAX + 1];
-  
-  //setVerbose(true);
-  //noteTime();
 
   // The basic SDL header used for this test.
   packet.type = SDL_PACKET_TYPE_DATA;
@@ -228,7 +225,9 @@ int receiveTest(void)
   expect(!snetNodeStart(server));
   expect(snetManagementSize() == 1);
   expect(RUNNING(server));
-  //noteTime();
+
+  // TODO: why do we need this?
+  usleep(SERVER_DUTY_CYCLE_US);
 
   // Build the SDL packet in a flat buffer.
   sdlPacketToFlatBuffer(&packet, serverCommand + 1);
@@ -251,14 +250,11 @@ int receiveTest(void)
   serverCommand[SDL_PHY_PDU_LEN + SDL_MAC_PDU_LEN] = SERVER_OFF_COMMAND;
   expect(!snetNodeCommand(server, RECEIVE, serverCommand));
   usleep(SERVER_DUTY_CYCLE_US);
-  //expect(!RUNNING(server));
+  expect(!RUNNING(server));
 
   // Done.
-  noteTime();
-  expect(snetManagementDeinit() == 1);
+  expect(snetManagementDeinit() == 0);
   expect(!snetManagementSize());
-
-  printSignalData();
 
   return 0;
 }
@@ -275,7 +271,7 @@ int main(void)
   
   run(noopTest);
   
-  //run(receiveTest);
+  run(receiveTest);
 
   return 0;
 }

@@ -50,7 +50,7 @@ static void signalHandler(int signal)
   if (signal == CHILD_ALERT_SIGNAL) {
     // Read the command out of the pipe.
     // TODO: report bad read.
-    //read(fd, &command, sizeof(command));
+    read(fd, &command, sizeof(command));
 
     // Handle the command, remembering that this is
     // called in an interupt context.
