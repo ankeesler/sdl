@@ -18,14 +18,12 @@
 #include "nodes/server.h"
 #include "mac.h"
 
-#define RUNNING(node) (kill(node->pid, 0) == 0)
+#include "sdl-test-util.h"
+
 #define STOP(server) kill(server->pid, SERVER_OFF_SIGNAL)
 
 SnetNode *server = NULL;
 SnetNode *server1 = NULL, *server2 = NULL;
-
-// SNET test harness.
-extern void printSignalData(void);
 
 // Stubs.
 SdlStatus sdlPhyTransmit(uint8_t *data, uint8_t length) { return SDL_SUCCESS; }
