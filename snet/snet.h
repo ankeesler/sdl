@@ -74,6 +74,9 @@ enum {
 
   /* Tell the PHY that there is incoming SDL data */
   RECEIVE  = 0x02, // args: uint8_t *bytes
+
+  /* Tell the PHY to transmit SDL data. */
+  TRANSMIT = 0x03, // args: uint8_t *bytes
 };
 typedef uint8_t SnetNodeCommand;
 

@@ -255,6 +255,46 @@ int receiveTest(void)
   return 0;
 }
 
+int transmitTest(void)
+{
+  SdlPacket packet;
+  uint8_t serverCommand[SDL_PHY_SDU_MAX + 1];
+
+  // Bring up two servers.
+  expect((int)(server1 = snetNodeMake("server1", "build/server/server")));
+  expect((int)(server2 = snetNodeMake("server2", "build/server/server")));
+
+  // Boot the servers.
+  expect(!snetNodeStart(server1));
+  expect(RUNNING(server1));
+  expect(!snetNodeStart(server2));
+  expect(RUNNING(server2));
+
+  // The basic SDL header used for this test.
+  packet.type = SDL_PACKET_TYPE_DATA;
+  packet.sequence = 0xABCD;
+  packet.source = 0x01234567;
+  packet.destination = 0xFFFFFFFF;
+  packet.dataLength = 1;
+  packet.data[0] = SERVER_OFF_COMMAND;
+  sdlPacketToFlatBuffer(&packet, serverCommand + 1);
+  serverCommand[0] = SDL_PHY_PDU_LEN + SDL_MAC_PDU_LEN + 1; // packet length
+
+  // Transmit the off command from server1 to server2.
+  expect(!snetNodeCommand(server1, TRANSMIT, serverCommand));
+
+  // After a duty cycle, server2 should be off.
+  usleep(SERVER_DUTY_CYCLE_US);
+  expect(RUNNING(server1));
+  expect(!RUNNING(server2));
+
+  // Tear down the network.
+  expect(snetManagementDeinit() == 1);
+  expect(!snetManagementSize());
+
+  return 0;
+}
+
 int main(void)
 {
   announce();
@@ -268,6 +308,7 @@ int main(void)
   run(noopTest);
   
   run(receiveTest);
+  run(transmitTest);
 
   return 0;
 }

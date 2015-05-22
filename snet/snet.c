@@ -298,7 +298,7 @@ static void nodeRemoveReally(SnetNode *node)
 
 int snetNodeCommand(SnetNode *node, SnetNodeCommand command, ...)
 {
-  uint8_t *data;
+  uint8_t *data, i;
   va_list args;
   SdlStatus status;
   
@@ -318,6 +318,20 @@ int snetNodeCommand(SnetNode *node, SnetNodeCommand command, ...)
   case NOOP:
     status = SDL_SUCCESS;
     break;
+  case TRANSMIT:
+    // Get the pointer to the raw SDL packet.
+    data = va_arg(args, void *);
+    // For each node that is on, tell them to receive it.
+    for (i = 0; i < SNET_MAX_HOSTS && status == SDL_SUCCESS; i ++) {
+      if (nodePool[i].mask & SNET_NODE_MASK_ON_NETWORK
+          && nodePool[i].pid != node->pid) {
+        status = snetNodeCommand(&nodePool[i], RECEIVE, data);
+        if (status == SDL_SUCCESS) {
+          status = snetChildAlert(nodePool[i].pid);
+        }
+      }
+    }
+    break;
   case RECEIVE:
     // Get the pointer to the raw SDL packet.
     // The first byte is the length of the whole packet.
@@ -332,7 +346,7 @@ int snetNodeCommand(SnetNode *node, SnetNodeCommand command, ...)
   va_end(args);
 
   // Finally, try tell the child that they have something coming for them.
-  return (status == SDL_SUCCESS
+  return (command != TRANSMIT && status == SDL_SUCCESS
           ? (snetChildAlert(node->pid)
              ? SNET_STATUS_BAD_NODE_COM
              : SNET_STATUS_SUCCESS)
