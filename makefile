@@ -33,6 +33,21 @@ VPATH=$(SNET_DIR) $(PHY_DIR) $(MAC_DIR) $(TEST_APPS_DIR) $(TEST_DIR) $(CAP_DIR)
 ALL_SOURCE=$(shell find . -name "*.[ch]") $(shell find . -name "*.java")
 
 #
+# SOURCE
+#
+
+SDL_LOG_FILES=$(CAP_DIR)/sdl-log.c
+
+MAC_FILES=$(MAC_DIR)/mac.c
+
+PHY_FILES=$(PHY_DIR)/phy.c
+
+SDL_FILES=$(PHY_FILES) $(MAC_FILES) $(SDL_LOG_FILES)
+
+SNET_PARENT_FILES=$(SNET_DIR)/snet.c
+SNET_CHILD_FILES=$(SDL_FILES)
+
+#
 # UTIL
 #
 
@@ -62,19 +77,27 @@ $(BUILD_DIR)/%.o: %.c | $(BUILD_DIR)
 # TEST
 #
 
-test: run-mac-test run-log-test run-snet-test
+test: run-snet-test run-phy-test run-mac-test run-log-test
 
 #
 # PHY
 #
 
-PHY_FILES=$(PHY_DIR)/phy.c
+PHY_TEST_FILES=$(SNET_PARENT_FILES) $(TEST_DIR)/phy-test.c $(MAC_FILES)
+PHY_TEST_EXES=               \
+  $(BUILD_DIR)/phy-test      \
+  $(BUILD_DIR)/client/client \
+  $(BUILD_DIR)/server/server
+
+$(BUILD_DIR)/phy-test: $(addprefix $(BUILD_DIR)/,$(notdir $(PHY_TEST_FILES:.c=.o)))
+	$(CC) $(LDFLAGS) -o $@ $^
+
+run-phy-test: $(PHY_TEST_EXES)
+	./$<
 
 #
 # MAC
 #
-
-MAC_FILES=$(MAC_DIR)/mac.c
 
 MAC_TEST_FILES=$(TEST_DIR)/mac-test.c $(MAC_FILES)
 $(BUILD_DIR)/mac-test: $(addprefix $(BUILD_DIR)/,$(notdir $(MAC_TEST_FILES:.c=.o)))
@@ -83,10 +106,6 @@ $(BUILD_DIR)/mac-test: $(addprefix $(BUILD_DIR)/,$(notdir $(MAC_TEST_FILES:.c=.o
 #
 # SDL
 #
-
-SDL_LOG_FILES=$(CAP_DIR)/sdl-log.c
-
-SDL_FILES=$(PHY_FILES) $(MAC_FILES) $(SDL_LOG_FILES)
 
 SDL_LOG_TEST_FILE=tuna.sdl
 
@@ -107,9 +126,6 @@ $(BUILD_DIR)/log-test: $(LOG_TEST_OBJ)
 #
 # SNET
 #
-
-SNET_PARENT_FILES=$(SNET_DIR)/snet.c
-SNET_CHILD_FILES=$(SDL_FILES)
 
 SNET_TEST_EXES=              \
   $(BUILD_DIR)/snet-test     \

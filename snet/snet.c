@@ -154,6 +154,8 @@ void signalHandler(int signal)
 
     // Find that child process and really remove it.
     nodeRemoveReally(findNodeForPid(pid));
+  } else if (signal == PARENT_ALERT_SIGNAL) {
+    // Uh, which node was this from?
   }
 
   logSignalData(pid, signal);
@@ -168,6 +170,9 @@ void snetManagementInit(void)
 
   // Signal handler for child processes that die.
   signal(SIGCHLD, signalHandler);
+
+  // Signal handler for child process to communicate with parent.
+  signal(PARENT_ALERT_SIGNAL, signalHandler);
 }
 
 int snetManagementDeinit(void)

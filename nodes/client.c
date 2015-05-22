@@ -9,12 +9,33 @@
 //
 
 #include "snet/snet.h"
+#include "sdl-types.h"
+#include "phy.h" // sdlPhyTransmit()
+#include "mac.h" // sdlPacketToFlatBuffer()
+
+#include <stdlib.h>
+
+#include "client.h"
 
 int nodeState = 0;
 
 int main(void)
 {
-  usleep(10000);
+  SdlPacket packet;
+  uint8_t serverCommand[SDL_PHY_SDU_MAX + 1];
 
-  return 0;
+  // Sleep.
+  usleep(CLIENT_WAKEUP_DELAY);
+
+  // Tell the server to turn off.
+  packet.type = SDL_PACKET_TYPE_DATA;
+  packet.sequence = 0xABCD;
+  packet.source = 0x01234567;
+  packet.destination = 0xFFFFFFFF;
+  packet.dataLength = 1;
+  sdlPacketToFlatBuffer(&packet, serverCommand);
+  sdlPhyTransmit(serverCommand, SDL_MAC_PDU_LEN + 1); // packet length
+
+  // See ya.
+  exit(0);
 }

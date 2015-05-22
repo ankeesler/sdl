@@ -17,13 +17,15 @@
 // A generic status code in SDL.
 enum {
   // Success!
-  SDL_SUCCESS       = 0x00,
+  SDL_SUCCESS          = 0x00,
   // The SDL layer does not have any received data in it.
-  SDL_EMPTY         = 0x01,
+  SDL_EMPTY            = 0x01,
   // The SDL layer is uninitialized.
-  SDL_UNINITIALIZED = 0x02,
+  SDL_UNINITIALIZED    = 0x02,
   // A fatal failure has occured.
-  SDL_FATAL         = 0x03,
+  SDL_FATAL            = 0x03,
+  // A transmit failure has occured.
+  SDL_TRANSMIT_FAILURE = 0x04,
 };
 typedef uint8_t SdlStatus;
 
