@@ -32,14 +32,10 @@ SdlStatus sdlPhyTransmit(uint8_t *data, uint8_t length) { return SDL_SUCCESS; }
 
 static void failureHandler(void)
 {
-  if (server)
-    kill(server->pid, SIGTERM);
-  if (client)
-    kill(client->pid, SIGTERM);
-  if (server1)
-    kill(server1->pid, SIGTERM);
-  if (server2)
-    kill(server2->pid, SIGTERM);
+  if (server)  kill(server->pid, SIGTERM);
+  if (client)  kill(client->pid, SIGTERM);
+  if (server1) kill(server1->pid, SIGTERM);
+  if (server2) kill(server2->pid, SIGTERM);
 
   while (wait(NULL) != -1) ;
 }
