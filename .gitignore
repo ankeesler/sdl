@@ -18,3 +18,6 @@ TODO.txt
 
 # commit file
 COMMIT.txt
+
+# cscope
+cscope.*

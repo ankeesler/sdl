@@ -8,6 +8,8 @@ all: test
 # VARS
 #
 
+SHELL=sh
+
 INC_DIR=inc
 SNET_DIR=snet
 PHY_DIR=phy
@@ -28,12 +30,20 @@ BUILD_DIR=build
 
 VPATH=$(SNET_DIR) $(PHY_DIR) $(MAC_DIR) $(TEST_APPS_DIR) $(TEST_DIR) $(CAP_DIR)
 
+ALL_SOURCE=$(shell find . -name "*.[ch]") $(shell find . -name "*.java")
+
 #
 # UTIL
 #
 
 run-%: $(BUILD_DIR)/%
 	./$<
+
+cscope.files: $(ALL_SOURCE)
+	echo $^ > $@
+
+cscope: cscope.files
+	cscope -b -q
 
 #
 # BUILD
