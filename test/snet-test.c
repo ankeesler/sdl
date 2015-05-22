@@ -21,7 +21,7 @@
 #define RUNNING(node) (kill(node->pid, 0) == 0)
 #define STOP(server) kill(server->pid, SERVER_OFF_SIGNAL)
 
-SnetNode *server = NULL, *client = NULL;
+SnetNode *server = NULL;
 SnetNode *server1 = NULL, *server2 = NULL;
 
 // SNET test harness.
@@ -33,7 +33,6 @@ SdlStatus sdlPhyTransmit(uint8_t *data, uint8_t length) { return SDL_SUCCESS; }
 static void failureHandler(void)
 {
   if (server)  kill(server->pid, SIGTERM);
-  if (client)  kill(client->pid, SIGTERM);
   if (server1) kill(server1->pid, SIGTERM);
   if (server2) kill(server2->pid, SIGTERM);
 
@@ -42,7 +41,7 @@ static void failureHandler(void)
 
 int singleNodeTest(void)
 {
-  server = client = NULL;
+  server = NULL;
   snetManagementInit();
 
   // Make the node.

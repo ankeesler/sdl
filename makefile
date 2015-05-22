@@ -113,7 +113,6 @@ SNET_CHILD_FILES=$(SDL_FILES)
 
 SNET_TEST_EXES=              \
   $(BUILD_DIR)/snet-test     \
-  $(BUILD_DIR)/client/client \
   $(BUILD_DIR)/server/server
 
 $(SNET_TEST_EXES): DEFINES += -DSNET_TEST
