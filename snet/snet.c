@@ -220,28 +220,11 @@ SnetNode *snetNodeMake(const char *image, const char *name)
   return node;
 }
 
-// If we copy an int to an argument list, the argument
-// list might think it ends sooner than it does because
-// of once of the 4 int bytes being 0. So, store a 4-byte int
-// in the lower 8 nibbles of a byte buffer, and then null
-// terminate the buffer.
-// This is not endian-safe!
-static void fillLowNibbles(unsigned char buf[], int n)
-{
-  long mask = (0xF << (sizeof(int) * 2));
-  int i;
-  
-  for (i = 0; i < sizeof(int) * 2; i ++)
-    buf[i] = 0xF0 | ((mask >>= 4) & n) >> (0x1C - (i<<2));
-
-  buf[sizeof(int)] = 0; // null terminator
-}
-
 int snetNodeStart(SnetNode *node)
 {
   pid_t newPid;
   int fd[2];
-  unsigned char buf[(2 * sizeof(int)) + 1];
+  char fdBuf[10]; // max digits of signed 32-bit integer
 
   if (nodeIsUnknown(node))
     return SNET_STATUS_UNKNOWN_NODE;
@@ -260,8 +243,8 @@ int snetNodeStart(SnetNode *node)
   } else {
     // Child.
     close(fd[1]); // close the write end of the pipe
-    fillLowNibbles(buf, fd[0]);
-    execl(node->image, node->image, buf, 0);
+    sprintf(fdBuf, "%d", fd[0]);
+    execl(node->image, node->image, fdBuf, 0);
 
     // If execl returns, then this is bad.
     exit(1);

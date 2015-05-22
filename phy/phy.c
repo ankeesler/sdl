@@ -86,11 +86,8 @@ int main(int argc, char *argv[])
   if (argc < 2) {
     return 1;
   } else {
-    // See fillLogNibbles in snet.c. This is our file descriptor for
-    // communicating with our parent.
-    uint8_t i;
-    for (fd = i = 0; i < (sizeof(int) * 2); i ++)
-      fd |= (0x0F & argv[1][i]) << (i<<2);
+    // This is our file descriptor for communicating with our parent.
+    fd = atoi(argv[1]);
   }
 #endif
 
