@@ -21,3 +21,6 @@ COMMIT.txt
 
 # cscope
 cscope.*
+
+# child log file
+.child
