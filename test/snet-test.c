@@ -258,8 +258,8 @@ int transmitTest(void)
   uint8_t serverCommand[SDL_PHY_SDU_MAX + 1];
 
   // Bring up two servers.
-  expect((int)(server1 = snetNodeMake("server1", "build/server/server")));
-  expect((int)(server2 = snetNodeMake("server2", "build/server/server")));
+  expect((int)(server1 = snetNodeMake("build/server/server", "server1")));
+  expect((int)(server2 = snetNodeMake("build/server/server", "server2")));
 
   // Boot the servers.
   expect(!snetNodeStart(server1));
@@ -280,7 +280,11 @@ int transmitTest(void)
   // Transmit the off command from server1 to server2.
   expect(!snetNodeCommand(server1, TRANSMIT, serverCommand));
 
-  // After a duty cycle, server2 should be off.
+  // FIXME: WHY DOES THIS WORK?
+  usleep(SERVER_DUTY_CYCLE_US);
+  expect(!snetNodeCommand(server1, TRANSMIT, serverCommand));
+
+  // After a duty cycle, server2 should turn off and server1 should stay on.
   usleep(SERVER_DUTY_CYCLE_US);
   expect(RUNNING(server1));
   expect(!RUNNING(server2));

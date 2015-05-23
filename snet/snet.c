@@ -286,9 +286,12 @@ int snetNodeCommand(SnetNode *node, SnetNodeCommand command, ...)
   if (!(node->mask & SNET_NODE_MASK_ON_NETWORK))
     return SNET_STATUS_INVALID_NETWORK_STATE;
 
-  // First write the command to the pipe.
-  if (write(node->fd, &command, sizeof(command)) != sizeof(command))
-    return SNET_STATUS_CANNOT_COMMAND_NODE;
+  // First write the command to the pipe, except for a TRANSMIT since
+  // we don't notify the child for this currently.
+  if (command != TRANSMIT) {
+    if (write(node->fd, &command, sizeof(command)) != sizeof(command))
+      return SNET_STATUS_CANNOT_COMMAND_NODE;
+  }
 
   // Now, write the arguments to the command.
   va_start(args, command);
@@ -299,14 +302,11 @@ int snetNodeCommand(SnetNode *node, SnetNodeCommand command, ...)
   case TRANSMIT:
     // Get the pointer to the raw SDL packet.
     data = va_arg(args, void *);
-    // For each node that is on, tell them to receive it.
+    // For each node that is on (except for this one), tell them to receive it.
     for (i = 0; i < SNET_MAX_HOSTS && status == SDL_SUCCESS; i ++) {
       if (nodePool[i].mask & SNET_NODE_MASK_ON_NETWORK
           && nodePool[i].pid != node->pid) {
         status = snetNodeCommand(&nodePool[i], RECEIVE, data);
-        if (status == SDL_SUCCESS) {
-          status = snetChildAlert(nodePool[i].pid);
-        }
       }
     }
     break;

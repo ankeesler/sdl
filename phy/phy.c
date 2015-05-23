@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
     return 1;
   } else {
     // This is our file descriptor for communicating with our parent.
-    fd = atoi(argv[PARENT_TO_CHILD_FD_INDEX]);
+    sscanf(argv[PARENT_TO_CHILD_FD_INDEX], "%d", &fd);
   }
 #endif
 
