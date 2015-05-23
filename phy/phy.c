@@ -14,6 +14,7 @@
 #include "sdl-types.h"
 #include "snet-internal.h"
 #include "sdl-protocol.h"
+#include "snet-debug.h"
 
 #include "cap/sdl-log.h"
 
@@ -26,6 +27,7 @@
 // SIGNALS
 
 FILE *childLogFile = NULL;
+char childLogFilename[256];
 
 // The reading fd for the pipe.
 static int fd;
@@ -46,6 +48,8 @@ static void signalHandler(int signal)
 {
   uint8_t rxBuffer[SDL_PHY_SDU_MAX + SDL_PHY_PDU_LEN];
   SnetNodeCommand command = NOOP;
+
+  fprintf(childLogFile, "signal: %s\n", signalNames[signal]);
 
   if (signal == CHILD_ALERT_SIGNAL) {
     // Read the command out of the pipe.
@@ -87,25 +91,25 @@ int main(int argc, char *argv[])
     return 1;
   } else {
     // This is our file descriptor for communicating with our parent.
-    fd = atoi(argv[1]);
+    fd = atoi(argv[PARENT_TO_CHILD_FD_INDEX]);
   }
 #endif
 
   // Log file.
-  childLogFile = fopen(".child", "w");
-  fprintf(childLogFile, "HELLO\n");
-  fprintf(childLogFile, "I am %s and my fd is %d\n", argv[0], fd);
+  sprintf(childLogFilename, ".child-%s", argv[CHILD_NAME_INDEX]);
+  childLogFile = fopen(childLogFilename, "w");
+  fprintf(childLogFile,
+          "HELLO (name: %s) (fd: %d)\n",
+          argv[CHILD_NAME_INDEX], fd);
 
   // Say that we want to handle the CHILD_ALERT_SIGNAL signal.
   // This will be our parent telling us that there is data for
   // us in the pipe.
   signal(CHILD_ALERT_SIGNAL, signalHandler);
-  fprintf(childLogFile, "registering CHILD_ALERT_SIGNAL\n");
   
   // Also say that we want to handle the CHILD_QUIT_SIGNAL,
   // for when our parent wants us to quit immediately.
   signal(CHILD_QUIT_SIGNAL, signalHandler);
-  fprintf(childLogFile, "registering CHILD_QUIT_SIGNAL\n");
 
   // Call the child node's main function.
   ret = SNET_MAIN(argc, argv);

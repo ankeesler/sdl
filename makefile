@@ -44,8 +44,9 @@ PHY_FILES=$(PHY_DIR)/phy.c
 
 SDL_FILES=$(PHY_FILES) $(MAC_FILES) $(SDL_LOG_FILES)
 
-SNET_PARENT_FILES=$(SNET_DIR)/snet.c
 SNET_CHILD_FILES=$(SDL_FILES)
+SNET_DEBUG_FILE=$(SNET_DIR)/snet-debug.c
+SNET_PARENT_FILES=$(SNET_DIR)/snet.c $(SNET_DEBUG_FILE)
 
 #
 # UTIL
@@ -83,7 +84,11 @@ test: run-snet-test run-phy-test run-mac-test run-log-test
 # PHY
 #
 
-PHY_TEST_FILES=$(SNET_PARENT_FILES) $(TEST_DIR)/phy-test.c $(MAC_FILES)
+PHY_TEST_FILES=          \
+  $(SNET_PARENT_FILES)   \
+  $(TEST_DIR)/phy-test.c \
+  $(MAC_FILES)           \
+  $(SNET_DEBUG_FILE)
 PHY_TEST_EXES=               \
   $(BUILD_DIR)/phy-test      \
   $(BUILD_DIR)/client/client \
@@ -113,7 +118,7 @@ SDL_LOG_TEST_FILE=tuna.sdl
 $(BUILD_DIR)/sdl-log-on.o: $(CAP_DIR)/sdl-log.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -o $@ -c $<
 
-LOG_TEST_OBJ=$(addprefix $(BUILD_DIR)/, phy.o log-test.o sdl-log-on.o)
+LOG_TEST_OBJ=$(addprefix $(BUILD_DIR)/, phy.o log-test.o sdl-log-on.o snet-debug.o)
 
 $(BUILD_DIR)/log-test:                                 \
     DEFINES += -DSNET_TEST                             \
@@ -146,14 +151,14 @@ run-snet-test: $(SNET_TEST_EXES)
 #
 
 $(BUILD_DIR)/client/client $(BUILD_DIR)/server/server: \
-    DEFINES += -DSDL_LOG -DSDL_LOG_FILE=\"$(SDL_LOG_TEST_FILE)\"
+    DEFINES += -DSNET_TEST -DSDL_LOG -DSDL_LOG_FILE=\"$(SDL_LOG_TEST_FILE)\"
 
 SERVER_DIR=$(BUILD_DIR)/server
 $(SERVER_DIR): | $(BUILD_DIR)
 	mkdir $@
 $(BUILD_DIR)/server/%.o: %.c | $(SERVER_DIR)
 	$(CC) $(CFLAGS) -o $@ -c $<
-SERVER_FILES=$(SNET_CHILD_FILES) $(TEST_APPS_DIR)/server.c
+SERVER_FILES=$(SNET_CHILD_FILES) $(TEST_APPS_DIR)/server.c $(SNET_DEBUG_FILE)
 SERVER_OBJ=$(addprefix $(SERVER_DIR)/,$(notdir $(SERVER_FILES:.c=.o)))
 $(BUILD_DIR)/server/server: $(SERVER_OBJ)
 	$(CC) $(LDFLAGS) -o $@ $^
@@ -165,7 +170,7 @@ $(CLIENT_DIR): | $(BUILD_DIR)
 	mkdir $@
 $(BUILD_DIR)/client/%.o: %.c | $(CLIENT_DIR)
 	$(CC) $(CFLAGS) -o $@ -c $<
-CLIENT_FILES=$(SNET_CHILD_FILES) $(TEST_APPS_DIR)/client.c
+CLIENT_FILES=$(SNET_CHILD_FILES) $(TEST_APPS_DIR)/client.c $(SNET_DEBUG_FILE)
 CLIENT_OBJ=$(addprefix $(CLIENT_DIR)/,$(notdir $(CLIENT_FILES:.c=.o)))
 $(BUILD_DIR)/client/client: $(CLIENT_OBJ)
 	$(CC) $(LDFLAGS) -o $@ $^

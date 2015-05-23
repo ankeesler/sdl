@@ -19,6 +19,7 @@
 
 #include "snet.h"
 #include "snet-internal.h"
+#include "snet-debug.h"
 #include "sdl-types.h"
 
 #include "sdl-protocol.h"
@@ -67,34 +68,6 @@ static int nodesInNetwork = 0;
   static SignalData signalData[SIGNAL_DATA_SIZE];
   static uint8_t signalDataIndex = 0;
 
-  #define MAX_SIG SIGIO
-  static const char *signalNames[] = {
-    "NONE",
-    "SIGHUP",
-    "SIGINT",
-    "SIGQUIT",
-    "SIGILL",
-    "SIGTRAP",
-    "SIGABRT",
-    "SIGPOLL/SIGEMT",
-    "SIGFPE",
-    "SIGKILL",
-    "SIGBUS",
-    "SIGSEGV",
-    "SIGSYS",
-    "SIGPIPE",
-    "SIGALRM",
-    "SIGTERM",
-    "SIGURG",
-    "SIGSTOP",
-    "SIGTSTP",
-    "SIGCONT",
-    "SIGCHLD",
-    "SIGTTIN",
-    "SIGTTOU",
-    "SIGIO",
-  };
-  
   static void logSignalData(pid_t pid, int signal)
   {
     SnetNode *node;
@@ -249,7 +222,7 @@ int snetNodeStart(SnetNode *node)
     // Child.
     close(fd[1]); // close the write end of the pipe
     sprintf(fdBuf, "%d", fd[0]);
-    execl(node->image, node->image, fdBuf, 0);
+    execl(node->image, node->image, node->name, fdBuf, 0);
 
     // If execl returns, then this is bad.
     exit(1);

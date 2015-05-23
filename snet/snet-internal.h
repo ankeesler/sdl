@@ -24,3 +24,9 @@
 // for it to read off of the file descriptor.
 #define PARENT_ALERT_SIGNAL SIGUSR1
 #define snetParentAlert() kill(getppid(), PARENT_ALERT_SIGNAL)
+
+// The index of argv that the child node name lives in.
+#define CHILD_NAME_INDEX (1)
+
+// The index of argv that the parent to child fd lives in.
+#define PARENT_TO_CHILD_FD_INDEX (2)

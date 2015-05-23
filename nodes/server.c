@@ -43,7 +43,6 @@ int main(void)
     if (sdlMacReceive(&packet) == SDL_SUCCESS) {
       spin = (packet.data[0] != SERVER_OFF_COMMAND);
     }
-    fprintf(childLogFile, "errno: %d\n", errno);
   }
 
   exit(0);
