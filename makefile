@@ -66,7 +66,7 @@ cscope: cscope.files
 #
 
 clean: clean-cap
-	rm -frd ./*.o $(BUILD_DIR) $(SDL_LOG_TEST_FILE)
+	rm -frd ./*.o $(BUILD_DIR) $(SDL_LOG_TEST_FILE) .child*
 
 $(BUILD_DIR):
 	mkdir $@
