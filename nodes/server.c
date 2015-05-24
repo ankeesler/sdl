@@ -8,12 +8,11 @@
 // Server test application.
 //
 
-#include <unit-test.h>
-#include <signal.h>
-#include <errno.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "mac.h"
-#include "snet/snet.h"
+#include "snet.h"
 #include "server.h"
 
 static int spin = 1;

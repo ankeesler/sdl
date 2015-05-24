@@ -8,6 +8,8 @@
 // Server test application defines and test hooks.
 //
 
+#include <signal.h>
+
 #define SERVER_DUTY_CYCLE_US (10000)
 
 #define SERVER_OFF_SIGNAL (SIGUSR2)

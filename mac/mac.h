@@ -11,7 +11,6 @@
 #ifndef __SDL_H__
 #define __SDL_H__
 
-#include "sdl-protocol.h"
 #include "sdl-types.h"
 
 //

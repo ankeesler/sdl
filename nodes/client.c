@@ -8,12 +8,12 @@
 // Client test application.
 //
 
-#include "snet/snet.h"
+#include <stdlib.h>
+
+#include "snet.h"
 #include "sdl-types.h"
 #include "phy.h" // sdlPhyTransmit()
 #include "mac.h" // sdlPacketToFlatBuffer()
-
-#include <stdlib.h>
 
 #include "client.h"
 

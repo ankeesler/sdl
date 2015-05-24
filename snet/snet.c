@@ -11,10 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
-#include <unistd.h>
-#include <sys/wait.h>
 #include <signal.h>
-#include <errno.h>
 #include <stdint.h>
 
 #include "snet.h"

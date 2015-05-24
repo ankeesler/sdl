@@ -7,4 +7,3 @@
 //
 // Internal definitions for the SDL MAC.
 
-#include <stdint.h>
