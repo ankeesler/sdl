@@ -14,23 +14,13 @@
 #include <unistd.h>
 #include <stdint.h>
 
+#include "sdl-types.h"
+
 #if !defined(__SNET_C__) && !defined(__SNET_TEST_C__)
 #define main SNET_MAIN
 #else
 int SNET_MAIN(int argc, char *argv[]);
 #endif
-
-//
-// Status.
-//
-
-#define SNET_STATUS_SUCCESS 0
-#define SNET_STATUS_UNKNOWN_NODE 1
-#define SNET_STATUS_INVALID_NETWORK_STATE 2
-#define SNET_STATUS_CANNOT_START_NODE 3
-#define SNET_STATUS_BAD_NODE_COM 4
-#define SNET_STATUS_CANNOT_COMMAND_NODE 5
-#define SNET_STATUS_UNKNOWN_COMMAND 6
 
 //
 // Configuration.
@@ -49,10 +39,10 @@ void snetManagementInit(void);
 // Deinitialize the network.
 // Returns the number of nodes that were active in the network.
 // MUST BE CALLED!!!
-int snetManagementDeinit(void);
+uint8_t snetManagementDeinit(void);
 
 // Get the count of nodes in the network.
-int snetManagementSize(void);
+uint8_t snetManagementSize(void);
 
 //
 // Nodes.
@@ -90,15 +80,14 @@ SnetNode *snetNodeMake(const char *image, const char *name);
 
 // Start a node with its image.
 // A node can be turned off with snetNodeStop.
-// Returns a SNET_STATUS_ definition.
-int snetNodeStart(SnetNode *node);
+// If SDL_FATAL is returned, then there was a system process issue.
+SdlStatus snetNodeStart(SnetNode *node);
 
 // Cut the power to a node.
 // In order to turn the node back on, snetNodeAdd should be called.
-// Returns a SNET_STATUS_ definition.
-int snetNodeStop(SnetNode *node);
+SdlStatus snetNodeStop(SnetNode *node);
 
 // Command the node to do something.
-int snetNodeCommand(SnetNode *node, SnetNodeCommand command, ...);
+SdlStatus snetNodeCommand(SnetNode *node, SnetNodeCommand command, ...);
 
 #endif /* __SNET_H__ */

@@ -33,11 +33,11 @@ int sanityCheck(void)
   // We shouldn't be able to check out ID, transmit, or receive
   // if we have not initialized.
   expect(sdlMacAddress(&source)
-         == SDL_UNINITIALIZED);
+         == SDL_MAC_UNINITIALIZED);
   expect(sdlMacTransmit(SDL_PACKET_TYPE_DATA, destination, data, dataBufferLength)
-         == SDL_UNINITIALIZED);
+         == SDL_MAC_UNINITIALIZED);
   expect(sdlMacReceive(&packet)
-         == SDL_UNINITIALIZED);
+         == SDL_MAC_UNINITIALIZED);
 
   // Initialization should go fine.
   expect(sdlMacInit(getpid())
@@ -54,7 +54,7 @@ int sanityCheck(void)
 
   // Receiving something right now should return SDL_EMPTY.
   expect(sdlMacReceive(&packet)
-         == SDL_EMPTY);
+         == SDL_MAC_EMPTY);
 
   return 0;
 }
@@ -78,7 +78,7 @@ int loopbackTest(void)
 
   // After, the SDL should be empty.
   expect(sdlMacReceive(&packet)
-         == SDL_EMPTY);
+         == SDL_MAC_EMPTY);
 
   return 0;
 }
@@ -102,7 +102,7 @@ int broadcastTest(void)
 
   // After, the SDL should be empty.
   expect(sdlMacReceive(&packet)
-         == SDL_EMPTY);
+         == SDL_MAC_EMPTY);
 
   // Destination address of almost SDL_MAC_ADDRESS_BROADCAST.
   flatPacket[8] = 0xF1;
@@ -111,7 +111,7 @@ int broadcastTest(void)
   flatPacket[11] = 0xF4;
   sdlPhyReceiveIsr(flatPacket, SDL_MAC_PDU_LEN);
   expect(sdlMacReceive(&packet)
-         == SDL_EMPTY);
+         == SDL_MAC_EMPTY);
 
   return 0;
 }

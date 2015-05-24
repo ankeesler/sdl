@@ -48,7 +48,7 @@ static SnetNode nodePool[SNET_MAX_HOSTS];
    || ((node) > (nodePool + SNET_MAX_HOSTS)))
 
 // The number of nodes added to the network.
-static int nodesInNetwork = 0;
+static uint8_t nodesInNetwork = 0;
 
 // ----------------------------------------------------------------------------
 // Testing.
@@ -157,13 +157,13 @@ void snetManagementInit(void)
   signal(PARENT_ALERT_SIGNAL, signalHandler);
 }
 
-int snetManagementDeinit(void)
+uint8_t snetManagementDeinit(void)
 {
-  int count = 0, i = 0;
+  uint8_t count = 0, i = 0;
 
   while (i < SNET_MAX_HOSTS) {
     if ((nodePool[i].mask & SNET_NODE_MASK_USED)
-        && (snetNodeStop(nodePool + i) == SNET_STATUS_SUCCESS)) {
+        && (snetNodeStop(nodePool + i) == SDL_SUCCESS)) {
       count ++;
     }
     i ++;
@@ -172,15 +172,15 @@ int snetManagementDeinit(void)
   return count;
 }
   
-int snetManagementSize(void)
+uint8_t snetManagementSize(void)
 {
   return nodesInNetwork;
 }
 
 // Returns the next available node index, or -1 if there is none.
-static int nextAvailableNode(void)
+static uint8_t nextAvailableNode(void)
 {
-  int i;
+  uint8_t i;
   for (i = 0; i < SNET_MAX_HOSTS; i ++) {
     if (!(nodePool[i].mask & SNET_NODE_MASK_USED)) {
       return i;
@@ -207,21 +207,21 @@ SnetNode *snetNodeMake(const char *image, const char *name)
   return node;
 }
 
-int snetNodeStart(SnetNode *node)
+SdlStatus snetNodeStart(SnetNode *node)
 {
   pid_t newPid;
   int fd[2];
   char fdBuf[10]; // max digits of signed 32-bit integer
 
   if (nodeIsUnknown(node))
-    return SNET_STATUS_UNKNOWN_NODE;
+    return SDL_SNET_UNKNOWN_NODE;
 
   if (node->mask & SNET_NODE_MASK_ON_NETWORK)
-    return SNET_STATUS_INVALID_NETWORK_STATE;
+    return SDL_SNET_INVALID_NETWORK_STATE;
 
   if (pipe(fd) || (newPid = fork()) == -1) {
     // Failure.
-    return SNET_STATUS_CANNOT_START_NODE;
+    return SDL_FATAL;
   } else if (newPid) {
     // Parent.
     close(fd[0]); // close the read end of the pipe
@@ -240,21 +240,21 @@ int snetNodeStart(SnetNode *node)
   node->mask |= SNET_NODE_MASK_ON_NETWORK;
   nodesInNetwork ++;
 
-  return SNET_STATUS_SUCCESS;
+  return SDL_SUCCESS;
 }
 
-int snetNodeStop(SnetNode *node)
+SdlStatus snetNodeStop(SnetNode *node)
 {
   if (nodeIsUnknown(node))
-    return SNET_STATUS_UNKNOWN_NODE;
+    return SDL_SNET_UNKNOWN_NODE;
 
   if (!(node->mask & SNET_NODE_MASK_ON_NETWORK))
-    return SNET_STATUS_INVALID_NETWORK_STATE;
+    return SDL_SNET_INVALID_NETWORK_STATE;
 
   kill(node->pid, SIGTERM);
   nodeRemoveReally(node);
 
-  return SNET_STATUS_SUCCESS;
+  return SDL_SUCCESS;
 }
 
 static void nodeRemoveReally(SnetNode *node)
@@ -283,21 +283,21 @@ static void nodeRemoveReally(SnetNode *node)
 // ----------------------------------------------------------------------------
 // Commands.
 
-int snetNodeCommand(SnetNode *node, SnetNodeCommand command, ...)
+SdlStatus snetNodeCommand(SnetNode *node, SnetNodeCommand command, ...)
 {
   uint8_t *data;
   va_list args;
   SdlStatus status = SDL_SUCCESS;
   
   if (nodeIsUnknown(node))
-    return SNET_STATUS_UNKNOWN_NODE;
+    return SDL_SNET_UNKNOWN_NODE;
 
   if (!(node->mask & SNET_NODE_MASK_ON_NETWORK))
-    return SNET_STATUS_INVALID_NETWORK_STATE;
+    return SDL_SNET_INVALID_NETWORK_STATE;
 
   // First write the command to the pipe.
   if (write(node->fd, &command, sizeof(command)) != sizeof(command))
-    return SNET_STATUS_CANNOT_COMMAND_NODE;
+    return SDL_SNET_COM_FAILURE;
 
   // Now, write the arguments to the command.
   va_start(args, command);
@@ -311,18 +311,18 @@ int snetNodeCommand(SnetNode *node, SnetNodeCommand command, ...)
     // The first byte is the length of the whole packet.
     data = va_arg(args, void *);
     status = (write(node->fd, data, data[0]) == data[0]
-              ? SNET_STATUS_SUCCESS
-              : SNET_STATUS_CANNOT_COMMAND_NODE);
+              ? SDL_SUCCESS
+              : SDL_SNET_COM_FAILURE);
     break;
   default:
-    status = SNET_STATUS_UNKNOWN_COMMAND;
+    status = SDL_SNET_UNKNOWN_COMMAND;
   }
   va_end(args);
 
   // Finally, try tell the child that they have something coming for them.
   return (status == SDL_SUCCESS
           ? (snetChildAlert(node->pid)
-             ? SNET_STATUS_BAD_NODE_COM
-             : SNET_STATUS_SUCCESS)
+             ? SDL_SNET_COM_FAILURE
+             : SDL_SUCCESS)
           : status);
 }

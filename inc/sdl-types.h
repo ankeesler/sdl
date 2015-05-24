@@ -16,16 +16,31 @@
 
 // A generic status code in SDL.
 enum {
+  /* General */
   // Success!
-  SDL_SUCCESS          = 0x00,
-  // The SDL layer does not have any received data in it.
-  SDL_EMPTY            = 0x01,
-  // The SDL layer is uninitialized.
-  SDL_UNINITIALIZED    = 0x02,
+  SDL_SUCCESS = 0x00,
   // A fatal failure has occured.
-  SDL_FATAL            = 0x03,
+  SDL_FATAL   = 0x01,
+
+  /* MAC */
+  // The SDL MAC layer does not have any received data in it.
+  SDL_MAC_EMPTY         = 0x11,
+  // The SDL MAC layer is uninitialized.
+  SDL_MAC_UNINITIALIZED = 0x12,
+
+  /* PHY */
   // A transmit failure has occured.
-  SDL_TRANSMIT_FAILURE = 0x04,
+  SDL_TRANSMIT_FAILURE = 0x21,
+
+  /* SNET */
+  // An unknown node has been passed to a SNET API.
+  SDL_SNET_UNKNOWN_NODE          = 0x31,
+  // The network state for a SnetNode is invalid.
+  SDL_SNET_INVALID_NETWORK_STATE = 0x32,
+  // The node cannot be communicated with.
+  SDL_SNET_COM_FAILURE           = 0x33,
+  // The passed commandf is unknown.
+  SDL_SNET_UNKNOWN_COMMAND       = 0x34,
 };
 typedef uint8_t SdlStatus;
 

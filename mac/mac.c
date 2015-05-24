@@ -83,7 +83,7 @@ SdlStatus sdlMacInit(SdlAddress address)
 
 SdlStatus sdlMacAddress(SdlAddress *address)
 {
-  if (!(state & STATE_INITIALIZED)) return SDL_UNINITIALIZED;
+  if (!(state & STATE_INITIALIZED)) return SDL_MAC_UNINITIALIZED;
 
   *address = ourAddress;
 
@@ -125,7 +125,7 @@ SdlStatus sdlMacTransmit(SdlPacketType type,
   SdlPacket packet;
   SdlStatus status = SDL_SUCCESS;
 
-  if (!(state & STATE_INITIALIZED)) return SDL_UNINITIALIZED;
+  if (!(state & STATE_INITIALIZED)) return SDL_MAC_UNINITIALIZED;
 
   packet.type = type;
   packet.sequence = sequence;
@@ -149,9 +149,9 @@ SdlStatus sdlMacTransmit(SdlPacketType type,
                     
 SdlStatus sdlMacReceive(SdlPacket *packet)
 {
-  if (!(state & STATE_INITIALIZED)) return SDL_UNINITIALIZED;
+  if (!(state & STATE_INITIALIZED)) return SDL_MAC_UNINITIALIZED;
 
-  if (rxBufferIsEmpty()) return SDL_EMPTY;
+  if (rxBufferIsEmpty()) return SDL_MAC_EMPTY;
 
   // Deep copy.
   *packet = rxBuffer[rxHead];
