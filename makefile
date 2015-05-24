@@ -97,9 +97,6 @@ PHY_TEST_EXES=               \
 $(BUILD_DIR)/phy-test: $(addprefix $(BUILD_DIR)/,$(notdir $(PHY_TEST_FILES:.c=.o)))
 	$(CC) $(LDFLAGS) -o $@ $^
 
-run-phy-test: $(PHY_TEST_EXES)
-	./$<
-
 #
 # MAC
 #
@@ -143,9 +140,6 @@ SNET_TEST_OBJ=$(addprefix $(BUILD_DIR)/,$(notdir $(SNET_TEST_FILES:.c=.o)))
 $(BUILD_DIR)/snet-test: $(SNET_TEST_OBJ)
 	$(CC) $(LDFLAGS) -o $@ $^
 
-run-snet-test: $(SNET_TEST_EXES)
-	./$<
-
 #
 # TEST APPS
 #
@@ -162,8 +156,6 @@ SERVER_FILES=$(SNET_CHILD_FILES) $(TEST_APPS_DIR)/server.c $(SNET_DEBUG_FILE)
 SERVER_OBJ=$(addprefix $(SERVER_DIR)/,$(notdir $(SERVER_FILES:.c=.o)))
 $(BUILD_DIR)/server/server: $(SERVER_OBJ)
 	$(CC) $(LDFLAGS) -o $@ $^
-run-server: $(BUILD_DIR)/server/server
-	./$< $(ARGS)
 
 CLIENT_DIR=$(BUILD_DIR)/client
 $(CLIENT_DIR): | $(BUILD_DIR)
@@ -174,8 +166,6 @@ CLIENT_FILES=$(SNET_CHILD_FILES) $(TEST_APPS_DIR)/client.c $(SNET_DEBUG_FILE)
 CLIENT_OBJ=$(addprefix $(CLIENT_DIR)/,$(notdir $(CLIENT_FILES:.c=.o)))
 $(BUILD_DIR)/client/client: $(CLIENT_OBJ)
 	$(CC) $(LDFLAGS) -o $@ $^
-run-client: $(BUILD_DIR)/client/client
-	./$< $(ARGS)
 
 #
 # CAPTURE FRAMEWORK
