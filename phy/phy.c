@@ -34,6 +34,8 @@ static int fd;
 
 static void cleanup(void)
 {
+  fprintf(childLogFile, "GOODBYE\n");
+
   // Close our log file.
   fclose(childLogFile);
 
@@ -98,9 +100,8 @@ int main(int argc, char *argv[])
   // Log file.
   sprintf(childLogFilename, ".child-%s", argv[CHILD_NAME_INDEX]);
   childLogFile = fopen(childLogFilename, "w");
-  fprintf(childLogFile,
-          "HELLO (name: %s) (fd: %d)\n",
-          argv[CHILD_NAME_INDEX], fd);
+  fprintf(childLogFile, "HELLO\n");
+  fprintf(childLogFile, "name: %s, fd: %d\n", argv[CHILD_NAME_INDEX], fd);
 
   // Say that we want to handle the CHILD_ALERT_SIGNAL signal.
   // This will be our parent telling us that there is data for
