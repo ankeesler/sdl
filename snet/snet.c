@@ -278,7 +278,7 @@ int snetNodeCommand(SnetNode *node, SnetNodeCommand command, ...)
 {
   uint8_t *data, i;
   va_list args;
-  SdlStatus status;
+  SdlStatus status = SDL_SUCCESS;
   
   if (nodeIsUnknown(node))
     return SNET_STATUS_UNKNOWN_NODE;
