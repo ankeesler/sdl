@@ -77,6 +77,9 @@ enum {
 
   /* Tell the PHY to transmit SDL data. */
   TRANSMIT = 0x03, // args: uint8_t *bytes
+
+  /* A command that should never be sent to a node. */
+  NIL      = 0x04, // args: void
 };
 typedef uint8_t SnetNodeCommand;
 

@@ -49,7 +49,7 @@ static void cleanup(void)
 static void signalHandler(int signal)
 {
   uint8_t rxBuffer[SDL_PHY_SDU_MAX + SDL_PHY_PDU_LEN];
-  SnetNodeCommand command = NOOP;
+  SnetNodeCommand command = NIL;
 
   fprintf(childLogFile, "signal: %s\n", signalNames[signal]);
 
@@ -64,11 +64,17 @@ static void signalHandler(int signal)
     case NOOP:
       break;
     case RECEIVE:
+    case TRANSMIT:
       // First byte is the PHY PDU, i.e., the length of the whole packet.
       read(fd, rxBuffer, sizeof(uint8_t));
       read(fd, rxBuffer + 1, rxBuffer[0] - SDL_PHY_PDU_LEN);
-      sdlLogRx(rxBuffer, rxBuffer[0]);
-      sdlPhyReceiveIsr(rxBuffer + 1, rxBuffer[0] - SDL_PHY_PDU_LEN);
+      if (command == RECEIVE) {
+        sdlLogRx(rxBuffer, rxBuffer[0]);
+        sdlPhyReceiveIsr(rxBuffer + 1, rxBuffer[0] - SDL_PHY_PDU_LEN);
+      } else { // command == TRANSMIT
+        // TODO: pass me to sdlPhyTransmit!
+        // sdlPhyTransmit(rxBuffer + 1, rxBuffer[0] - SDL_PHY_PDU_LEN);
+      }
       break;
     default:
       ; // TODO: report bad command.
