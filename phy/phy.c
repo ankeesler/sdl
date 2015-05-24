@@ -133,7 +133,7 @@ static uint8_t realTxBuffer[SDL_PHY_SDU_MAX + SDL_PHY_PDU_LEN];
 
 SdlStatus sdlPhyTransmit(uint8_t *data, uint8_t length)
 {
-  SdlStatus status;
+  SdlStatus status = SDL_SUCCESS;
   uint8_t realLength = length + SDL_PHY_PDU_LEN;
   
   // Copy to real tx buffer.
@@ -144,10 +144,12 @@ SdlStatus sdlPhyTransmit(uint8_t *data, uint8_t length)
   sdlLogTx(realTxBuffer, realLength);
   
   // Write the packet to the file descriptor.
+#ifndef SDL_LOG_TEST /* TODO: take me away when log-test moves to SNET. */
   status = (write(fd, realTxBuffer, realTxBuffer[0]) == realTxBuffer[0]
             ? SDL_SUCCESS
             : SDL_TRANSMIT_FAILURE);
-  
+#endif  
+
   // Tell the parent they have got something coming for them.
   return (status == SDL_SUCCESS
           ? (snetParentAlert()
