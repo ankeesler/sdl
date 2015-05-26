@@ -31,6 +31,9 @@
 // The index of argv that the parent to child fd lives in.
 #define PARENT_TO_CHILD_FD_INDEX (2)
 
+// The index of argv that the child to parent fd lives in.
+#define CHILD_TO_PARENT_FD_INDEX (3)
+
 // Internal child exit values.
 #define CHILD_EXIT_SUCCESS    0x00
 #define CHILD_EXIT_EXECL_FAIL 0x01

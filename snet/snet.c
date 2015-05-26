@@ -211,8 +211,10 @@ SnetNode *snetNodeMake(const char *image, const char *name)
 SdlStatus snetNodeStart(SnetNode *node)
 {
   pid_t newPid;
-  int fd[2];
-  char fdBuf[10]; // max digits of signed 32-bit integer
+  int parentToChildPipe[2], childToParentPipe[2];
+
+  // max digits of signed 32-bit integer
+  char parentToChildFdBuf[10], childToParentFdBuf[10]; 
 
   if (nodeIsUnknown(node))
     return SDL_SNET_UNKNOWN_NODE;
@@ -220,19 +222,30 @@ SdlStatus snetNodeStart(SnetNode *node)
   if (node->mask & SNET_NODE_MASK_ON_NETWORK)
     return SDL_SNET_INVALID_NETWORK_STATE;
 
-  if (pipe(fd) || (newPid = fork()) == -1) {
+  if (pipe(parentToChildPipe)
+      || pipe(childToParentPipe)
+      || (newPid = fork()) == -1) {
     // Failure.
     return SDL_FATAL;
   } else if (newPid) {
     // Parent.
-    close(fd[0]); // close the read end of the pipe
+    close(parentToChildPipe[0]); // close the read end of the pipe
+    close(childToParentPipe[1]); // close the write end of the pipe
     node->pid = newPid;
-    node->fd = fd[1];
+    node->parentToChildFd = parentToChildPipe[1];
+    node->childToParentFd = childToParentPipe[0];
   } else {
     // Child.
-    close(fd[1]); // close the write end of the pipe
-    sprintf(fdBuf, "%d", fd[0]);
-    execl(node->image, node->image, node->name, fdBuf, 0);
+    close(parentToChildPipe[1]); // close the write end of the pipe
+    close(childToParentPipe[0]); // close the read end of the pipe
+    sprintf(parentToChildFdBuf, "%d", parentToChildPipe[0]);
+    sprintf(childToParentFdBuf, "%d", childToParentPipe[1]);
+    execl(node->image,
+          node->image,
+          node->name,
+          parentToChildFdBuf,
+          childToParentFdBuf,
+          0);
 
     // If execl returns, then this is bad.
     exit(CHILD_EXIT_EXECL_FAIL);
@@ -274,8 +287,9 @@ static void nodeRemoveReally(SnetNode *node)
   node->mask &= ~SNET_NODE_MASK_ON_NETWORK;
   nodesInNetwork --;
 
-  // Close the pipe.
-  close(node->fd);
+  // Close the pipes.
+  close(node->parentToChildFd);
+  close(node->childToParentFd);
 
   // Wait on the process.
   waitpid(node->pid, NULL, 0);
@@ -297,7 +311,10 @@ SdlStatus snetNodeCommand(SnetNode *node, SnetNodeCommand command, ...)
     return SDL_SNET_INVALID_NETWORK_STATE;
 
   // First write the command to the pipe.
-  if (write(node->fd, &command, sizeof(command)) != sizeof(command))
+  if (write(node->parentToChildFd,
+            &command,
+            sizeof(command))
+      != sizeof(command))
     return SDL_SNET_COM_FAILURE;
 
   // Now, write the arguments to the command.
@@ -311,7 +328,7 @@ SdlStatus snetNodeCommand(SnetNode *node, SnetNodeCommand command, ...)
     // Get the pointer to the raw SDL packet.
     // The first byte is the length of the whole packet.
     data = va_arg(args, void *);
-    status = (write(node->fd, data, data[0]) == data[0]
+    status = (write(node->parentToChildFd, data, data[0]) == data[0]
               ? SDL_SUCCESS
               : SDL_SNET_COM_FAILURE);
     break;

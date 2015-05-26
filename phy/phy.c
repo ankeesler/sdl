@@ -28,8 +28,7 @@
 FILE *childLogFile = NULL;
 char childLogFilename[256];
 
-// The reading fd for the pipe.
-static int fd;
+static int parentToChildFd, childToParentFd;
 
 static void cleanup(void)
 {
@@ -38,8 +37,9 @@ static void cleanup(void)
   // Close our log file.
   fclose(childLogFile);
 
-  // Close the read end of the pipe.
-  close(fd);
+  // Close the pipes.
+  close(parentToChildFd);
+  close(childToParentFd);
   
   // Dump to the log.
   sdlLogDump();
@@ -55,7 +55,7 @@ static void signalHandler(int signal)
   if (signal == CHILD_ALERT_SIGNAL) {
     // Read the command out of the pipe.
     // TODO: report bad read.
-    read(fd, &command, sizeof(command));
+    read(parentToChildFd, &command, sizeof(command));
 
     // Handle the command, remembering that this is
     // called in an interupt context.
@@ -65,14 +65,13 @@ static void signalHandler(int signal)
     case RECEIVE:
     case TRANSMIT:
       // First byte is the PHY PDU, i.e., the length of the whole packet.
-      read(fd, rxBuffer, sizeof(uint8_t));
-      read(fd, rxBuffer + 1, rxBuffer[0] - SDL_PHY_PDU_LEN);
+      read(parentToChildFd, rxBuffer, sizeof(uint8_t));
+      read(parentToChildFd, rxBuffer + 1, rxBuffer[0] - SDL_PHY_PDU_LEN);
       if (command == RECEIVE) {
         sdlLogRx(rxBuffer, rxBuffer[0]);
         sdlPhyReceiveIsr(rxBuffer + 1, rxBuffer[0] - SDL_PHY_PDU_LEN);
       } else { // command == TRANSMIT
-        // TODO: pass me to sdlPhyTransmit!
-        // sdlPhyTransmit(rxBuffer + 1, rxBuffer[0] - SDL_PHY_PDU_LEN);
+        sdlPhyTransmit(rxBuffer + 1, rxBuffer[0] - SDL_PHY_PDU_LEN);
       }
       break;
     default:
@@ -91,14 +90,12 @@ int main(int argc, char *argv[])
 {
   int ret;
 
-  // The first argument past the program name is pipe fds from the
-  // parent.
 #ifndef SDL_LOG_TEST
   if (argc < 2) {
     return 1;
   } else {
-    // This is our file descriptor for communicating with our parent.
-    sscanf(argv[PARENT_TO_CHILD_FD_INDEX], "%d", &fd);
+    sscanf(argv[PARENT_TO_CHILD_FD_INDEX], "%d", &parentToChildFd);
+    sscanf(argv[CHILD_TO_PARENT_FD_INDEX], "%d", &childToParentFd);
   }
 #endif
 
@@ -106,7 +103,10 @@ int main(int argc, char *argv[])
   sprintf(childLogFilename, ".child-%s", argv[CHILD_NAME_INDEX]);
   childLogFile = fopen(childLogFilename, "w");
   fprintf(childLogFile, "HELLO\n");
-  fprintf(childLogFile, "name: %s, fd: %d\n", argv[CHILD_NAME_INDEX], fd);
+  fprintf(childLogFile, "name: %s, p -> c: %d, c -> p %d\n",
+          argv[CHILD_NAME_INDEX],
+          parentToChildFd,
+          childToParentFd);
 
   // Say that we want to handle the CHILD_ALERT_SIGNAL signal.
   // This will be our parent telling us that there is data for
@@ -145,7 +145,10 @@ SdlStatus sdlPhyTransmit(uint8_t *data, uint8_t length)
   
   // Write the packet to the file descriptor.
 #ifndef SDL_LOG_TEST /* TODO: take me away when log-test moves to SNET. */
-  status = (write(fd, realTxBuffer, realTxBuffer[0]) == realTxBuffer[0]
+  status = ((write(childToParentFd,
+                   realTxBuffer,
+                   realTxBuffer[0])
+             == realTxBuffer[0])
             ? SDL_SUCCESS
             : SDL_TRANSMIT_FAILURE);
 #endif  

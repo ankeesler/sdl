@@ -54,7 +54,7 @@ typedef struct {
   const char *name;
   int mask;
   pid_t pid;
-  int fd;
+  int parentToChildFd, childToParentFd;
 } SnetNode;
 
 // A command for a node.
