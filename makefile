@@ -140,6 +140,9 @@ SNET_TEST_OBJ=$(addprefix $(BUILD_DIR)/,$(notdir $(SNET_TEST_FILES:.c=.o)))
 $(BUILD_DIR)/snet-test: $(SNET_TEST_OBJ)
 	$(CC) $(LDFLAGS) -o $@ $^
 
+run-snet-test: $(SNET_TEST_EXES)
+	./$<
+
 #
 # TEST APPS
 #
