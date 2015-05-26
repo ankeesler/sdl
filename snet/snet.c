@@ -59,13 +59,14 @@ static uint8_t nodesInNetwork = 0;
     const char *nodeName;
     struct timeval time;
     int signal;
+    int ret;
   } SignalData;
   
   #define SIGNAL_DATA_SIZE (32)
   static SignalData signalData[SIGNAL_DATA_SIZE];
   static uint8_t signalDataIndex = 0;
 
-  static void logSignalData(pid_t pid, int signal)
+  static void logSignalData(pid_t pid, int signal, int ret)
   {
     SnetNode *node;
 
@@ -74,6 +75,7 @@ static uint8_t nodesInNetwork = 0;
       signalData[signalDataIndex].pid = pid;
       signalData[signalDataIndex].signal = signal;
       signalData[signalDataIndex].nodeName = (node ? node->name : "???");
+      signalData[signalDataIndex].ret = ret;
       gettimeofday(&(signalData[signalDataIndex].time), NULL);
       signalDataIndex ++;
     }
@@ -85,14 +87,15 @@ static uint8_t nodesInNetwork = 0;
 
     printf("\n");
     for (i = 0; i < signalDataIndex; i ++) {
-      printf("(signalData[%d] = {pid=%d(%s), time=%ld us, signal=%d(%s)})\n",
+      printf("(signalData[%d] = {pid=%d(%s), time=%ld us, signal=%d(%s), ret=%d})\n",
              i,
              signalData[i].pid,
              signalData[i].nodeName,
              ((signalData[i].time.tv_sec * 1000000)
                + signalData[i].time.tv_usec),
              signalData[i].signal,
-             signalNames[signalData[i].signal]);
+             signalNames[signalData[i].signal],
+             signalData[i].ret);
     }
   }  
 #else
@@ -117,10 +120,11 @@ static SnetNode *findNodeForPid(pid_t pid)
 void signalHandler(int signal)
 {
   pid_t pid = 0;
+  int stat = 0;
 
   if (signal == SIGCHLD) {
     // Wait to see which child process is quitting.
-    pid = wait(NULL);
+    pid = wait(&stat);
 
     // Find that child process and really remove it.
     nodeRemoveReally(findNodeForPid(pid));
@@ -137,7 +141,7 @@ void signalHandler(int signal)
     */
   }
 
-  logSignalData(pid, signal);
+  logSignalData(pid, signal, WEXITSTATUS(stat));
 }
 
 void snetManagementInit(void)
@@ -231,7 +235,7 @@ SdlStatus snetNodeStart(SnetNode *node)
     execl(node->image, node->image, node->name, fdBuf, 0);
 
     // If execl returns, then this is bad.
-    exit(1);
+    exit(CHILD_EXIT_EXECL_FAIL);
   }
   
   node->mask |= SNET_NODE_MASK_ON_NETWORK;

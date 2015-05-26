@@ -80,7 +80,7 @@ static void signalHandler(int signal)
     }
   } else if (signal == CHILD_QUIT_SIGNAL) {
     cleanup();
-    exit(0);
+    exit(CHILD_EXIT_SUCCESS);
   }
 }
 
