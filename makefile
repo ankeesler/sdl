@@ -59,6 +59,7 @@ cscope.files: $(ALL_SOURCE)
 	echo $^ > $@
 
 cscope: cscope.files
+	rm cscope*out
 	cscope -b -q
 
 #
