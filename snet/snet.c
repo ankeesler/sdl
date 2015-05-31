@@ -85,7 +85,7 @@ static uint8_t nodesInNetwork = 0;
   {
     uint8_t i;
 
-    printf("\n");
+    printf("(signal count = %d)\n", signalDataIndex);
     for (i = 0; i < signalDataIndex; i ++) {
       printf("(signalData[%d] = {pid=%d(%s), time=%ld us, signal=%d(%s), ret=%d})\n",
              i,
