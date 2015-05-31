@@ -35,5 +35,7 @@
 #define CHILD_TO_PARENT_FD_INDEX (3)
 
 // Internal child exit values.
-#define CHILD_EXIT_SUCCESS    0x00
-#define CHILD_EXIT_EXECL_FAIL 0x01
+#define CHILD_EXIT_SUCCESS     0x00
+#define CHILD_EXIT_EXECL_FAIL  0x01
+#define CHILD_EXIT_BAD_READ    0x02
+#define CHILD_EXIT_BAD_COMMAND 0x03

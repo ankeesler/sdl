@@ -54,8 +54,10 @@ static void signalHandler(int signal)
 
   if (signal == CHILD_ALERT_SIGNAL) {
     // Read the command out of the pipe.
-    // TODO: report bad read.
-    read(parentToChildFd, &command, sizeof(command));
+    if (read(parentToChildFd, &command, sizeof(command)) != sizeof(command)) {
+      cleanup();
+      exit(CHILD_EXIT_BAD_READ);
+    }
 
     // Handle the command, remembering that this is
     // called in an interupt context.
@@ -78,7 +80,8 @@ static void signalHandler(int signal)
       }
       break;
     default:
-      ; // TODO: report bad command.
+      cleanup();
+      exit(CHILD_EXIT_BAD_COMMAND);
     }
   } else if (signal == CHILD_QUIT_SIGNAL) {
     cleanup();
