@@ -117,7 +117,7 @@ static SnetNode *findNodeForPid(pid_t pid)
   return NULL;
 }
 
-void signalHandler(int signal)
+void signalHandler(int signal, siginfo_t *info, void *wut)
 {
   pid_t pid = 0;
   int stat = 0;
@@ -146,16 +146,22 @@ void signalHandler(int signal)
 
 void snetManagementInit(void)
 {
-  int i;
+  uint8_t i;
+  struct sigaction action = {
+    .sa_sigaction = signalHandler,
+    .sa_mask      = 0,
+    .sa_flags     = SA_SIGINFO,
+  };
+
   for (i = 0; i < SNET_MAX_HOSTS; i ++)
     nodePool[i].mask = 0;
   nodesInNetwork = 0;
 
   // Signal handler for child processes that die.
-  signal(SIGCHLD, signalHandler);
+  sigaction(SIGCHLD, &action, NULL); // oact - don't care
 
   // Signal handler for child process to communicate with parent.
-  signal(PARENT_ALERT_SIGNAL, signalHandler);
+  sigaction(PARENT_ALERT_SIGNAL, &action, NULL); // oact - don't care
 }
 
 uint8_t snetManagementDeinit(void)
