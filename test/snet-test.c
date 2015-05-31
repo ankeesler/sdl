@@ -279,13 +279,13 @@ int transmitTest(void)
   serverCommand[0] = SDL_PHY_PDU_LEN + SDL_MAC_PDU_LEN + 1; // packet length
 
   // Transmit the off command from server1 to server2.
-  //expect(!snetNodeCommand(server1, TRANSMIT, serverCommand));
+  expect(!snetNodeCommand(server1, TRANSMIT, serverCommand));
 
   // After a duty cycle, server2 should turn off and server1 should stay on.
-  // FIXME: server2 should NOT be running.
+  // FIXME: server1 keeps dying and server2 should NOT be running.
   //usleep(SERVER_DUTY_CYCLE_US);
   //expect(RUNNING(server1));
-  //expect(RUNNING(server2));
+  //expect(!RUNNING(server2));
 
   // Tear down the network.
   expect(snetManagementDeinit());

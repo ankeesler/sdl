@@ -121,6 +121,8 @@ void signalHandler(int signal, siginfo_t *info, void *wut)
 {
   pid_t pid = 0;
   int stat = 0;
+  uint8_t i, buffer[SDL_PHY_PDU_LEN + SDL_PHY_SDU_MAX];
+  SdlStatus status;
 
   if (signal == SIGCHLD) {
     // Wait to see which child process is quitting.
@@ -129,16 +131,16 @@ void signalHandler(int signal, siginfo_t *info, void *wut)
     // Find that child process and really remove it.
     nodeRemoveReally(findNodeForPid(pid));
   } else if (signal == PARENT_ALERT_SIGNAL) {
-    // Uh, which node was this from?
-    /*
+    pid = info->si_pid;
     // For each node that is on (except for this one), tell them to receive it.
     for (i = 0; i < SNET_MAX_HOSTS && status == SDL_SUCCESS; i ++) {
       if (nodePool[i].mask & SNET_NODE_MASK_ON_NETWORK
-          && nodePool[i].pid != node->pid) {
-        status = snetNodeCommand(&nodePool[i], RECEIVE, data);
+          && nodePool[i].pid != pid) {
+        read(nodePool[i].childToParentFd, buffer + 0, sizeof(uint8_t));
+        read(nodePool[i].childToParentFd, buffer + 1, buffer[0]);
+        status = snetNodeCommand(&nodePool[i], RECEIVE, buffer);
       }
     }
-    */
   }
 
   logSignalData(pid, signal, WEXITSTATUS(stat));
