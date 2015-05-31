@@ -66,12 +66,15 @@ static void signalHandler(int signal)
     case TRANSMIT:
       // First byte is the PHY PDU, i.e., the length of the whole packet.
       read(parentToChildFd, rxBuffer, sizeof(uint8_t));
-      read(parentToChildFd, rxBuffer + 1, rxBuffer[0] - SDL_PHY_PDU_LEN);
+      read(parentToChildFd, rxBuffer + SDL_PHY_PDU_LEN,
+           rxBuffer[0] - SDL_PHY_PDU_LEN);
       if (command == RECEIVE) {
         sdlLogRx(rxBuffer, rxBuffer[0]);
-        sdlPhyReceiveIsr(rxBuffer + 1, rxBuffer[0] - SDL_PHY_PDU_LEN);
+        sdlPhyReceiveIsr(rxBuffer + SDL_PHY_PDU_LEN,
+                         rxBuffer[0] - SDL_PHY_PDU_LEN);
       } else { // command == TRANSMIT
-        sdlPhyTransmit(rxBuffer + 1, rxBuffer[0] - SDL_PHY_PDU_LEN);
+        sdlPhyTransmit(rxBuffer + SDL_PHY_PDU_LEN,
+                       rxBuffer[0] - SDL_PHY_PDU_LEN);
       }
       break;
     default:
