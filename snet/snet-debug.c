@@ -45,4 +45,8 @@ const char *signalNames[] = {
   "SIGUSR2",
 };
   
-
+void printSdlData(FILE *file, uint8_t *bytes)
+{
+  uint8_t i = 0;
+  while (i < bytes[0]) fprintf(file, " 0x%02X", bytes[i++]);
+}
