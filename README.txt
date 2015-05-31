@@ -10,6 +10,4 @@ SDL 01 - Network Simulator.
 
 SDL 02 - IPC Support.
   - Interprocess communication support.
-  - Per-process interface id.
-  - Packet sequence number support.
-  - MAC packet filtering.
+  - Defined SDL protocol data packet.
