@@ -52,9 +52,6 @@ SNET_PARENT_FILES=$(SNET_DIR)/snet.c $(SNET_DEBUG_FILE)
 # UTIL
 #
 
-run-%: $(BUILD_DIR)/%
-	./$<
-
 cscope.files: $(ALL_SOURCE)
 	echo $^ > $@
 
@@ -79,6 +76,7 @@ $(BUILD_DIR)/%.o: %.c | $(BUILD_DIR)
 # TEST
 #
 
+.PHONY: test
 test: run-snet-test run-phy-test run-mac-test run-log-test
 
 #
@@ -98,6 +96,10 @@ PHY_TEST_EXES=               \
 $(BUILD_DIR)/phy-test: $(addprefix $(BUILD_DIR)/,$(notdir $(PHY_TEST_FILES:.c=.o)))
 	$(CC) $(LDFLAGS) -o $@ $^
 
+.PHONY: run-phy-test
+run-phy-test: $(BUILD_DIR)/phy-test
+	./$<
+
 #
 # MAC
 #
@@ -105,6 +107,10 @@ $(BUILD_DIR)/phy-test: $(addprefix $(BUILD_DIR)/,$(notdir $(PHY_TEST_FILES:.c=.o
 MAC_TEST_FILES=$(TEST_DIR)/mac-test.c $(MAC_FILES)
 $(BUILD_DIR)/mac-test: $(addprefix $(BUILD_DIR)/,$(notdir $(MAC_TEST_FILES:.c=.o)))
 	$(CC) $(LDFLAGS) -o $@ $^
+
+.PHONY: run-mac-test
+run-mac-test: $(BUILD_DIR)/mac-test
+	./$<
 
 #
 # SDL
@@ -126,6 +132,10 @@ $(BUILD_DIR)/log-test:                                 \
 $(BUILD_DIR)/log-test: $(LOG_TEST_OBJ)
 	$(CC) $(LDFLAGS) -o $@ $^
 
+.PHONY: run-log-test
+run-log-test: $(BUILD_DIR)/log-test
+	./$<
+
 #
 # SNET
 #
@@ -141,6 +151,7 @@ SNET_TEST_OBJ=$(addprefix $(BUILD_DIR)/,$(notdir $(SNET_TEST_FILES:.c=.o)))
 $(BUILD_DIR)/snet-test: $(SNET_TEST_OBJ)
 	$(CC) $(LDFLAGS) -o $@ $^
 
+.PHONY: run-snet-test
 run-snet-test: $(SNET_TEST_EXES)
 	./$<
 
