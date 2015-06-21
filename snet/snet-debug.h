@@ -14,8 +14,9 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#ifdef SNET_TEST
 extern const char *signalNames[];
+
+#ifdef SNET_TEST
 
 // Print some SDL PHY data.
 // This means the first byte is the length of the total packet.

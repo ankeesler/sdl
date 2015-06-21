@@ -74,15 +74,12 @@ $(BUILD_DIR_CREATED):
 	mkdir $(@D)
 	touch $@
 
-$(BUILD_DIR)/%.o: %.c | $(BUILD_DIR_CREATED)
-	$(CC) $(CFLAGS) -o $@ -c $<
-
 #
 # TEST
 #
 
 .PHONY: test
-test: run-snet-test run-phy-test run-mac-test #run-log-test
+test: run-snet-test run-phy-test run-mac-test run-log-test
 
 #
 # PHY
@@ -202,27 +199,37 @@ run-snet-test: $(SNET_TEST_EXES)
 # TEST APPS
 #
 
-$(BUILD_DIR)/client/client $(BUILD_DIR)/server/server: \
-    DEFINES += -DSNET_TEST -DSDL_LOG -DSDL_LOG_FILE=\"$(SDL_LOG_TEST_FILE)\"
+ALL_TEST_APPS:                 \
+    $(BUILD_DIR)/client/client \
+    $(SERVER_DIR)/server
+
+$(ALL_TEST_APPS):                                       \
+    DEFINES += -DSNET_TEST                              \
+               -DSDL_LOG                                \
+               -DSDL_LOG_FILE=\"$(SDL_LOG_TEST_FILE)\"
 
 SERVER_DIR=$(BUILD_DIR)/server
-$(SERVER_DIR): | $(BUILD_DIR)
-	mkdir $@
-$(BUILD_DIR)/server/%.o: %.c | $(SERVER_DIR)
+SERVER_DIR_CREATED=$(SERVER_DIR)/tuna
+$(SERVER_DIR_CREATED): $(BUILD_DIR_CREATED)
+	mkdir $(@D)
+	touch $@
+$(SERVER_DIR)/%.o: %.c | $(SERVER_DIR_CREATED)
 	$(COMPILE)
 SERVER_FILES=$(SNET_CHILD_FILES) $(TEST_APPS_DIR)/server.c $(SNET_DEBUG_FILE)
 SERVER_OBJ=$(addprefix $(SERVER_DIR)/,$(notdir $(SERVER_FILES:.c=.o)))
-$(BUILD_DIR)/server/server: $(SERVER_OBJ)
+$(SERVER_DIR)/server: $(addprefix $(SERVER_DIR)/,$(notdir $(SERVER_FILES:.c=.o)))
 	$(LINK)
 
 CLIENT_DIR=$(BUILD_DIR)/client
-$(CLIENT_DIR): | $(BUILD_DIR)
-	mkdir $@
-$(BUILD_DIR)/client/%.o: %.c | $(CLIENT_DIR)
+CLIENT_DIR_CREATED=$(CLIENT_DIR)/tuna
+$(CLIENT_DIR_CREATED): $(BUILD_DIR_CREATED)
+	mkdir $(@D)
+	touch $@
+$(CLIENT_DIR)/%.o: %.c | $(CLIENT_DIR_CREATED)
 	$(COMPILE)
 CLIENT_FILES=$(SNET_CHILD_FILES) $(TEST_APPS_DIR)/client.c $(SNET_DEBUG_FILE)
 CLIENT_OBJ=$(addprefix $(CLIENT_DIR)/,$(notdir $(CLIENT_FILES:.c=.o)))
-$(BUILD_DIR)/client/client: $(CLIENT_OBJ)
+$(CLIENT_DIR)/client: $(addprefix $(CLIENT_DIR)/,$(notdir $(CLIENT_FILES:.c=.o)))
 	$(LINK)
 
 #
