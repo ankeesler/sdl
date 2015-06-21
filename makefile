@@ -84,21 +84,24 @@ test: run-snet-test run-phy-test run-mac-test run-log-test
 #
 
 PHY_TEST_FILES=          \
-  $(SNET_PARENT_FILES)   \
   $(TEST_DIR)/phy-test.c \
-  $(MAC_FILES)           \
-  $(SNET_DEBUG_FILE)
-PHY_TEST_EXES=               \
-  $(BUILD_DIR)/phy-test      \
-  $(BUILD_DIR)/client/client \
-  $(BUILD_DIR)/server/server
+  $(PHY_FILES)           \
+  $(SNET_DEBUG_FILE)     \
 
+PHY_TEST_TXT=phy-test.txt
+STDIN  = 0
+STDERR = 2
+
+$(PHY_TEST_TXT):
+	touch $@
+
+$(BUILD_DIR)/phy-test: DEFINES += -DSNET_TEST -DPHY_TEST
 $(BUILD_DIR)/phy-test: $(addprefix $(BUILD_DIR)/,$(notdir $(PHY_TEST_FILES:.c=.o)))
 	$(CC) $(LDFLAGS) -o $@ $^
 
 .PHONY: run-phy-test
-run-phy-test: $(BUILD_DIR)/phy-test
-	./$<
+run-phy-test: $(BUILD_DIR)/phy-test $(PHY_TEST_TXT)
+	./$< phy-test $(STDIN) $(STDERR) < $(PHY_TEST_TXT)
 
 #
 # MAC

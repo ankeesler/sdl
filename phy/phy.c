@@ -51,6 +51,7 @@ static void signalHandler(int signal)
   SnetNodeCommand command = NIL;
 
   fprintf(childLogFile, "signal: %s\n", signalNames[signal]);
+  fflush(childLogFile);
 
   if (signal == CHILD_ALERT_SIGNAL) {
     // Read the command out of the pipe.
@@ -96,7 +97,7 @@ int main(int argc, char *argv[])
 {
   int ret;
 
-#ifndef SDL_LOG_TEST
+#if !defined(SDL_LOG_TEST)
   if (argc < 2) {
     return 1;
   } else {
@@ -113,6 +114,7 @@ int main(int argc, char *argv[])
           argv[CHILD_NAME_INDEX],
           parentToChildFd,
           childToParentFd);
+  fflush(childLogFile);
 
   // Say that we want to handle the CHILD_ALERT_SIGNAL signal.
   // This will be our parent telling us that there is data for
