@@ -19,9 +19,9 @@
 #include "sdl-types.h"
 #include "sdl-protocol.h"
 
-// Keep this inline with PHY_TEST_TXT in the makefile.
+// Keep this inline with PHY_TEST_IN in the makefile.
 // This test reads from this file for the PARENT_TO_CHILD data.
-#define PHY_TEST_TXT_NAME "phy-test.txt"
+#define PHY_TEST_IN_NAME "phy-test.in"
 
 // -----------------------------------------------------------------------------
 // Stubs
@@ -41,7 +41,7 @@ void sdlPhyReceiveIsr(uint8_t *data, uint8_t count)
 // -----------------------------------------------------------------------------
 // Utility
 
-static const uint8_t phyTestTxtData[] = {
+static const uint8_t phyTestInData[] = {
   // sanityTest
   NOOP, // First command is a NOOP command, i.e., do nothing.
 
@@ -49,29 +49,38 @@ static const uint8_t phyTestTxtData[] = {
   RECEIVE, // SnetNodeCommand
   0x02   , // SDL_PHY_PDU
   0x80   , // SDL_PHY_SDU
-};
-#define PHY_TEST_TXT_LEN (sizeof(phyTestTxtData) / sizeof(phyTestTxtData[0]))
 
-static void setupPhyTestTxt(void)
+  // transmitTest
+  TRANSMIT, // SnetNodeCommand
+  0x02    , // SDL_PHY_PDU
+  0xA0    , // SDL_PHY_SDU
+  
+  RECEIVE , // SnetNodeCommand
+  0x02    , // SDL_PHY_PDU
+  0xC0    , // SDL_PHY_SDU
+};
+#define PHY_TEST_IN_LEN (sizeof(phyTestInData) / sizeof(phyTestInData[0]))
+
+static void setupPhyTestIn(void)
 {
-  FILE *phyTestTxt = NULL;
+  FILE *phyTestIn = NULL;
   uint8_t i;
 
-  assert((phyTestTxt = fopen(PHY_TEST_TXT_NAME, "w")));
-  for (i = 0; i < PHY_TEST_TXT_LEN; i ++) {
-    fputc(phyTestTxtData[i], phyTestTxt);
+  assert((phyTestIn = fopen(PHY_TEST_IN_NAME, "w")));
+  for (i = 0; i < PHY_TEST_IN_LEN; i ++) {
+    fputc(phyTestInData[i], phyTestIn);
   }
-  fflush(phyTestTxt);
+  fflush(phyTestIn);
 }
 
-static void tearDownPhyTestTxt(void)
+static void tearDownPhyTestIn(void)
 {
-  unlink(PHY_TEST_TXT_NAME);
+  unlink(PHY_TEST_IN_NAME);
 }
 
 static void failureHandler(void)
 {
-  tearDownPhyTestTxt();
+  tearDownPhyTestIn();
 }
 
 // -----------------------------------------------------------------------------
@@ -90,7 +99,7 @@ int sanityTest(void)
   return 0;
 }
 
-int receiveTest(boid)
+int receiveTest(void)
 {
   // We should be able to send an error checking signal to ourselves.
   expectEquals(kill(getpid(), 0), 0);
@@ -99,7 +108,28 @@ int receiveTest(boid)
   // See phyTestTxtData for these values.
   expectEquals(snetChildAlert(getpid()), 0);
   expectEquals(phyReceiveDataLength, 1);
-  expectEquals(phyReceiveData[0], 0x80); 
+  expectEquals(phyReceiveData[0], 0x80);
+
+  return 0;
+}
+
+int transmitTest(void)
+{
+  // We should be able to send an error checking signal to ourselves.
+  expectEquals(kill(getpid(), 0), 0);
+
+  // We should be able to send something and have it written to stderr,
+  // per the correct fd passed to this executable via the makefile.
+  expectEquals(snetChildAlert(getpid()), 0);
+
+  // Per the snet-internal.h definition, upon successfully transmitting,
+  // we send outselves another CHILD_ALERT_SIGNAL so that we can make
+  // sure that we actually sent something. Otherwise, we would most likely
+  // be sending the CHILD_ALERT_SIGNAL to make or the terminal. This would
+  // probably lead to incorrectly failing tests.
+  // See the phyTestTxtData array for these values.
+  expectEquals(phyReceiveDataLength, 1);
+  expectEquals(phyReceiveData[0], 0xC0);
 
   return 0;
 }
@@ -109,12 +139,13 @@ int main(void)
   announce();
 
   setFailureHandler(failureHandler);
-  setupPhyTestTxt();
+  setupPhyTestIn();
 
   run(sanityTest);
   run(receiveTest);
+  run(transmitTest);
 
-  tearDownPhyTestTxt();
+  tearDownPhyTestIn();
 
   return 0;
 }

@@ -22,8 +22,16 @@
 
 // The signal used to notify the parent that the child has stuff
 // for it to read off of the file descriptor.
+// For the phy-test, we send this signal to ourselves so that we
+// can make sure it was sent. If this was not the case, then we would
+// have to deal with sending the PARENT_ALERT_SIGNAL to make or the
+// terminal, which would result in a failing test.
 #define PARENT_ALERT_SIGNAL SIGUSR1
-#define snetParentAlert() kill(getppid(), PARENT_ALERT_SIGNAL)
+#ifdef PHY_TEST
+  #define snetParentAlert() kill(getpid(), CHILD_ALERT_SIGNAL)
+#else
+  #define snetParentAlert() kill(getppid(), PARENT_ALERT_SIGNAL)
+#endif
 
 // The index of argv that the child node name lives in.
 #define CHILD_NAME_INDEX (1)
