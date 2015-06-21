@@ -257,6 +257,8 @@ int transmitTest(void)
   SdlPacket packet;
   uint8_t serverCommand[SDL_PHY_SDU_MAX + 1];
 
+  snetManagementInit();
+
   // Bring up two servers.
   server1 = server2 = NULL;
   expect((int)(server1 = snetNodeMake("build/server/server", "server1")));
@@ -283,7 +285,7 @@ int transmitTest(void)
 
   // After a duty cycle, server2 should turn off and server1 should stay on.
   // FIXME: server1 keeps dying and server2 should NOT be running.
-  //usleep(SERVER_DUTY_CYCLE_US);
+  usleep(SERVER_DUTY_CYCLE_US);
   //expect(RUNNING(server1));
   //expect(!RUNNING(server2));
 

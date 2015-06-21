@@ -13,3 +13,4 @@
 
 // SNET test harness.
 extern void printSignalData(void);
+extern void printNodeData(void);

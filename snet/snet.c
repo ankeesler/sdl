@@ -33,9 +33,9 @@ static SnetNode *findNodeForPid(pid_t pid);
 
 // SnetNode mask.
 /* is the node being used? */
-#define SNET_NODE_MASK_USED (1 << 0) 
+#define SNET_NODE_MASK_USED       (0x01)
 /* is the node on the network?? */
-#define SNET_NODE_MASK_ON_NETWORK (1 << 1)
+#define SNET_NODE_MASK_ON_NETWORK (0x02)
 
 // Possible nodes.
 static SnetNode nodePool[SNET_MAX_HOSTS];
@@ -97,7 +97,17 @@ static uint8_t nodesInNetwork = 0;
              signalNames[signalData[i].signal],
              signalData[i].ret);
     }
-  }  
+  }
+
+  void printNodeData(void)
+  {
+    uint8_t i;
+    for (i = 0; i < SNET_MAX_HOSTS; i ++ ) {
+      printf("i = %d, image = %s, name = %s, mask = 0x%02X, pid = %d\n",
+             i, nodePool[i].image, nodePool[i].name, nodePool[i].mask, nodePool[i].pid);
+    }
+  }
+  
 #else
   #define logSignalData(...)
   void printSignalData(void) {}
@@ -210,7 +220,7 @@ SnetNode *snetNodeMake(const char *image, const char *name)
     node = nodePool + i;
     node->image = image;
     node->name = name;
-    node->mask |= SNET_NODE_MASK_USED;
+    node->mask = SNET_NODE_MASK_USED;
   }
 
   return node;

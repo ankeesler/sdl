@@ -52,7 +52,7 @@ uint8_t snetManagementSize(void);
 typedef struct {
   const char *image;
   const char *name;
-  int mask;
+  uint8_t mask;
   pid_t pid;
   int parentToChildFd, childToParentFd;
 } SnetNode;
@@ -84,7 +84,9 @@ SnetNode *snetNodeMake(const char *image, const char *name);
 SdlStatus snetNodeStart(SnetNode *node);
 
 // Cut the power to a node.
-// In order to turn the node back on, snetNodeAdd should be called.
+// In order to turn the node back on, snetNodeStart should be called.
+// Other than the image and the name, one should not cache any values
+// of a SnetNode!
 SdlStatus snetNodeStop(SnetNode *node);
 
 // Command the node to do something.
