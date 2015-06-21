@@ -31,7 +31,7 @@ BUILD_DIR_CREATED=$(BUILD_DIR)/tuna
 
 VPATH=$(SNET_DIR) $(PHY_DIR) $(MAC_DIR) $(TEST_APPS_DIR) $(TEST_DIR) $(CAP_DIR)
 
-ALL_SOURCE=$(shell find . -name "*.[ch]") $(shell find . -name "*.java")
+SDL_LOG_TEST_FILE=tuna.sdl
 
 #
 # SOURCE
@@ -48,6 +48,8 @@ SDL_FILES=$(PHY_FILES) $(MAC_FILES) $(SDL_LOG_FILES)
 SNET_CHILD_FILES=$(SDL_FILES)
 SNET_DEBUG_FILE=$(SNET_DIR)/snet-debug.c
 SNET_PARENT_FILES=$(SNET_DIR)/snet.c $(SNET_DEBUG_FILE)
+
+ALL_SOURCE=$(shell find . -name "*.[ch]") $(shell find . -name "*.java")
 
 #
 # UTIL
@@ -79,7 +81,7 @@ $(BUILD_DIR_CREATED):
 #
 
 .PHONY: test
-test: run-snet-test run-phy-test run-mac-test run-log-test
+test: run-snet-test run-phy-test run-mac-test
 
 #
 # PHY
@@ -89,6 +91,7 @@ PHY_TEST_FILES=          \
   $(TEST_DIR)/phy-test.c \
   $(PHY_FILES)           \
   $(SNET_DEBUG_FILE)     \
+  $(SDL_LOG_FILES)
 
 PHY_TEST_IN=phy-test.in
 STDIN  = 0
@@ -106,7 +109,12 @@ $(PHY_TEST_DIR)/%.o: %.c | $(PHY_TEST_DIR_CREATED)
 $(PHY_TEST_IN):
 	touch $@
 
-$(PHY_TEST_DIR)/phy-test: DEFINES += -DSNET_TEST -DPHY_TEST
+$(PHY_TEST_DIR)/phy-test:                              \
+    DEFINES += -DSNET_TEST                             \
+               -DPHY_TEST                              \
+               -DSDL_LOG                               \
+               -DSDL_LOG_FILE=\"$(SDL_LOG_TEST_FILE)\"
+
 $(PHY_TEST_DIR)/phy-test: $(addprefix $(PHY_TEST_DIR)/,$(notdir $(PHY_TEST_FILES:.c=.o)))
 	$(LINK)
 
@@ -139,34 +147,6 @@ run-mac-test: $(MAC_TEST_DIR)/mac-test
 #
 # SDL
 #
-
-LOG_TEST_FILES=              \
-    $(PHY_DIR)/phy.c         \
-    $(TEST_DIR)/log-test.c   \
-    $(CAP_DIR)/sdl-log.c     \
-    $(SNET_DIR)/snet-debug.c
-SDL_LOG_TEST_FILE=tuna.sdl
-
-LOG_TEST_DIR=$(BUILD_DIR)/log-test-dir
-LOG_TEST_DIR_CREATED=$(LOG_TEST_DIR)/tuna
-$(LOG_TEST_DIR_CREATED): $(BUILD_DIR_CREATED)
-	mkdir $(@D)
-	touch $@
-
-$(LOG_TEST_DIR)/%.o:                                   \
-    DEFINES += -DSNET_TEST                             \
-               -DSDL_LOG                               \
-               -DSDL_LOG_FILE=\"$(SDL_LOG_TEST_FILE)\" \
-               -DSDL_LOG_TEST
-$(LOG_TEST_DIR)/%.o: %.c | $(LOG_TEST_DIR_CREATED)
-	$(COMPILE)
-
-$(LOG_TEST_DIR)/log-test: $(addprefix $(LOG_TEST_DIR)/, $(notdir $(LOG_TEST_FILES:.c=.o)))
-	$(LINK)
-
-.PHONY: run-log-test
-run-log-test: $(LOG_TEST_DIR)/log-test
-	./$<
 
 #
 # SNET

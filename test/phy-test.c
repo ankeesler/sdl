@@ -19,16 +19,14 @@
 #include "sdl-types.h"
 #include "sdl-protocol.h"
 
+#include "cap/sdl-log.h"
+
 // Keep this inline with PHY_TEST_IN in the makefile.
 // This test reads from this file for the PARENT_TO_CHILD data.
 #define PHY_TEST_IN_NAME "phy-test.in"
 
 // -----------------------------------------------------------------------------
 // Stubs
-
-int sdlLogDump(void) { return 0; }
-int sdlLogTx(unsigned char *bytes, int length) { return 0; }
-int sdlLogRx(unsigned char *bytes, int length) { return 0; }
 
 static uint8_t phyReceiveData[SDL_PHY_SDU_MAX];
 static uint8_t phyReceiveDataLength = 0;
@@ -134,6 +132,23 @@ int transmitTest(void)
   return 0;
 }
 
+int logTest(void)
+{
+  expect(sdlLogOn());
+  sdlLogDump();
+
+  // Sanity check.
+  expect(!system("grep -q CAPTURE " SDL_LOG_FILE));
+  expect( system("grep -q TUNA    " SDL_LOG_FILE));
+  
+  // File.
+  expect(!system("grep -q -E '\\([0-9]+.[0-9]+\\) RX \\[0x02, 0x80\\]' " SDL_LOG_FILE));
+  expect(!system("grep -q -E '\\([0-9]+\\.[0-9]+\\) TX \\[0x02, 0xA0\\]' " SDL_LOG_FILE));
+  expect(!system("grep -q -E '\\([0-9]+\\.[0-9]+\\) RX \\[0x02, 0xC0\\]' " SDL_LOG_FILE));
+
+  return 0;
+}
+
 int main(void)
 {
   announce();
@@ -144,6 +159,8 @@ int main(void)
   run(sanityTest);
   run(receiveTest);
   run(transmitTest);
+
+  run(logTest);
 
   tearDownPhyTestIn();
 

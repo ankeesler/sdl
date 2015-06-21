@@ -138,6 +138,9 @@ int main(int argc, char *argv[])
   // for when our parent wants us to quit immediately.
   signal(CHILD_QUIT_SIGNAL, signalHandler);
 
+  // Initialize logging. If logging is not used, this will be macro'd out.
+  sdlLogInit();
+
   // Call the child node's main function.
   ret = SNET_MAIN(argc, argv);
 
