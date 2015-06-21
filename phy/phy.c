@@ -111,14 +111,12 @@ int main(int argc, char *argv[])
 {
   int ret;
 
-#if !defined(SDL_LOG_TEST)
   if (argc < 2) {
     return 1;
   } else {
     sscanf(argv[PARENT_TO_CHILD_FD_INDEX], "%d", &parentToChildFd);
     sscanf(argv[CHILD_TO_PARENT_FD_INDEX], "%d", &childToParentFd);
   }
-#endif
 
   // Log file.
   sprintf(childLogFilename, ".child-%s", argv[CHILD_NAME_INDEX]);
@@ -168,14 +166,12 @@ SdlStatus sdlPhyTransmit(uint8_t *data, uint8_t length)
   sdlLogTx(realTxBuffer, realLength);
   
   // Write the packet to the file descriptor.
-#ifndef SDL_LOG_TEST /* TODO: take me away when log-test moves to SNET. */
   status = ((write(childToParentFd,
                    realTxBuffer,
                    realTxBuffer[0])
              == realTxBuffer[0])
             ? SDL_SUCCESS
             : SDL_TRANSMIT_FAILURE);
-#endif  
 
   // Tell the parent they have got something coming for them.
   return (status == SDL_SUCCESS
