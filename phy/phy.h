@@ -21,4 +21,7 @@ SdlStatus sdlPhyTransmit(uint8_t *data, uint8_t length);
 // The length is the length of the data vector.
 void sdlPhyReceiveIsr(uint8_t *data, uint8_t length);
 
+// A button ISR. Good for testing.
+void sdlPhyButtonIsr(uint8_t button);
+
 #endif /* __PHY_H__ */

@@ -318,7 +318,6 @@ static void nodeRemoveReally(SnetNode *node)
 
 SdlStatus snetNodeCommand(SnetNode *node, SnetNodeCommand command, ...)
 {
-  uint8_t *data;
   va_list args;
   SdlStatus status = SDL_SUCCESS;
   
@@ -342,14 +341,24 @@ SdlStatus snetNodeCommand(SnetNode *node, SnetNodeCommand command, ...)
     status = SDL_SUCCESS;
     break;
   case TRANSMIT:
-  case RECEIVE:
+  case RECEIVE: {
     // Get the pointer to the raw SDL packet.
     // The first byte is the length of the whole packet.
-    data = va_arg(args, void *);
+    uint8_t *data = va_arg(args, void *);
     status = (write(node->parentToChildFd, data, data[0]) == data[0]
               ? SDL_SUCCESS
               : SDL_SNET_COM_FAILURE);
     break;
+  }
+  case BUTTON: {
+    int buttonArg = (int)va_arg(args, void *);
+    uint8_t button = (uint8_t)buttonArg;
+    status = ((write(node->parentToChildFd, &button, sizeof(button))
+               == sizeof(button))
+              ? SDL_SUCCESS
+              : SDL_SNET_COM_FAILURE);
+    break;
+  }
   default:
     status = SDL_SNET_UNKNOWN_COMMAND;
   }

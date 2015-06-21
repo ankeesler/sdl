@@ -19,6 +19,11 @@ static int spin = 1;
 
 int nodeState = 0;
 
+void sdlPhyButtonIsr(uint8_t button)
+{
+  
+}
+
 void handler(int signal)
 {
   if (signal == SERVER_OFF_SIGNAL) {

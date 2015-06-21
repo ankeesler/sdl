@@ -36,6 +36,12 @@ void sdlPhyReceiveIsr(uint8_t *data, uint8_t count)
   phyReceiveDataLength = count;
 }
 
+static uint8_t buttonId = 0xFF;
+void sdlPhyButtonIsr(uint8_t button)
+{
+  buttonId = button;
+}
+
 // -----------------------------------------------------------------------------
 // Utility
 
@@ -44,9 +50,9 @@ static const uint8_t phyTestInData[] = {
   NOOP, // First command is a NOOP command, i.e., do nothing.
 
   // receiveTest
-  RECEIVE, // SnetNodeCommand
-  0x02   , // SDL_PHY_PDU
-  0x80   , // SDL_PHY_SDU
+  RECEIVE , // SnetNodeCommand
+  0x02    , // SDL_PHY_PDU
+  0x80    , // SDL_PHY_SDU
 
   // transmitTest
   TRANSMIT, // SnetNodeCommand
@@ -56,6 +62,13 @@ static const uint8_t phyTestInData[] = {
   RECEIVE , // SnetNodeCommand
   0x02    , // SDL_PHY_PDU
   0xC0    , // SDL_PHY_SDU
+
+  // buttonTest
+  BUTTON  , // SnetNodeCommand
+  0x00    , // Button ID
+
+  BUTTON  , // SnetNodeCommand
+  0x01    , // Button ID
 };
 #define PHY_TEST_IN_LEN (sizeof(phyTestInData) / sizeof(phyTestInData[0]))
 
@@ -132,6 +145,22 @@ int transmitTest(void)
   return 0;
 }
 
+int buttonTest(void)
+{
+  // We should be able to send an error checking signal to ourselves.
+  expectEquals(kill(getpid(), 0), 0);
+
+  // Tell ourselves that we should read about a button ISR.
+  expectEquals(snetChildAlert(getpid()), 0);
+  expectEquals(buttonId, 0x00);
+
+  // Run it back.
+  expectEquals(snetChildAlert(getpid()), 0);
+  expectEquals(buttonId, 0x01);
+
+  return 0;
+}
+
 int logTest(void)
 {
   expect(sdlLogOn());
@@ -159,6 +188,8 @@ int main(void)
   run(sanityTest);
   run(receiveTest);
   run(transmitTest);
+
+  run(buttonTest);
 
   run(logTest);
 

@@ -19,6 +19,11 @@
 
 int nodeState = 0;
 
+void sdlPhyButtonIsr(uint8_t button)
+{
+  
+}
+
 int main(void)
 {
   SdlPacket packet;

@@ -94,6 +94,11 @@ static void signalHandler(int signal)
         sdlPhyTransmit(sdlPacketData(rxBuffer), sdlPacketDataLength(rxBuffer));
       }
       break;
+    case BUTTON:
+      // Read the 1 byte button ID out of the FD.
+      read(parentToChildFd, rxBuffer, sizeof(uint8_t));
+      sdlPhyButtonIsr(rxBuffer[0]);
+      break;
     default:
       cleanup();
       exit(CHILD_EXIT_BAD_COMMAND);
