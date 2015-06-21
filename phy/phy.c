@@ -127,7 +127,7 @@ int main(int argc, char *argv[])
   sprintf(childLogFilename, ".child-%s", argv[CHILD_NAME_INDEX]);
   childLogFile = fopen(childLogFilename, "w");
   childLog("%s", "HELLO");
-  childLog("name: %s, p -> c: %d, c -> p %d\n",
+  childLog("name: %s, p -> c: %d, c -> p %d",
            argv[CHILD_NAME_INDEX],
            parentToChildFd,
            childToParentFd);
@@ -165,16 +165,16 @@ SdlStatus sdlPhyTransmit(uint8_t *data, uint8_t length)
   
   // Copy to real tx buffer.
   realTxBuffer[0] = realLength;
-  memcpy(realTxBuffer + 1, data, length);
-  
+  memcpy(sdlPacketData(realTxBuffer), data, length);
+
   // Log.
   sdlLogTx(realTxBuffer, realLength);
   
   // Write the packet to the file descriptor.
   status = ((write(childToParentFd,
                    realTxBuffer,
-                   realTxBuffer[0])
-             == realTxBuffer[0])
+                   sdlPacketLength(realTxBuffer))
+             == sdlPacketLength(realTxBuffer))
             ? SDL_SUCCESS
             : SDL_TRANSMIT_FAILURE);
 
