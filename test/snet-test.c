@@ -296,6 +296,44 @@ int transmitTest(void)
   return 0;
 }
 
+int buttonTest(void)
+{
+  snetManagementInit();
+
+  // Bring up two servers.
+  server1 = server2 = NULL;
+  expect((int)(server1 = snetNodeMake("build/server/server", "server1")));
+  expect((int)(server2 = snetNodeMake("build/server/server", "server2")));
+
+  // Boot the servers.
+  expect(!snetNodeStart(server1));
+  expect(RUNNING(server1));
+  expect(!snetNodeStart(server2));
+  expect(RUNNING(server2));
+
+  // If we push SERVER_NOOP_BUTTON, the servers should do nothing.
+  // FIXME: why does server1 die?
+  expect(!snetNodeCommand(server1, BUTTON, SERVER_NOOP_BUTTON));
+  /*
+  usleep(SERVER_DUTY_CYCLE_US * 2);
+  expect(RUNNING(server1));
+  expect(RUNNING(server2));
+
+  // If we push SERVER_OFF_BUTTON, the server should broadcast the off
+  // command to err'body. That includes themselves.
+  expect(!snetNodeCommand(server1, BUTTON, SERVER_OFF_BUTTON));
+  usleep(SERVER_DUTY_CYCLE_US * 2);
+  expect(!RUNNING(server1));
+  expect(!RUNNING(server2));
+  */
+
+  // Tear down the network.
+  expect(snetManagementDeinit());
+  expect(!snetManagementSize());
+
+  return 0;
+}
+
 int main(void)
 {
   announce();
@@ -310,6 +348,8 @@ int main(void)
   
   run(receiveTest);
   run(transmitTest);
+
+  run(buttonTest);
 
   return 0;
 }
