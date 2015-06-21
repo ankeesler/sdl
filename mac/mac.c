@@ -137,10 +137,10 @@ SdlStatus sdlMacTransmit(SdlPacketType type,
   sdlPacketToFlatBuffer(&packet, txBuffer);
 
   // If this is for us, put it in the receive queue.
-  // This is agressive to call the ISR...but it is OK, right.
-  if (destination == ourAddress) {
+  // Otherwise, throw it to the PHY.
+  if (destination == ourAddress || destination == SDL_MAC_ADDRESS_BROADCAST) {
     sdlPhyReceiveIsr(txBuffer, SDL_MAC_PDU_LEN + dataLength);
-  } else {
+  } else if (destination != ourAddress) {
     status = sdlPhyTransmit(txBuffer, SDL_MAC_PDU_LEN + dataLength);
   }
 

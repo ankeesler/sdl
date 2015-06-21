@@ -53,7 +53,7 @@ typedef uint8_t SdlPacketType;
 // An SDL address.
 typedef uint32_t SdlAddress;
 
-// A packet from the point of view of the SDL layer.
+// A packet from the point of view of the MAC layer.
 typedef struct {
   SdlPacketType type;
   uint16_t sequence;
