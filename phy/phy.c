@@ -27,12 +27,17 @@
 
 FILE *childLogFile = NULL;
 char childLogFilename[256];
+#define childLog(format, ...)                         \
+  do {                                                \
+    fprintf(childLogFile, format "\n", __VA_ARGS__);  \
+    fflush(childLogFile);                             \
+  } while (0);
 
 static int parentToChildFd, childToParentFd;
 
 static void cleanup(void)
 {
-  fprintf(childLogFile, "GOODBYE\n");
+  childLog("%s", "GOODBYE");
 
   // Close our log file.
   fclose(childLogFile);
@@ -50,8 +55,7 @@ static void signalHandler(int signal)
   uint8_t rxBuffer[SDL_PHY_SDU_MAX + SDL_PHY_PDU_LEN];
   SnetNodeCommand command = NIL;
 
-  fprintf(childLogFile, "signal: %s\n", signalNames[signal]);
-  fflush(childLogFile);
+  childLog("signal: %s", signalNames[signal]);
 
   if (signal == CHILD_ALERT_SIGNAL) {
     // Read the command out of the pipe.
@@ -109,12 +113,11 @@ int main(int argc, char *argv[])
   // Log file.
   sprintf(childLogFilename, ".child-%s", argv[CHILD_NAME_INDEX]);
   childLogFile = fopen(childLogFilename, "w");
-  fprintf(childLogFile, "HELLO\n");
-  fprintf(childLogFile, "name: %s, p -> c: %d, c -> p %d\n",
-          argv[CHILD_NAME_INDEX],
-          parentToChildFd,
-          childToParentFd);
-  fflush(childLogFile);
+  childLog("%s", "HELLO");
+  childLog("name: %s, p -> c: %d, c -> p %d\n",
+           argv[CHILD_NAME_INDEX],
+           parentToChildFd,
+           childToParentFd);
 
   // Say that we want to handle the CHILD_ALERT_SIGNAL signal.
   // This will be our parent telling us that there is data for
