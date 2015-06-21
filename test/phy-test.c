@@ -12,10 +12,12 @@
 #include <unit-test.h>
 #include <signal.h>   // kill
 #include <assert.h>   // assert
+#include <string.h>   // memcpy
 
 #include "snet.h"
 #include "snet-internal.h" // snetChildAlert
 #include "sdl-types.h"
+#include "sdl-protocol.h"
 
 // Keep this inline with PHY_TEST_TXT in the makefile.
 // This test reads from this file for the PARENT_TO_CHILD data.
@@ -28,15 +30,25 @@ int sdlLogDump(void) { return 0; }
 int sdlLogTx(unsigned char *bytes, int length) { return 0; }
 int sdlLogRx(unsigned char *bytes, int length) { return 0; }
 
+static uint8_t phyReceiveData[SDL_PHY_SDU_MAX];
+static uint8_t phyReceiveDataLength = 0;
 void sdlPhyReceiveIsr(uint8_t *data, uint8_t count)
 {
+  memcpy(phyReceiveData, data, count);
+  phyReceiveDataLength = count;
 }
 
 // -----------------------------------------------------------------------------
 // Utility
 
 static const uint8_t phyTestTxtData[] = {
+  // sanityTest
   NOOP, // First command is a NOOP command, i.e., do nothing.
+
+  // receiveTest
+  RECEIVE, // SnetNodeCommand
+  0x02   , // SDL_PHY_PDU
+  0x80   , // SDL_PHY_SDU
 };
 #define PHY_TEST_TXT_LEN (sizeof(phyTestTxtData) / sizeof(phyTestTxtData[0]))
 
@@ -65,7 +77,7 @@ static void failureHandler(void)
 // -----------------------------------------------------------------------------
 // Tests
 
-int transmitTest(void)
+int sanityTest(void)
 {
   // We should be able send an error checking signal to ourselves.
   expectEquals(kill(getpid(), 0), 0);
@@ -78,6 +90,20 @@ int transmitTest(void)
   return 0;
 }
 
+int receiveTest(boid)
+{
+  // We should be able to send an error checking signal to ourselves.
+  expectEquals(kill(getpid(), 0), 0);
+
+  // We should be able to receive something.
+  // See phyTestTxtData for these values.
+  expectEquals(snetChildAlert(getpid()), 0);
+  expectEquals(phyReceiveDataLength, 1);
+  expectEquals(phyReceiveData[0], 0x80); 
+
+  return 0;
+}
+
 int main(void)
 {
   announce();
@@ -85,7 +111,8 @@ int main(void)
   setFailureHandler(failureHandler);
   setupPhyTestTxt();
 
-  run(transmitTest);
+  run(sanityTest);
+  run(receiveTest);
 
   tearDownPhyTestTxt();
 

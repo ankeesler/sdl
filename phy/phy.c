@@ -23,6 +23,14 @@
 #include <string.h>
 
 // -----------------------------------------------------------------------------
+// DEFINITIONS
+
+#define sdlPacketLength(buffer)     (buffer[0])
+
+#define sdlPacketData(buffer)       (buffer + SDL_PHY_PDU_LEN)
+#define sdlPacketDataLength(buffer) (buffer[0] - SDL_PHY_PDU_LEN)
+
+// -----------------------------------------------------------------------------
 // SIGNALS
 
 FILE *childLogFile = NULL;
@@ -63,6 +71,7 @@ static void signalHandler(int signal)
       cleanup();
       exit(CHILD_EXIT_BAD_READ);
     }
+    childLog("  command: 0x%02X", command);
 
     // Handle the command, remembering that this is
     // called in an interupt context.
@@ -72,16 +81,17 @@ static void signalHandler(int signal)
     case RECEIVE:
     case TRANSMIT:
       // First byte is the PHY PDU, i.e., the length of the whole packet.
-      read(parentToChildFd, rxBuffer, sizeof(uint8_t));
-      read(parentToChildFd, rxBuffer + SDL_PHY_PDU_LEN,
-           rxBuffer[0] - SDL_PHY_PDU_LEN);
+      read(parentToChildFd,
+           rxBuffer,
+           SDL_PHY_PDU_LEN);
+      read(parentToChildFd,
+           rxBuffer + SDL_PHY_PDU_LEN,
+           sdlPacketDataLength(rxBuffer));
       if (command == RECEIVE) {
-        sdlLogRx(rxBuffer, rxBuffer[0]);
-        sdlPhyReceiveIsr(rxBuffer + SDL_PHY_PDU_LEN,
-                         rxBuffer[0] - SDL_PHY_PDU_LEN);
+        sdlLogRx(rxBuffer, sdlPacketLength(rxBuffer));
+        sdlPhyReceiveIsr(sdlPacketData(rxBuffer), sdlPacketDataLength(rxBuffer));
       } else { // command == TRANSMIT
-        sdlPhyTransmit(rxBuffer + SDL_PHY_PDU_LEN,
-                       rxBuffer[0] - SDL_PHY_PDU_LEN);
+        sdlPhyTransmit(sdlPacketData(rxBuffer), sdlPacketDataLength(rxBuffer));
       }
       break;
     default:
