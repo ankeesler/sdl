@@ -27,6 +27,7 @@ LDFLAGS=-lmcgoo
 SHELL=sh
 
 BUILD_DIR=build
+BUILD_DIR_CREATED=$(BUILD_DIR)/tuna
 
 VPATH=$(SNET_DIR) $(PHY_DIR) $(MAC_DIR) $(TEST_APPS_DIR) $(TEST_DIR) $(CAP_DIR)
 
@@ -66,10 +67,11 @@ cscope: cscope.files
 clean: clean-cap
 	rm -frd ./*.o $(BUILD_DIR) $(SDL_LOG_TEST_FILE) .child*
 
-$(BUILD_DIR):
-	mkdir $@
+$(BUILD_DIR_CREATED):
+	mkdir $(@D)
+	touch $@
 
-$(BUILD_DIR)/%.o: %.c | $(BUILD_DIR)
+$(BUILD_DIR)/%.o: %.c | $(BUILD_DIR_CREATED)
 	$(CC) $(CFLAGS) -o $@ -c $<
 
 #
