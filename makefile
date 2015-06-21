@@ -53,6 +53,9 @@ SNET_PARENT_FILES=$(SNET_DIR)/snet.c $(SNET_DEBUG_FILE)
 # UTIL
 #
 
+COMPILE=$(CC) $(CFLAGS) -o $@ -c $<
+LINK=$(CC) $(LDFLAGS) -o $@ $^
+
 cscope.files: $(ALL_SOURCE)
 	echo $^ > $@
 
@@ -94,15 +97,24 @@ PHY_TEST_IN=phy-test.in
 STDIN  = 0
 STDERR = 2
 
+PHY_TEST_DIR=$(BUILD_DIR)/phy-test-dir
+PHY_TEST_DIR_CREATED=$(PHY_TEST_DIR)/tuna
+$(PHY_TEST_DIR_CREATED): $(BUILD_DIR_CREATED)
+	mkdir $(@D)
+	touch $@
+
+$(PHY_TEST_DIR)/%.o: %.c | $(PHY_TEST_DIR_CREATED)
+	$(COMPILE)
+
 $(PHY_TEST_IN):
 	touch $@
 
-$(BUILD_DIR)/phy-test: DEFINES += -DSNET_TEST -DPHY_TEST
-$(BUILD_DIR)/phy-test: $(addprefix $(BUILD_DIR)/,$(notdir $(PHY_TEST_FILES:.c=.o)))
-	$(CC) $(LDFLAGS) -o $@ $^
+$(PHY_TEST_DIR)/phy-test: DEFINES += -DSNET_TEST -DPHY_TEST
+$(PHY_TEST_DIR)/phy-test: $(addprefix $(PHY_TEST_DIR)/,$(notdir $(PHY_TEST_FILES:.c=.o)))
+	$(LINK)
 
 .PHONY: run-phy-test
-run-phy-test: $(BUILD_DIR)/phy-test $(PHY_TEST_IN)
+run-phy-test: $(PHY_TEST_DIR)/phy-test $(PHY_TEST_IN)
 	./$< phy-test $(STDIN) $(STDERR) < $(PHY_TEST_IN) 2>/dev/null
 
 #
