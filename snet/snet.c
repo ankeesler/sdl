@@ -161,9 +161,9 @@ void snetManagementInit(void)
   uint8_t i;
   struct sigaction action = {
     .sa_sigaction = signalHandler,
-    .sa_mask      = 0,
     .sa_flags     = SA_SIGINFO,
   };
+  sigemptyset(&action.sa_mask);
 
   for (i = 0; i < SNET_MAX_HOSTS; i ++)
     nodePool[i].mask = 0;
