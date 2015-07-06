@@ -47,6 +47,8 @@ static SnetNode nodePool[SNET_MAX_HOSTS];
 // The number of nodes added to the network.
 static uint8_t nodesInNetwork = 0;
 
+static volatile sig_atomic_t newestChildReady = 0;
+
 // ----------------------------------------------------------------------------
 // Testing.
 
@@ -97,6 +99,7 @@ static uint8_t nodesInNetwork = 0;
              signalNames[signalData[i].signal],
              signalData[i].ret);
     }
+    fflush(stdout);
   }
 
   void printNodeData(void)
@@ -133,23 +136,38 @@ void signalHandler(int signal, siginfo_t *info, void *wut)
   int stat = 0;
   uint8_t i, buffer[SDL_PHY_PDU_LEN + SDL_PHY_SDU_MAX];
   SdlStatus status;
+  SnetNode *node = NULL;
 
   if (signal == SIGCHLD) {
     // Wait to see which child process is quitting.
     pid = wait(&stat);
 
     // Find that child process and really remove it.
-    nodeRemoveReally(findNodeForPid(pid));
+    // TODO: die on unknown node.
+    if ((node = findNodeForPid(pid))) {
+      nodeRemoveReally(node);
+    }
   } else if (signal == PARENT_ALERT_SIGNAL) {
-    pid = info->si_pid;
-    // For each node that is on (except for this one), tell them to receive it.
-    for (i = 0; i < SNET_MAX_HOSTS && status == SDL_SUCCESS; i ++) {
-      if (nodePool[i].mask & SNET_NODE_MASK_ON_NETWORK
-          && nodePool[i].pid != pid) {
-        read(nodePool[i].childToParentFd, buffer + 0, sizeof(uint8_t));
-        read(nodePool[i].childToParentFd, buffer + 1, buffer[0]);
-        status = snetNodeCommand(&nodePool[i], RECEIVE, buffer);
+    // TODO: die on unknown node.
+    if ((node = findNodeForPid((pid = info->si_pid)))) {
+      // Read packet from buffer.
+      // TODO: die on bad read.
+      // TODO: use same read definitions as phy.c.
+      read(node->childToParentFd, buffer + 0, sizeof(uint8_t));
+      read(node->childToParentFd, buffer + 1, buffer[0] - 1);
+      // For each node that is on (except for this one), tell them to
+      // receive the packet.
+      for (i = 0; i < SNET_MAX_HOSTS && status == SDL_SUCCESS; i ++) {
+        if (nodePool[i].mask & SNET_NODE_MASK_ON_NETWORK
+            && nodePool[i].pid != pid) {
+          status = snetNodeCommand(&nodePool[i], RECEIVE, buffer);
+        }
       }
+    }
+  } else if (signal == CHILD_READY_SIGNAL) {
+    pid = info->si_pid;
+    if (!newestChildReady) {
+      newestChildReady = pid;
     }
   }
 
@@ -174,6 +192,9 @@ void snetManagementInit(void)
 
   // Signal handler for child process to communicate with parent.
   sigaction(PARENT_ALERT_SIGNAL, &action, NULL); // oact - don't care
+
+  // Signal handler for when our child is ready.
+  sigaction(CHILD_READY_SIGNAL, &action, NULL); // oact - don't care
 }
 
 uint8_t snetManagementDeinit(void)
@@ -252,6 +273,11 @@ SdlStatus snetNodeStart(SnetNode *node)
     node->pid = newPid;
     node->parentToChildFd = parentToChildPipe[1];
     node->childToParentFd = childToParentPipe[0];
+
+    // Wait for the child to tell us that it is ready.
+    // TODO: add an alarm here if we don't hear back from our child.
+    while (newestChildReady != newPid) ;
+    newestChildReady = 0;
   } else {
     // Child.
     close(parentToChildPipe[1]); // close the write end of the pipe

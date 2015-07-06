@@ -28,9 +28,19 @@
 // terminal, which would result in a failing test.
 #define PARENT_ALERT_SIGNAL SIGUSR1
 #ifdef PHY_TEST
-  #define snetParentAlert() kill(getpid(), CHILD_ALERT_SIGNAL)
+  #define snetParentAlert() kill(getpid(), PARENT_ALERT_SIGNAL)
 #else
   #define snetParentAlert() kill(getppid(), PARENT_ALERT_SIGNAL)
+#endif
+
+// The child uses this signal to tell the parent that it is ready
+// to go. Same thing as above here - for phy-test, send ourself
+// this signal to test for it.
+#define CHILD_READY_SIGNAL SIGUSR2
+#ifdef PHY_TEST
+  #define childReady() kill(getpid(), CHILD_READY_SIGNAL);
+#else
+  #define childReady() kill(getppid(), CHILD_READY_SIGNAL);
 #endif
 
 // The index of argv that the child node name lives in.

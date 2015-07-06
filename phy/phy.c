@@ -141,8 +141,19 @@ int main(int argc, char *argv[])
   // for when our parent wants us to quit immediately.
   signal(CHILD_QUIT_SIGNAL, signalHandler);
 
+#ifdef PHY_TEST
+  // For phy-test, handle the CHILD_READY_SIGNAL so that we can make sure we
+  // sent it. Since our main() in phy-test.c is defined as SNET_MAIN to be run
+  // from the phy.c code, we need to say we want to handle it here.
+  extern void phyTestSignalHandler(int);
+  signal(CHILD_READY_SIGNAL, phyTestSignalHandler);
+#endif
+
   // Initialize logging. If logging is not used, this will be macro'd out.
   sdlLogInit();
+
+  // Tell our parent we are ready to go.
+  childReady();
 
   // Call the child node's main function.
   ret = SNET_MAIN(argc, argv);

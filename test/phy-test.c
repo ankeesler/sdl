@@ -13,6 +13,7 @@
 #include <signal.h>   // kill
 #include <assert.h>   // assert
 #include <string.h>   // memcpy
+#include <stdbool.h>  // bool
 
 #include "snet.h"
 #include "snet-internal.h" // snetChildAlert
@@ -94,6 +95,13 @@ static void failureHandler(void)
   tearDownPhyTestIn();
 }
 
+static bool childReadySignalReceived = false;
+void phyTestSignalHandler(int signal)
+{
+  childReadySignalReceived = (signal == CHILD_READY_SIGNAL);
+}
+#define expectChildReadySignalReceived() (expect(childReadySignalReceived))
+
 // -----------------------------------------------------------------------------
 // Tests
 
@@ -101,6 +109,10 @@ int sanityTest(void)
 {
   // We should be able send an error checking signal to ourselves.
   expectEquals(kill(getpid(), 0), 0);
+
+  // Make sure we send our parent (or ourselves in this test) the
+  // signal that we are up and running. This happens in the phy.c code.
+  expectChildReadySignalReceived();
 
   // Since we sign ourselves up for the CHILD_ALERT_SIGNAL, we should
   // handle the signal by reading from the PARENT_TO_CHILD_FD, i.e., stdin

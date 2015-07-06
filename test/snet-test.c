@@ -284,9 +284,9 @@ int transmitTest(void)
   expect(!snetNodeCommand(server1, TRANSMIT, serverCommand));
 
   // After a duty cycle, server2 should turn off and server1 should stay on.
-  // FIXME: server1 keeps dying and server2 should NOT be running.
+  // FIXME: server2 should NOT be running.
   usleep(SERVER_DUTY_CYCLE_US);
-  //expect(RUNNING(server1));
+  expect(RUNNING(server1));
   //expect(!RUNNING(server2));
 
   // Tear down the network.
@@ -312,13 +312,12 @@ int buttonTest(void)
   expect(RUNNING(server2));
 
   // If we push SERVER_NOOP_BUTTON, the servers should do nothing.
-  // FIXME: why does server1 die?
   expect(!snetNodeCommand(server1, BUTTON, SERVER_NOOP_BUTTON));
-  /*
   usleep(SERVER_DUTY_CYCLE_US * 2);
   expect(RUNNING(server1));
   expect(RUNNING(server2));
 
+  /*
   // If we push SERVER_OFF_BUTTON, the server should broadcast the off
   // command to err'body. That includes themselves.
   expect(!snetNodeCommand(server1, BUTTON, SERVER_OFF_BUTTON));
