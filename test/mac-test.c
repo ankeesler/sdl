@@ -148,6 +148,57 @@ int utilitiesTest(void)
   return 0;
 }
 
+static int rxOverflowTest(void)
+{
+  uint8_t i, packet[64], macQueueSize;
+  uint32_t value = 0xFFFFFFFF;
+  SdlPacket reallyPacket;
+
+  // Destination address of SDL_MAC_ADDRESS_BROADCAST so we will
+  // put it in our queue.
+  packet[8] = 0xFF;
+  packet[9] = 0xFF;
+  packet[10] = 0xFF;
+  packet[11] = 0xFF;
+
+  // MAC RX Overflow should be 0 at this point.
+  expect(sdlCounterValue(SDL_COUNTER_MAC_RX_OVERFLOW, &value));
+  expectEquals(value, 0);
+
+  // If we receive more than the mac queue can handle, then we should
+  // get a SDL_COUNTER_MAC_RX_OVERFLOW counter increment.
+  // Keep this macQueueSize value inline with the same one in mac.c!
+  macQueueSize = 5;
+  for (i = 0; i < macQueueSize; i ++) {
+    expect(sdlCounterValue(SDL_COUNTER_MAC_RX_OVERFLOW, &value));
+    expectEquals(value, 0);
+    sdlPhyReceiveIsr(packet, SDL_MAC_PDU_LEN);
+  }
+  for (i = 1; i < 5; i ++) {
+    expect(sdlCounterValue(SDL_COUNTER_MAC_RX_OVERFLOW, &value));
+    expectEquals(value, i);
+    sdlPhyReceiveIsr(packet, SDL_MAC_PDU_LEN);
+  }
+
+  // Clear the counter.
+  expect(sdlCounterClear(SDL_COUNTER_MAC_RX_OVERFLOW));
+  expect(sdlCounterValue(SDL_COUNTER_MAC_RX_OVERFLOW, &value));
+  expectEquals(value, 0);
+
+  // If we take a packet off the queue...
+  expectEquals(sdlMacReceive(&reallyPacket), SDL_SUCCESS);
+  // ...then we should have room to add one...
+  sdlPhyReceiveIsr(packet, SDL_MAC_PDU_LEN);
+  expect(sdlCounterValue(SDL_COUNTER_MAC_RX_OVERFLOW, &value));
+  expectEquals(value, 0);
+  // ...but then go back to our overflow stuff...
+  sdlPhyReceiveIsr(packet, SDL_MAC_PDU_LEN);
+  expect(sdlCounterValue(SDL_COUNTER_MAC_RX_OVERFLOW, &value));
+  expectEquals(value, 1);
+
+  return 0;
+}
+
 int main(void)
 {
   announce();
@@ -158,6 +209,8 @@ int main(void)
   run(broadcastTest);
 
   run(utilitiesTest);
+
+  run(rxOverflowTest);
 
   return 0;
 }

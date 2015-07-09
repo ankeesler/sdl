@@ -39,7 +39,7 @@ SDL_LOG_TEST_FILE=tuna.sdl
 
 SDL_LOG_FILES=$(CAP_DIR)/sdl-log.c
 
-MAC_FILES=$(MAC_DIR)/mac.c
+MAC_FILES=$(MAC_DIR)/mac.c $(MAC_DIR)/mac-util.c
 
 PHY_FILES=$(PHY_DIR)/phy.c
 

@@ -12,6 +12,7 @@
 #define __SDL_TYPES_H__
 
 #include <stdint.h>
+#include <stdbool.h>
 #include "sdl-protocol.h"
 
 // A generic status code in SDL.
@@ -64,5 +65,12 @@ typedef struct {
   uint8_t data[SDL_PHY_SDU_MAX];
   uint8_t dataLength;
 } SdlPacket;
+
+// A counter value.
+enum {
+  // How many times the MAC gets a packet for which it doesn't have room.
+  SDL_COUNTER_MAC_RX_OVERFLOW = 0x01,
+};
+typedef uint8_t SdlCounter;
 
 #endif /* __SDL_TYPES_H__ */

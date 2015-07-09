@@ -10,9 +10,11 @@
 
 #include "mac.h"
 #include "phy.h"
-#include "mac-internal.h"
 
 #include <string.h> // memcpy()
+#include <signal.h> // sig_atomic_t
+
+#include "mac-internal.h"
 
 // -----------------------------------------------------------------------------
 // Declarations
@@ -22,44 +24,13 @@ static void communicationInit(void);
 // -----------------------------------------------------------------------------
 // Utilities
 
-#define HIGH_BYTE(v) (uint8_t)((v & 0xFF00) >> 0x08)
-#define LOW_BYTE(v)  (uint8_t)((v & 0x00FF) >> 0x00)
-
 // Big-endian.
-static void putAddressInBuffer(SdlAddress address, uint8_t *buffer)
-{
-  buffer[0] = (address & 0xFF000000) >> 0x18;
-  buffer[1] = (address & 0x00FF0000) >> 0x10;
-  buffer[2] = (address & 0x0000FF00) >> 0x08;
-  buffer[3] = (address & 0x000000FF) >> 0x00;
-}
 static void getAddressFromBuffer(SdlAddress *address, uint8_t *buffer)
 {
   *address = ((buffer[0] << 0x18)
               | (buffer[1] << 0x10)
               | (buffer[2] << 0x08)
               | (buffer[3] << 0x00));
-}
-
-void sdlPacketToFlatBuffer(SdlPacket *packet, uint8_t *buffer)
-{
-  // Big endian (see sdl-protocol.h).
-  
-  // Frame control.
-  buffer[0] = packet->type;
-
-  // Sequence number.
-  buffer[2] = HIGH_BYTE(packet->sequence);
-  buffer[3] = LOW_BYTE(packet->sequence);
-
-  // Source address.
-  putAddressInBuffer(packet->source, buffer + 4);
-  
-  // Destination address.
-  putAddressInBuffer(packet->destination, buffer + 8);
-
-  // Data.
-  memcpy(buffer + 12, packet->data, packet->dataLength);
 }
 
 // -----------------------------------------------------------------------------
@@ -95,6 +66,8 @@ SdlStatus sdlMacAddress(SdlAddress *address)
 
 uint8_t sdlCsmaOn = SDL_CSMA_OFF;
 uint8_t sdlCsmaRetries = SDL_CSMA_RETRIES;
+
+volatile sig_atomic_t macRxOverflow = 0;
 
 #define TX_BUFFER_SIZE SDL_PHY_SDU_MAX
 static uint8_t txBuffer[TX_BUFFER_SIZE];
@@ -167,8 +140,12 @@ void sdlPhyReceiveIsr(uint8_t *data, uint8_t length)
   uint8_t dataLength = length - SDL_MAC_PDU_LEN;
 
   // If the queue is full, then we can't receive anymore.
-  // TODO: report this.
-  if (rxBufferIsFull()) return;
+  if (rxBufferIsFull()) {
+    if (macRxOverflow + 1) {
+      macRxOverflow ++;
+    }
+    return;
+  }
 
   // Big endian (see sdl-protocol.h).
 
@@ -177,7 +154,7 @@ void sdlPhyReceiveIsr(uint8_t *data, uint8_t length)
   if (rxBuffer[rxTail].destination != ourAddress
       && rxBuffer[rxTail].destination != SDL_MAC_ADDRESS_BROADCAST)
     return;
-  
+
   // Frame control.
   rxBuffer[rxTail].type = data[0];
 

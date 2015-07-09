@@ -70,4 +70,14 @@ extern uint8_t sdlMacCsmaRetries;
 // Takes an SdlPacket struct and converts it to a flat buffer.
 void sdlPacketToFlatBuffer(SdlPacket *packet, uint8_t *buffer);
 
+// Get the current value of a SdlCounter.
+// Returns true if the counter has a value and false if there was
+// no value for the counter.
+bool sdlCounterValue(SdlCounter counter, uint32_t *value);
+
+// Clear the current counter value of an SdlCounter.
+// Returns true if the counter has a value and false if there was
+// no value for the counter.
+bool sdlCounterClear(SdlCounter counter);
+
 #endif /* __SDL_H__ */
