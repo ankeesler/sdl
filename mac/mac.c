@@ -64,6 +64,8 @@ SdlStatus sdlMacAddress(SdlAddress *address)
 // -----------------------------------------------------------------------------
 // Communication
 
+// TODO: make me psuedo-interrupt safe!
+
 uint8_t sdlCsmaOn = SDL_CSMA_OFF;
 uint8_t sdlCsmaRetries = SDL_CSMA_RETRIES;
 
