@@ -219,9 +219,6 @@ int receiveTest(void)
   expect(snetManagementSize() == 1);
   expect(RUNNING(server));
 
-  // TODO: why do we need this?
-  usleep(SERVER_DUTY_CYCLE_US);
-
   // Build the SDL packet in a flat buffer.
   sdlPacketToFlatBuffer(&packet, serverCommand + 1);
   serverCommand[0] = SDL_PHY_PDU_LEN + SDL_MAC_PDU_LEN + 1; // packet length

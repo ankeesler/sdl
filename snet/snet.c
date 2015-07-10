@@ -143,16 +143,13 @@ void signalHandler(int signal, siginfo_t *info, void *wut)
     pid = wait(&stat);
 
     // Find that child process and really remove it.
-    // TODO: die on unknown node.
     if ((node = findNodeForPid(pid))) {
       nodeRemoveReally(node);
     }
   } else if (signal == PARENT_ALERT_SIGNAL) {
-    // TODO: die on unknown node.
     if ((node = findNodeForPid((pid = info->si_pid)))) {
       // Read packet from buffer.
-      // TODO: die on bad read.
-      // TODO: use same read definitions as phy.c.
+      // TODO: die on bad read?
       read(node->childToParentFd, buffer + 0, sizeof(uint8_t));
       read(node->childToParentFd, buffer + 1, buffer[0] - 1);
       // For each node that is on (except for this one), tell them to
