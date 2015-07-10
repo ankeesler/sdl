@@ -15,7 +15,9 @@
 #include "snet.h"
 #include "server.h"
 
-static int spin = 1;
+#include <signal.h> // sig_atomic_t
+
+static volatile sig_atomic_t spin = 1;
 
 int nodeState = 0;
 

@@ -273,18 +273,27 @@ int transmitTest(void)
   packet.source = 0x01234567;
   packet.destination = 0xFFFFFFFF;
   packet.dataLength = 1;
-  packet.data[0] = SERVER_OFF_COMMAND;
-  sdlPacketToFlatBuffer(&packet, serverCommand + 1);
   serverCommand[0] = SDL_PHY_PDU_LEN + SDL_MAC_PDU_LEN + 1; // packet length
 
+  // Transmit the noop command from server2 to server1.
+  packet.data[0] = SERVER_NOOP_COMMAND;
+  sdlPacketToFlatBuffer(&packet, serverCommand + 1);
+  expect(!snetNodeCommand(server2, TRANSMIT, serverCommand));
+
+  // After a duty cycle, everybody should still be up and running.
+  usleep(SERVER_DUTY_CYCLE_US);
+  expect(RUNNING(server1));
+  expect(RUNNING(server2));
+
   // Transmit the off command from server1 to server2.
+  packet.data[0] = SERVER_OFF_COMMAND;
+  sdlPacketToFlatBuffer(&packet, serverCommand + 1);
   expect(!snetNodeCommand(server1, TRANSMIT, serverCommand));
 
   // After a duty cycle, server2 should turn off and server1 should stay on.
-  // FIXME: server2 should NOT be running.
   usleep(SERVER_DUTY_CYCLE_US);
   expect(RUNNING(server1));
-  //expect(!RUNNING(server2));
+  while(RUNNING(server2)) ;
 
   // Tear down the network.
   expect(snetManagementDeinit());
