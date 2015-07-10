@@ -46,7 +46,6 @@ SdlStatus sdlMacTransmit(SdlPacketType type,
 SdlStatus sdlMacReceive(SdlPacket *packet);
 
 // Do something kinda like a CCA.
-// FIXME:
 uint8_t sdlMacActivity(void);
 
 // Whether or not to use CSMA mechanism per transmit.

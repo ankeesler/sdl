@@ -174,6 +174,5 @@ void sdlPhyReceiveIsr(uint8_t *data, uint8_t length)
 
 uint8_t sdlActivity(void)
 {
-  // TODO:
   return 0;
 }
