@@ -48,6 +48,7 @@ static SnetNode nodePool[SNET_MAX_HOSTS];
 static uint8_t nodesInNetwork = 0;
 
 static volatile sig_atomic_t newestChildReady = 0;
+static volatile sig_atomic_t waitForNewChild  = 1;
 
 // ----------------------------------------------------------------------------
 // Testing.
@@ -166,6 +167,8 @@ void signalHandler(int signal, siginfo_t *info, void *wut)
     if (!newestChildReady) {
       newestChildReady = pid;
     }
+  } else if (signal == SIGALRM) {
+    waitForNewChild = 0;
   }
 
   logSignalData(pid, signal, WEXITSTATUS(stat));
@@ -192,6 +195,9 @@ void snetManagementInit(void)
 
   // Signal handler for when our child is ready.
   sigaction(CHILD_READY_SIGNAL, &action, NULL); // oact - don't care
+
+  // Signal handler for SIGALRM.
+  sigaction(SIGALRM, &action, NULL); // oact - don't care
 }
 
 uint8_t snetManagementDeinit(void)
@@ -246,6 +252,7 @@ SnetNode *snetNodeMake(const char *image, const char *name)
 
 SdlStatus snetNodeStart(SnetNode *node)
 {
+  SdlStatus status = SDL_SUCCESS;
   pid_t newPid;
   int parentToChildPipe[2], childToParentPipe[2];
 
@@ -262,7 +269,7 @@ SdlStatus snetNodeStart(SnetNode *node)
       || pipe(childToParentPipe)
       || (newPid = fork()) == -1) {
     // Failure.
-    return SDL_FATAL;
+    status = SDL_FATAL;
   } else if (newPid) {
     // Parent.
     close(parentToChildPipe[0]); // close the read end of the pipe
@@ -271,10 +278,14 @@ SdlStatus snetNodeStart(SnetNode *node)
     node->parentToChildFd = parentToChildPipe[1];
     node->childToParentFd = childToParentPipe[0];
 
-    // Wait for the child to tell us that it is ready.
-    // TODO: add an alarm here if we don't hear back from our child.
-    while (newestChildReady != newPid) ;
+    // Wait a second for the child to tell us that it is ready.
+    alarm(1);
+    while (waitForNewChild && newestChildReady != newPid) ;
+    if (!waitForNewChild) {
+      status = SDL_SNET_COM_FAILURE;
+    }
     newestChildReady = 0;
+    waitForNewChild = 1;
   } else {
     // Child.
     close(parentToChildPipe[1]); // close the write end of the pipe
@@ -295,7 +306,7 @@ SdlStatus snetNodeStart(SnetNode *node)
   node->mask |= SNET_NODE_MASK_ON_NETWORK;
   nodesInNetwork ++;
 
-  return SDL_SUCCESS;
+  return status;
 }
 
 SdlStatus snetNodeStop(SnetNode *node)
