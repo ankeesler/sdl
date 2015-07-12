@@ -133,11 +133,8 @@ int doubleNodeTest(void)
 
   // Both of the servers should stop running, and the number
   // of nodes in the network should drop to 0.
-  while (RUNNING(server1)) ;
-  while (RUNNING(server2)) ;
-  expect(!snetManagementSize());
-
-  expect(snetManagementDeinit() == 0);
+  while(snetManagementSize()) ;
+  expectEquals(snetManagementDeinit(), 0);
 
   return 0;
 }
