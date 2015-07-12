@@ -15,10 +15,8 @@
 #include "mac.h"
 #include "mac-internal.h"
 
-#include <unistd.h> // getpid()
-
-// Stub.
-SdlStatus sdlPhyTransmit(uint8_t *data, uint8_t length) { return SDL_SUCCESS; }
+#include <unistd.h>  // getpid()
+#include <stdbool.h> // bool
 
 static SdlAddress source;
 static SdlAddress destination = 0x00000000;
@@ -27,6 +25,16 @@ static SdlAddress destination = 0x00000000;
 static uint8_t data[dataBufferLength];
 
 static SdlPacket packet;
+
+// Stub.
+static bool transmitCalled = false;
+SdlStatus sdlPhyTransmit(uint8_t *data, uint8_t length)
+{
+  transmitCalled = true;
+  return SDL_SUCCESS;
+}
+#define expectTransmitCalled() (expect(transmitCalled))
+#define resetTransmitCalled()  (transmitCalled = false)
 
 int sanityCheck(void)
 {
@@ -112,6 +120,19 @@ int broadcastTest(void)
   sdlPhyReceiveIsr(flatPacket, SDL_MAC_PDU_LEN);
   expect(sdlMacReceive(&packet)
          == SDL_MAC_EMPTY);
+
+  // If we send something as a total broadcast, we should make sure
+  // it both goes out the radio...
+  resetTransmitCalled();
+  expect(sdlMacTransmit(SDL_PACKET_TYPE_DATA,
+                        SDL_MAC_ADDRESS_BROADCAST,
+                        data,
+                        dataBufferLength)
+         == SDL_SUCCESS);
+  expectTransmitCalled();
+  // ...as well as back and to ourselves.
+  expect(sdlMacReceive(&packet)
+         == SDL_SUCCESS);
 
   return 0;
 }

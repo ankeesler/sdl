@@ -115,7 +115,8 @@ SdlStatus sdlMacTransmit(SdlPacketType type,
   // Otherwise, throw it to the PHY.
   if (destination == ourAddress || destination == SDL_MAC_ADDRESS_BROADCAST) {
     sdlPhyReceiveIsr(txBuffer, SDL_MAC_PDU_LEN + dataLength);
-  } else if (destination != ourAddress) {
+  }
+  if (destination != ourAddress) {
     status = sdlPhyTransmit(txBuffer, SDL_MAC_PDU_LEN + dataLength);
   }
 
