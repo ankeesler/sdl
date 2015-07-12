@@ -66,9 +66,6 @@ SdlStatus sdlMacAddress(SdlAddress *address)
 
 // TODO: make me psuedo-interrupt safe!
 
-bool sdlCsmaOn = SDL_CSMA_OFF;
-uint8_t sdlCsmaRetries = SDL_CSMA_RETRIES;
-
 volatile sig_atomic_t macRxOverflow = 0;
 
 #define TX_BUFFER_SIZE SDL_PHY_SDU_MAX

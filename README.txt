@@ -11,3 +11,4 @@ SDL 01 - Network Simulator.
 SDL 02 - IPC Support.
   - Interprocess communication support.
   - Defined SDL protocol data packet.
+  - Simplified transmission (no CSMA).
