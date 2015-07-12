@@ -49,7 +49,7 @@ SdlStatus sdlMacReceive(SdlPacket *packet);
 uint8_t sdlMacActivity(void);
 
 // Whether or not to use CSMA mechanism per transmit.
-extern uint8_t sdlMacCsmaOn;
+extern bool sdlMacCsmaOn;
 #define SDL_CSMA_ON  (1)
 #define SDL_CSMA_OFF (0)
 #define sdlMacCsmaIsOn()   (sdlCsmaOn)
