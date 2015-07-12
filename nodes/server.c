@@ -26,7 +26,7 @@ static uint8_t buttonPressed = NULL_BUTTON;
 
 void sdlPhyButtonIsr(uint8_t button)
 {
-  button = buttonPressed;
+  buttonPressed = button;
 }
 
 void handler(int signal)
@@ -38,12 +38,17 @@ void handler(int signal)
 
 static SdlStatus broadcastServerOff(void)
 {
+  SdlStatus status;
   uint8_t data[SDL_PHY_SDU_MAX];
+
   data[0] = SERVER_OFF_COMMAND;
-  return sdlMacTransmit(SDL_PACKET_TYPE_DATA,
-                        SDL_MAC_ADDRESS_BROADCAST,
-                        data,
-                        1);
+
+  status =  sdlMacTransmit(SDL_PACKET_TYPE_DATA,
+                           SDL_MAC_ADDRESS_BROADCAST,
+                           data,
+                           1);
+
+  return status;
 }
 
 int main(void)
@@ -71,6 +76,8 @@ int main(void)
 
     // Try to receive something.
     if (sdlMacReceive(&packet) == SDL_SUCCESS) {
+      fprintf(childLogFile, "packet received: [0x%02X]", packet.data[0]);
+      fflush(childLogFile);
       spin = (packet.data[0] != SERVER_OFF_COMMAND);
     }
   }

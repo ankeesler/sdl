@@ -319,22 +319,18 @@ int buttonTest(void)
 
   // If we push SERVER_NOOP_BUTTON, the servers should do nothing.
   expect(!snetNodeCommand(server1, BUTTON, SERVER_NOOP_BUTTON));
-  usleep(SERVER_DUTY_CYCLE_US * 2);
+  usleep(SERVER_DUTY_CYCLE_US);
   expect(RUNNING(server1));
   expect(RUNNING(server2));
 
-  /*
   // If we push SERVER_OFF_BUTTON, the server should broadcast the off
   // command to err'body. That includes themselves.
   expect(!snetNodeCommand(server1, BUTTON, SERVER_OFF_BUTTON));
-  usleep(SERVER_DUTY_CYCLE_US * 2);
-  expect(!RUNNING(server1));
-  expect(!RUNNING(server2));
-  */
+  usleep(SERVER_DUTY_CYCLE_US);
+  while(snetManagementSize()) ;
 
   // Tear down the network.
-  expect(snetManagementDeinit());
-  expect(!snetManagementSize());
+  expectEquals(snetManagementDeinit(), 0);
 
   return 0;
 }
