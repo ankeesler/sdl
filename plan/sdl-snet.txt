@@ -15,9 +15,8 @@ MILESTONES:
     - PHY INTERFACE: received ISR
     - SDL LOG TX: Put logging back in
     - SDL LOG RX: test with parent alert signal
-  TODO:
     - PHY INTERFACE: transmit (this is done in junction with SNET development)
-    - PHY: CSMA support (backwards compatability, was in SDL 01)
+  TODO:
     - PHY: CCA support (backwards compatability, was in SDL 01)
   BACKLOG:
     - SNET INTERFACE: add a way for users to define their own commands
