@@ -173,6 +173,7 @@ SdlStatus sdlPhyTransmit(uint8_t *data, uint8_t length)
 {
   SdlStatus status = SDL_SUCCESS;
   uint8_t realLength = length + SDL_PHY_PDU_LEN;
+  uint8_t command = CHILD_TO_PARENT_COMMAND_TRANSMIT;
   
   // Copy to real tx buffer.
   realTxBuffer[0] = realLength;
@@ -180,14 +181,24 @@ SdlStatus sdlPhyTransmit(uint8_t *data, uint8_t length)
 
   // Log.
   sdlLogTx(realTxBuffer, realLength);
-  
-  // Write the packet to the file descriptor.
+
+  // Write the command to the file descriptor.
   status = ((write(childToParentFd,
-                   realTxBuffer,
-                   sdlPacketLength(realTxBuffer))
-             == sdlPacketLength(realTxBuffer))
+                   &command,
+                   sizeof(command))
+             == sizeof(command))
             ? SDL_SUCCESS
             : SDL_TRANSMIT_FAILURE);
+
+  // Write the packet to the file descriptor.
+  if (status == SDL_SUCCESS) {
+    status = ((write(childToParentFd,
+                     realTxBuffer,
+                     sdlPacketLength(realTxBuffer))
+               == sdlPacketLength(realTxBuffer))
+              ? SDL_SUCCESS
+              : SDL_TRANSMIT_FAILURE);
+  }
 
   // Tell the parent they have got something coming for them.
   return (status == SDL_SUCCESS

@@ -57,3 +57,6 @@
 #define CHILD_EXIT_EXECL_FAIL  0x01
 #define CHILD_EXIT_BAD_READ    0x02
 #define CHILD_EXIT_BAD_COMMAND 0x03
+
+// Child to parent commands.
+#define CHILD_TO_PARENT_COMMAND_TRANSMIT (0x01)

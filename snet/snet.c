@@ -135,7 +135,7 @@ void signalHandler(int signal, siginfo_t *info, void *wut)
 {
   pid_t pid = 0;
   int stat = 0;
-  uint8_t i, buffer[SDL_PHY_PDU_LEN + SDL_PHY_SDU_MAX];
+  uint8_t i, buffer[SDL_PHY_PDU_LEN + SDL_PHY_SDU_MAX], command;
   SdlStatus status;
   SnetNode *node = NULL;
 
@@ -149,16 +149,21 @@ void signalHandler(int signal, siginfo_t *info, void *wut)
     }
   } else if (signal == PARENT_ALERT_SIGNAL) {
     if ((node = findNodeForPid((pid = info->si_pid)))) {
-      // Read packet from buffer.
+      // Read command from child.
       // TODO: die on bad read?
-      read(node->childToParentFd, buffer + 0, sizeof(uint8_t));
-      read(node->childToParentFd, buffer + 1, buffer[0] - 1);
-      // For each node that is on (except for this one), tell them to
-      // receive the packet.
-      for (i = 0; i < SNET_MAX_HOSTS && status == SDL_SUCCESS; i ++) {
-        if (nodePool[i].mask & SNET_NODE_MASK_ON_NETWORK
-            && nodePool[i].pid != pid) {
-          status = snetNodeCommand(&nodePool[i], RECEIVE, buffer);
+      read(node->childToParentFd, &command, sizeof(command));
+      if (command == CHILD_TO_PARENT_COMMAND_TRANSMIT) {
+        // Read packet from buffer.
+        // TODO: die on bad read?
+        read(node->childToParentFd, buffer + 0, sizeof(uint8_t));
+        read(node->childToParentFd, buffer + 1, buffer[0] - 1);
+        // For each node that is on (except for this one), tell them to
+        // receive the packet.
+        for (i = 0; i < SNET_MAX_HOSTS && status == SDL_SUCCESS; i ++) {
+          if (nodePool[i].mask & SNET_NODE_MASK_ON_NETWORK
+              && nodePool[i].pid != pid) {
+            status = snetNodeCommand(&nodePool[i], RECEIVE, buffer);
+          }
         }
       }
     }
