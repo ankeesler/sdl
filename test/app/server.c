@@ -9,7 +9,6 @@
 //
 
 #include "sdl.h"
-#include "uart.h"
 #include "server.h"
 
 #include <stdio.h>

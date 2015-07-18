@@ -15,7 +15,6 @@
 #include "snet.h"
 
 #include "snet-internal.h" // snetChildAlert
-#include "uart.h"
 
 #include "cap/sdl-log.h"
 

@@ -26,7 +26,10 @@
 // is included here. This API provides access to the raw simulated
 // networking interface that SDL provides.
 //
-// TODO: platform.
+// SDL also provides some simulated platform utilities, such as unidirectional
+// UART transmission and a button ISR. These APIs seek to provide both
+// testing utilities and closer adherance to the true functionality in
+// a networking application.
 //
 
 // SDL Protocol definitions.
@@ -41,7 +44,8 @@
 // SDL PHY layer interface.
 #include "phy.h"
 
-// TODO: platform.
+// SDL platform utilities.
+#include "plat.h"
 
 // SDL steals the main function from applications so that it can run setup
 // code in a main entry point of its own. It then promptly calls the

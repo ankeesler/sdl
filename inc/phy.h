@@ -18,7 +18,4 @@
 // Transmit length number of bytes in data.
 SdlStatus sdlPhyTransmit(uint8_t *data, uint8_t length);
 
-// A button ISR. Good for testing.
-void sdlPhyButtonIsr(uint8_t button);
-
 #endif /* __PHY_H__ */
