@@ -20,7 +20,6 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <signal.h>
-#include <stdint.h>
 
 // ----------------------------------------------------------------------------
 // Prototypes.

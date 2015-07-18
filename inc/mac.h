@@ -13,9 +13,6 @@
 
 #include "sdl-types.h"
 
-#include <stdint.h>
-#include <stdbool.h>
-
 //
 // Management.
 //

@@ -11,10 +11,9 @@
 #ifndef __SNET_H__
 #define __SNET_H__
 
-#include <unistd.h>
-#include <stdint.h>
-
 #include "sdl-types.h"
+
+#include <unistd.h>
 
 //
 // Configuration.

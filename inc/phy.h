@@ -13,8 +13,6 @@
 
 #include "sdl-types.h"
 
-#include <stdint.h>
-
 // Transmit length number of bytes in data.
 SdlStatus sdlPhyTransmit(uint8_t *data, uint8_t length);
 
