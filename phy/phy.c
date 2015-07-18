@@ -127,7 +127,7 @@ int main(int argc, char *argv[])
   sprintf(childLogFilename, ".child-%s", argv[CHILD_NAME_INDEX]);
   childLogFile = fopen(childLogFilename, "w");
   childLog("%s", "HELLO");
-  childLog("name: %s, p -> c: %d, c -> p %d",
+  childLog("name: %s, p -> c: %d, c -> p: %d",
            argv[CHILD_NAME_INDEX],
            parentToChildFd,
            childToParentFd);
