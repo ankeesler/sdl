@@ -10,10 +10,10 @@
 
 #include "mac.h"
 
+#include "mac-internal.h"
+
 #include <string.h> // memcpy()
 #include <signal.h> // sig_atomic_t
-
-#include "mac-internal.h"
 
 // -----------------------------------------------------------------------------
 // Private 

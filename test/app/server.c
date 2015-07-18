@@ -8,16 +8,15 @@
 // Server test application.
 //
 
+#include "sdl.h"
+#include "uart.h"
+#include "server.h"
+
 #include <stdio.h>
 #include <stdlib.h>
-
-#include "mac.h"
-#include "snet.h"
-#include "server.h"
-#include "uart.h"
-
 #include <signal.h> // sig_atomic_t
 #include <string.h> // strlen
+#include <unistd.h> // getpid
 
 static volatile sig_atomic_t spin = 1;
 

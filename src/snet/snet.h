@@ -16,12 +16,6 @@
 
 #include "sdl-types.h"
 
-#if !defined(__SNET_C__) && !defined(__SNET_TEST_C__)
-#define main SNET_MAIN
-#else
-int SNET_MAIN(int argc, char *argv[]);
-#endif
-
 //
 // Configuration.
 //

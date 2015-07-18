@@ -10,18 +10,19 @@
 //
 
 #include <unit-test.h>
+
+#include "sdl.h"
+#include "snet.h"
+
+#include "snet-internal.h" // snetChildAlert
+#include "uart.h"
+
+#include "cap/sdl-log.h"
+
 #include <signal.h>   // kill
 #include <assert.h>   // assert
 #include <string.h>   // memcpy
 #include <stdbool.h>  // bool
-
-#include "snet.h"
-#include "snet-internal.h" // snetChildAlert
-#include "sdl-types.h"
-#include "sdl-protocol.h"
-#include "uart.h"
-
-#include "cap/sdl-log.h"
 
 // Keep this inline with PHY_TEST_IN in the makefile.
 // This test reads from this file for the PARENT_TO_CHILD data.

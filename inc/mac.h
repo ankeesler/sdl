@@ -8,10 +8,13 @@
 // SDL MAC layer interface.
 //
 
-#ifndef __SDL_H__
-#define __SDL_H__
+#ifndef __MAC_H__
+#define __MAC_H__
 
 #include "sdl-types.h"
+
+#include <stdint.h>
+#include <stdbool.h>
 
 //
 // Management.
@@ -65,4 +68,4 @@ bool sdlCounterValue(SdlCounter counter, uint32_t *value);
 // no value for the counter.
 bool sdlCounterClear(SdlCounter counter);
 
-#endif /* __SDL_H__ */
+#endif /* __MAC_H__ */

@@ -8,18 +8,19 @@
 // SNET implementations.
 //
 
+#include "snet.h"
+
+#include "sdl-types.h"
+#include "sdl-protocol.h"
+
+#include "snet-internal.h"
+#include "snet-debug.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
 #include <signal.h>
 #include <stdint.h>
-
-#include "snet.h"
-#include "snet-internal.h"
-#include "snet-debug.h"
-#include "sdl-types.h"
-
-#include "sdl-protocol.h"
 
 // ----------------------------------------------------------------------------
 // Prototypes.

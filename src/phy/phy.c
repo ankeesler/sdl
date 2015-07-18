@@ -9,11 +9,12 @@
 //
 
 #define __SNET_C__
+#include "sdl.h"
+
 #include "snet.h"
-#include "phy.h"
-#include "sdl-types.h"
+
+#include "phy-internal.h"
 #include "snet-internal.h"
-#include "sdl-protocol.h"
 #include "snet-debug.h"
 
 #include "cap/sdl-log.h"

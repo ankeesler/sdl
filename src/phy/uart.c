@@ -9,6 +9,7 @@
 //
 
 #include "sdl-types.h"
+
 #include "snet-internal.h"
 #include "phy-internal.h"
 

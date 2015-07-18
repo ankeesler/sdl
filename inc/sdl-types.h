@@ -11,9 +11,10 @@
 #ifndef __SDL_TYPES_H__
 #define __SDL_TYPES_H__
 
+#include "sdl-protocol.h"
+
 #include <stdint.h>
 #include <stdbool.h>
-#include "sdl-protocol.h"
 
 // A generic status code in SDL.
 enum {

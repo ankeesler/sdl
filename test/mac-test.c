@@ -10,10 +10,11 @@
 
 #include <unit-test.h>
 
-#define __SDL_MAIN_C__
-#include "phy.h"
 #include "mac.h"
+#include "phy.h"
+
 #include "mac-internal.h"
+#include "phy-internal.h"
 
 #include <unistd.h>  // getpid()
 #include <stdbool.h> // bool

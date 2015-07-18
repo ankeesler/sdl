@@ -9,17 +9,18 @@
 //
 
 #include <unit-test.h>
-#include <signal.h>
-#include <sys/wait.h>
-#include <stdbool.h>
-#include <string.h> // strcmp
 
 #define __SNET_C__
-#include "src/snet/snet.h"
+#include "snet.h"
 #include "app/server.h"
 #include "mac.h"
 
 #include "sdl-test-util.h"
+
+#include <signal.h>
+#include <sys/wait.h>
+#include <stdbool.h>
+#include <string.h> // strcmp
 
 #define STOP(server) kill(server->pid, SERVER_OFF_SIGNAL)
 
