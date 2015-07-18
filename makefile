@@ -11,10 +11,12 @@ all: test
 SHELL=sh
 
 INC_DIR=inc
-SNET_DIR=snet
-PHY_DIR=phy
-MAC_DIR=mac
-TEST_APPS_DIR=nodes
+SRC_DIR=src
+
+SNET_DIR=$(SRC_DIR)/snet
+PHY_DIR=$(SRC_DIR)/phy
+MAC_DIR=$(SRC_DIR)/mac
+TEST_APPS_DIR=app
 TEST_DIR=test
 CAP_DIR=cap
 

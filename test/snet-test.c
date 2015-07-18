@@ -15,8 +15,8 @@
 #include <string.h> // strcmp
 
 #define __SNET_C__
-#include "snet/snet.h"
-#include "nodes/server.h"
+#include "src/snet/snet.h"
+#include "app/server.h"
 #include "mac.h"
 
 #include "sdl-test-util.h"
