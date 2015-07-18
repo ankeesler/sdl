@@ -63,15 +63,17 @@ LINK=$(CC) $(LDFLAGS) -o $@ $^
 cscope.files: $(ALL_SOURCE)
 	echo $^ > $@
 
-cscope: cscope.files
-	rm cscope*out
+cscope: clean-cscope cscope.files
 	cscope -b -q
+
+clean-cscope:
+	rm -f cscope*
 
 #
 # BUILD
 #
 
-clean: clean-cap
+clean: clean-cap clean-cscope
 	rm -frd ./*.o $(BUILD_DIR) $(SDL_LOG_TEST_FILE) .child*
 
 $(BUILD_DIR_CREATED):
