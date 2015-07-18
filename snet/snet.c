@@ -50,6 +50,8 @@ static uint8_t nodesInNetwork = 0;
 static volatile sig_atomic_t newestChildReady = 0;
 static volatile sig_atomic_t waitForNewChild  = 1;
 
+static SnetNodeUartIsr uartIsr = NULL;
+
 // ----------------------------------------------------------------------------
 // Testing.
 
@@ -135,8 +137,8 @@ void signalHandler(int signal, siginfo_t *info, void *wut)
 {
   pid_t pid = 0;
   int stat = 0;
-  uint8_t i, buffer[SDL_PHY_PDU_LEN + SDL_PHY_SDU_MAX], command;
-  SdlStatus status;
+  uint8_t i, buffer[UINT8_MAX], command, length;
+  SdlStatus status = SDL_SUCCESS;
   SnetNode *node = NULL;
 
   if (signal == SIGCHLD) {
@@ -164,6 +166,14 @@ void signalHandler(int signal, siginfo_t *info, void *wut)
               && nodePool[i].pid != pid) {
             status = snetNodeCommand(&nodePool[i], RECEIVE, buffer);
           }
+        }
+      } else if (command == CHILD_TO_PARENT_COMMAND_UART) {
+        if (uartIsr) {
+          // Cheat and use the TRANSMIT buffer to read in the data.
+          // TODO: die on bad read?
+          read(node->childToParentFd, &length, sizeof(uint8_t));
+          read(node->childToParentFd, buffer, length);
+          uartIsr(node->name, buffer, length);
         }
       }
     }
@@ -409,4 +419,11 @@ SdlStatus snetNodeCommand(SnetNode *node, SnetNodeCommand command, ...)
              ? SDL_SNET_COM_FAILURE
              : SDL_SUCCESS)
           : status);
+}
+
+SnetNodeUartIsr snetNodeUartIsr(SnetNodeUartIsr newUartIsr)
+{
+  SnetNodeUartIsr oldUartIsr = uartIsr;
+  uartIsr = newUartIsr;
+  return oldUartIsr;
 }

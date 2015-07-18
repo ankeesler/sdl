@@ -60,3 +60,4 @@
 
 // Child to parent commands.
 #define CHILD_TO_PARENT_COMMAND_TRANSMIT (0x01)
+#define CHILD_TO_PARENT_COMMAND_UART     (0x02)

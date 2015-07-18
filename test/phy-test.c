@@ -19,6 +19,7 @@
 #include "snet-internal.h" // snetChildAlert
 #include "sdl-types.h"
 #include "sdl-protocol.h"
+#include "uart.h"
 
 #include "cap/sdl-log.h"
 
@@ -70,6 +71,13 @@ static const uint8_t phyTestInData[] = {
 
   BUTTON  , // SnetNodeCommand
   0x01    , // Button ID
+
+  // uartTest
+  BUTTON  , // SnetNodeCommand
+  0x02    , // Button ID
+
+  BUTTON  , // SnetNodeCommand
+  0x03    , // Button ID
 };
 #define PHY_TEST_IN_LEN (sizeof(phyTestInData) / sizeof(phyTestInData[0]))
 
@@ -173,6 +181,30 @@ int buttonTest(void)
   return 0;
 }
 
+int uartTest(void)
+{
+  uint8_t data[10], dataLength = 0;
+  for (; dataLength < 10; dataLength ++) data[dataLength] = dataLength;
+  dataLength = 10;
+
+  // We should be able to send an error checking signal to ourselves.
+  expectEquals(kill(getpid(), 0), 0);
+
+  // When we transmit something over the uart, we should make sure that
+  // we are notifying our parent that something is up. In this test,
+  // we notify ourselves instead (see snet-internal.h). Therefore, we
+  // should run our signal handler and read a button command out of
+  // the fd (see phyTestInData).
+  expectEquals(sdlUartTransmit(data, dataLength), SDL_SUCCESS);
+  expectEquals(buttonId, 0x02);
+
+  // Just to make sure it is not a coincidence...
+  expectEquals(sdlUartTransmit(data, dataLength), SDL_SUCCESS);
+  expectEquals(buttonId, 0x03);
+
+  return 0;
+}
+
 int logTest(void)
 {
   expect(sdlLogOn());
@@ -202,6 +234,8 @@ int main(void)
   run(transmitTest);
 
   run(buttonTest);
+
+  run(uartTest);
 
   run(logTest);
 

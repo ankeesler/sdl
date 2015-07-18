@@ -41,7 +41,7 @@ char childLogFilename[256];
     fflush(childLogFile);                             \
   } while (0);
 
-static int parentToChildFd, childToParentFd;
+int parentToChildFd, childToParentFd;
 
 static void cleanup(void)
 {

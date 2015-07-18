@@ -12,6 +12,7 @@
 #include <signal.h>
 #include <sys/wait.h>
 #include <stdbool.h>
+#include <string.h> // strcmp
 
 #define __SNET_C__
 #include "snet/snet.h"
@@ -27,6 +28,21 @@ SnetNode *server1 = NULL, *server2 = NULL;
 
 // Stubs.
 SdlStatus sdlPhyTransmit(uint8_t *data, uint8_t length) { return SDL_SUCCESS; }
+
+static const char *lastUartName = NULL;
+static uint8_t lastUartData[128], lastUartDataLength = 0;
+static void uartIsr(const char *name, uint8_t *data, uint8_t length)
+{
+  lastUartName = name;
+  memcpy(lastUartData, data, length);
+  lastUartDataLength = length;
+}
+#define expectLastUartName(name)                  \
+  expect(strcmp(name, lastUartName) == 0)
+#define expectLastUartData(data, length)          \
+  expect(memcmp(data, lastUartData, length) == 0)
+#define expectLastUartLength(length)              \
+  expectEquals(length, lastUartDataLength)
 
 static void failureHandler(void)
 {
@@ -332,6 +348,75 @@ int buttonTest(void)
   return 0;
 }
 
+int uartTest(void)
+{
+  snetManagementInit();
+
+  // Bring up two servers.
+  server1 = server2 = NULL;
+  expect((int)(server1 = snetNodeMake("build/server/server", "server1")));
+  expect((int)(server2 = snetNodeMake("build/server/server", "server2")));
+
+  // Boot the servers.
+  expect(!snetNodeStart(server1));
+  expect(RUNNING(server1));
+  expect(!snetNodeStart(server2));
+  expect(RUNNING(server2));
+
+  // Sanity check.
+  expectLastUartLength(0);
+  expect(!lastUartName);
+
+  // If we don't set a uart isr, we shouldn't get any data.
+  expectEquals(snetNodeCommand(server1, BUTTON, SERVER_UART_BUTTON1),
+               SDL_SUCCESS);
+  expectLastUartLength(0);
+  expect(!lastUartName);
+
+  // When we set the uart isr at first, we should get null as the original.
+  expect(!snetNodeUartIsr(uartIsr));
+
+  // If we do set a uart isr, we should get some data.
+  expectEquals(snetNodeCommand(server1, BUTTON, SERVER_UART_BUTTON1),
+               SDL_SUCCESS);
+  usleep(SERVER_DUTY_CYCLE_US << 1);
+  expectLastUartLength(strlen(SERVER_UART_BUTTON1_STRING));
+  expectLastUartName("server1");
+  expectLastUartData(SERVER_UART_BUTTON1_STRING,
+                     strlen(SERVER_UART_BUTTON1_STRING));
+
+  // Because I am too skeptical...
+  expectLastUartLength(strlen(SERVER_UART_BUTTON1_STRING));
+  expectLastUartName("server1");
+  expectLastUartData(SERVER_UART_BUTTON1_STRING,
+                     strlen(SERVER_UART_BUTTON1_STRING));
+
+  // We should get the correct source node for each uart isr.
+  expectEquals(snetNodeCommand(server2, BUTTON, SERVER_UART_BUTTON2),
+               SDL_SUCCESS);
+  usleep(SERVER_DUTY_CYCLE_US << 1);
+  expectLastUartLength(strlen(SERVER_UART_BUTTON2_STRING));
+  expectLastUartName("server2");
+  expectLastUartData(SERVER_UART_BUTTON2_STRING,
+                     strlen(SERVER_UART_BUTTON2_STRING));
+
+  // If we set the uart isr to null, we shouldn't get any data again.
+  expect(uartIsr == snetNodeUartIsr(NULL));
+  expectEquals(snetNodeCommand(server1, BUTTON, SERVER_UART_BUTTON1),
+               SDL_SUCCESS);
+  usleep(SERVER_DUTY_CYCLE_US << 1);
+  expectLastUartLength(strlen(SERVER_UART_BUTTON2_STRING));
+  expectLastUartName("server2");
+  expectLastUartData(SERVER_UART_BUTTON2_STRING,
+                     strlen(SERVER_UART_BUTTON2_STRING));
+
+  // Tear down the network.
+  snetManagementDeinit();
+  expectEquals(snetManagementSize(), 0);
+
+  return 0;
+}
+
 int main(void)
 {
   announce();
@@ -348,6 +433,8 @@ int main(void)
   run(transmitTest);
 
   run(buttonTest);
+
+  run(uartTest);
 
   return 0;
 }

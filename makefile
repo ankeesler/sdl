@@ -41,7 +41,7 @@ SDL_LOG_FILES=$(CAP_DIR)/sdl-log.c
 
 MAC_FILES=$(MAC_DIR)/mac.c $(MAC_DIR)/mac-util.c
 
-PHY_FILES=$(PHY_DIR)/phy.c
+PHY_FILES=$(PHY_DIR)/phy.c $(PHY_DIR)/uart.c
 
 SDL_FILES=$(PHY_FILES) $(MAC_FILES) $(SDL_LOG_FILES)
 

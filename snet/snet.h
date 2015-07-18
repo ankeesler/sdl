@@ -95,4 +95,13 @@ SdlStatus snetNodeStop(SnetNode *node);
 // Command the node to do something.
 SdlStatus snetNodeCommand(SnetNode *node, SnetNodeCommand command, ...);
 
+// Set the parent-level pseudo-ISR for receiving UART bytes.
+// If this is not set then there will be no notification for when a node
+// sends bytes across its UART.
+// This function returns the previous nodeUartIsr.
+// The ISR takes the name of the node, the received data bytes, and the length
+// of the received bytes for its parameters.
+typedef void (*SnetNodeUartIsr)(const char *, uint8_t *, uint8_t);
+SnetNodeUartIsr snetNodeUartIsr(SnetNodeUartIsr uartIsr);
+
 #endif /* __SNET_H__ */
