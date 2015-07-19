@@ -16,11 +16,12 @@ MILESTONES:
     - SDL LOG TX: Put logging back in
     - SDL LOG RX: test with parent alert signal
     - PHY INTERFACE: transmit (this is done in junction with SNET development)
+    - SNET INTERFACE: add a way for users to define their own commands
+      - Buttons...
+    - MAC PROTOCOL: packet filtering
   TODO:
     - PHY: CCA support (backwards compatability, was in SDL 01)
   BACKLOG:
-    - SNET INTERFACE: add a way for users to define their own commands
-    - MAC PROTOCOL: packet filtering
     - MAC PROTOCOL: command packets
     
 # NWK
