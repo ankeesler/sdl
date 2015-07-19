@@ -75,9 +75,11 @@ int main(void)
     } else if (buttonPressed == SERVER_UART_BUTTON1) {
       uint8_t *data = (uint8_t *)SERVER_UART_BUTTON1_STRING;
       sdlUartTransmit(data, strlen(SERVER_UART_BUTTON1_STRING));
+      buttonPressed = NULL_BUTTON;
     } else if (buttonPressed == SERVER_UART_BUTTON2) {
       uint8_t *data = (uint8_t *)SERVER_UART_BUTTON2_STRING;
       sdlUartTransmit(data, strlen(SERVER_UART_BUTTON2_STRING));
+      buttonPressed = NULL_BUTTON;
     }
 
     // Try to receive something.
