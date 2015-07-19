@@ -204,18 +204,6 @@ SERVER_OBJ=$(addprefix $(SERVER_DIR)/,$(notdir $(SERVER_FILES:.c=.o)))
 $(SERVER_DIR)/server: $(addprefix $(SERVER_DIR)/,$(notdir $(SERVER_FILES:.c=.o)))
 	$(LINK)
 
-CLIENT_DIR=$(BUILD_DIR)/client
-CLIENT_DIR_CREATED=$(CLIENT_DIR)/tuna
-$(CLIENT_DIR_CREATED): $(BUILD_DIR_CREATED)
-	mkdir $(@D)
-	touch $@
-$(CLIENT_DIR)/%.o: %.c | $(CLIENT_DIR_CREATED)
-	$(COMPILE)
-CLIENT_FILES=$(SNET_CHILD_FILES) $(TEST_APPS_DIR)/client.c $(SNET_DEBUG_FILE)
-CLIENT_OBJ=$(addprefix $(CLIENT_DIR)/,$(notdir $(CLIENT_FILES:.c=.o)))
-$(CLIENT_DIR)/client: $(addprefix $(CLIENT_DIR)/,$(notdir $(CLIENT_FILES:.c=.o)))
-	$(LINK)
-
 #
 # CAPTURE FRAMEWORK
 #
