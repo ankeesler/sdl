@@ -299,6 +299,7 @@ SdlStatus snetNodeStart(SnetNode *node)
     if (!waitForNewChild) {
       status = SDL_SNET_COM_FAILURE;
     }
+    alarm(0);
     newestChildReady = 0;
     waitForNewChild = 1;
   } else {
