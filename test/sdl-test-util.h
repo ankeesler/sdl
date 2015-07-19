@@ -8,6 +8,8 @@
 // SDL testing utilities.
 //
 
+#include <signal.h> // kill()
+
 // Is a child node running?
 #define RUNNING(node) (kill(node->pid, 0) == 0)
 
