@@ -1,0 +1,40 @@
+# sensor-sink.txt
+# July 13, 2015
+# Andrew Keesler
+# Plan for sensor/sink sample app pair to test SNET.
+
+GOALS:
+  - 2 applications communicating with each other.
+  - Fully test the SNET tool.
+
+MILESTONES:
+  DONE:
+  TODO:
+  BACKLOG:
+
+                     sensor           sink
+                       |               |
+                       |               | (listen for sensors)
+                       |               |
+(power on)             |               |
+(broadcast sink find)  | ------>       |
+                       |               |
+                       |      <------  | (unicast sink find success)
+                       |               |
+(store sink info)      |               |
+                       ...
+(unicast report data)  | ------>       |
+                       |               |
+                       |               | (store data)
+                       |               |
+                       ...
+(unicast report data)  | ------>       |
+                       |               |
+                       |               | (store data)
+                       |               |
+                       ...
+(unicast report data)  | ------>       |
+                       |               |
+                       |               | (store data)
+                       |               |
+
