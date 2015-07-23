@@ -46,6 +46,9 @@ int parentToChildFd, childToParentFd;
 
 static void cleanup(void)
 {
+  // Dump to the log.
+  childLog("Dumping to log (%d)", sdlLogDump());
+
   childLog("%s", "GOODBYE");
 
   // Close our log file.
@@ -54,9 +57,6 @@ static void cleanup(void)
   // Close the pipes.
   close(parentToChildFd);
   close(childToParentFd);
-  
-  // Dump to the log.
-  sdlLogDump();
 }
 
 static void signalHandler(int signal)
