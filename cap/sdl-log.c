@@ -18,11 +18,11 @@
 
 #ifndef SDL_LOG
 // Then stubs.
-int sdlLogInit() { return 0; }
+int sdlLogInit() { return 1; }
 int sdlLogOn() { return 0; }
-int sdlLogDump() { return 0; }
-int sdlLogTx(unsigned char *bytes, int length) { return 0; }
-int sdlLogRx(unsigned char *bytes, int length) { return 0; }
+int sdlLogDump() { return 1; }
+int sdlLogTx(unsigned char *bytes, int length) { return 1; }
+int sdlLogRx(unsigned char *bytes, int length) { return 1; }
 #else //SDL_LOG
 
 #ifdef SDL_LOG_FILE

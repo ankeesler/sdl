@@ -35,6 +35,7 @@ int sdlLogOn(void);
 
 // Dumps log to specified file. If no value is specified for
 // macro SDL_LOG, then it will be dumped to stdout.
+// Returns 0 for success, 1 for error.
 int sdlLogDump(void);
 
 // Log transmits and receives.
