@@ -49,7 +49,7 @@ SDL_FILES=$(PHY_FILES) $(MAC_FILES) $(SDL_LOG_FILES)
 
 SNET_CHILD_FILES=$(SDL_FILES)
 SNET_DEBUG_FILE=$(SNET_DIR)/snet-debug.c
-SNET_PARENT_FILES=$(SNET_DIR)/snet.c $(SNET_DEBUG_FILE)
+SNET_PARENT_FILES=$(SNET_DIR)/snet.c $(SNET_DEBUG_FILE) $(SNET_DIR)/snet-expect.c
 
 ALL_SOURCE=$(shell find . -name "*.[ch]") $(shell find . -name "*.java")
 
@@ -85,7 +85,7 @@ $(BUILD_DIR_CREATED):
 #
 
 .PHONY: test
-test: run-snet-test run-phy-test run-mac-test
+test: run-snet-test run-phy-test run-mac-test run-snet-expect-test
 
 #
 # PHY
@@ -178,6 +178,31 @@ $(SNET_TEST_DIR)/snet-test: $(addprefix $(SNET_TEST_DIR)/,$(notdir $(SNET_TEST_F
 .PHONY: run-snet-test
 run-snet-test: $(SNET_TEST_EXES)
 	./$<
+
+SNET_EXPECT_TEST_FILES=          \
+  $(SNET_PARENT_FILES)           \
+  $(TEST_DIR)/snet-expect-test.c
+
+SNET_EXPECT_TEST_DIR=$(BUILD_DIR)/snet-expect-test-dir
+SNET_EXPECT_TEST_DIR_CREATED=$(SNET_EXPECT_TEST_DIR)/tuna
+$(SNET_EXPECT_TEST_DIR_CREATED): $(BUILD_DIR_CREATED)
+	mkdir $(@D)
+	touch $@
+
+$(SNET_EXPECT_TEST_DIR)/%.o: DEFINES += -DSNET_TEST
+$(SNET_EXPECT_TEST_DIR)/%.o: %.c | $(SNET_EXPECT_TEST_DIR_CREATED)
+	$(COMPILE)
+
+SNET_EXPECT_TEST_EXES=                      \
+  $(SNET_EXPECT_TEST_DIR)/snet-expect-test  \
+  $(BUILD_DIR)/server/server
+
+$(SNET_EXPECT_TEST_DIR)/snet-expect-test: $(addprefix $(SNET_EXPECT_TEST_DIR)/,$(notdir $(SNET_EXPECT_TEST_FILES:.c=.o)))
+	$(LINK)
+
+.PHONY: run-expect-snet-test
+run-snet-expect-test: $(SNET_EXPECT_TEST_EXES)
+	./$< $(ARGS)
 
 #
 # TEST APPS
