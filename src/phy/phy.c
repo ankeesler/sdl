@@ -64,7 +64,7 @@ static void signalHandler(int signal)
   uint8_t rxBuffer[SDL_PHY_SDU_MAX + SDL_PHY_PDU_LEN];
   SnetNodeCommand command = NIL;
 
-  childLog("signal: %s", signalNames[signal]);
+  childLog("signal: %s", sys_signame[signal]);
 
   if (signal == CHILD_ALERT_SIGNAL) {
     // Read the command out of the pipe.

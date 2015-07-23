@@ -99,7 +99,7 @@ static SnetNodeUartIsr uartIsr = NULL;
              ((signalData[i].time.tv_sec * 1000000)
                + signalData[i].time.tv_usec),
              signalData[i].signal,
-             signalNames[signalData[i].signal],
+             sys_signame[signalData[i].signal],
              signalData[i].ret);
     }
     fflush(stdout);

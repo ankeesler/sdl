@@ -14,8 +14,6 @@
 #include <stdint.h>
 #include <stdio.h>
 
-extern const char *signalNames[];
-
 #ifdef SNET_TEST
 
 // Print some SDL PHY data.
