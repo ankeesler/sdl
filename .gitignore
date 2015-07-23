@@ -1,8 +1,9 @@
 # Build...
 /build/
 
-# The test log file.
+# Log files.
 tuna.sdl
+sensor.sdl
 
 # Class files
 *.class

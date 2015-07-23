@@ -84,8 +84,10 @@ $(BUILD_DIR_CREATED):
 # TEST
 #
 
+TESTS=snet phy mac snet-expect sensor-sink
+
 .PHONY: test
-test: run-snet-test run-phy-test run-mac-test run-snet-expect-test
+test: $(patsubst %, run-%-test, $(TESTS))
 
 #
 # PHY
@@ -204,18 +206,34 @@ $(SNET_EXPECT_TEST_DIR)/snet-expect-test: $(addprefix $(SNET_EXPECT_TEST_DIR)/,$
 run-snet-expect-test: $(SNET_EXPECT_TEST_EXES)
 	./$< $(ARGS)
 
+SENSOR_SINK_TEST_FILES=          \
+  $(SNET_PARENT_FILES)           \
+  $(TEST_DIR)/sensor-sink-test.c
+
+SENSOR_SINK_TEST_DIR=$(BUILD_DIR)/sensor-sink-test-dir
+SENSOR_SINK_TEST_DIR_CREATED=$(SENSOR_SINK_TEST_DIR)/tuna
+$(SENSOR_SINK_TEST_DIR_CREATED): $(BUILD_DIR_CREATED)
+	mkdir $(@D)
+	touch $@
+
+$(SENSOR_SINK_TEST_DIR)/%.o: DEFINES += -DSNET_TEST
+$(SENSOR_SINK_TEST_DIR)/%.o: %.c | $(SENSOR_SINK_TEST_DIR_CREATED)
+	$(COMPILE)
+
+SENSOR_SINK_TEST_EXES=                      \
+  $(SENSOR_SINK_TEST_DIR)/sensor-sink-test  \
+  $(BUILD_DIR)/sensor/sensor
+
+$(SENSOR_SINK_TEST_DIR)/sensor-sink-test: $(addprefix $(SENSOR_SINK_TEST_DIR)/,$(notdir $(SENSOR_SINK_TEST_FILES:.c=.o)))
+	$(LINK)
+
+.PHONY: run-expect-snet-test
+run-sensor-sink-test: $(SENSOR_SINK_TEST_EXES)
+	./$< $(ARGS)
+
 #
 # TEST APPS
 #
-
-ALL_TEST_APPS:                 \
-    $(BUILD_DIR)/client/client \
-    $(SERVER_DIR)/server
-
-$(ALL_TEST_APPS):                                       \
-    DEFINES += -DSNET_TEST                              \
-               -DSDL_LOG                                \
-               -DSDL_LOG_FILE=\"$(SDL_LOG_TEST_FILE)\"
 
 SERVER_DIR=$(BUILD_DIR)/server
 SERVER_DIR_CREATED=$(SERVER_DIR)/tuna
@@ -227,6 +245,19 @@ $(SERVER_DIR)/%.o: %.c | $(SERVER_DIR_CREATED)
 SERVER_FILES=$(SNET_CHILD_FILES) $(TEST_APPS_DIR)/server.c $(SNET_DEBUG_FILE)
 SERVER_OBJ=$(addprefix $(SERVER_DIR)/,$(notdir $(SERVER_FILES:.c=.o)))
 $(SERVER_DIR)/server: $(addprefix $(SERVER_DIR)/,$(notdir $(SERVER_FILES:.c=.o)))
+	$(LINK)
+
+SENSOR_DIR=$(BUILD_DIR)/sensor
+SENSOR_DIR_CREATED=$(SENSOR_DIR)/tuna
+$(SENSOR_DIR_CREATED): $(BUILD_DIR_CREATED)
+	mkdir $(@D)
+	touch $@
+$(SENSOR_DIR)/%.o: DEFINES += -DSDL_LOG -DSDL_LOG_FILE=\"sensor.sdl\"
+$(SENSOR_DIR)/%.o: %.c | $(SENSOR_DIR_CREATED)
+	$(COMPILE)
+SENSOR_FILES=$(SNET_CHILD_FILES) $(TEST_APPS_DIR)/sensor.c $(SNET_DEBUG_FILE)
+SENSOR_OBJ=$(addprefix $(SENSOR_DIR)/,$(notdir $(SENSOR_FILES:.c=.o)))
+$(SENSOR_DIR)/sensor: $(addprefix $(SENSOR_DIR)/,$(notdir $(SENSOR_FILES:.c=.o)))
 	$(LINK)
 
 #
