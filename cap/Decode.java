@@ -16,13 +16,46 @@ public class Decode {
 
   private static final String YAML_FILENAME = "ipv6.yaml";
 
+  private static final String OPTION_SDL     = "--sdl";
+  private static final String OPTION_SDL_KEY = "--sdl-key=";
+
+  private static final String OPTION_IP  = "--ip";
+
+  private static boolean doDecodeSdl(String[] args) {
+    for (String arg : args) {
+      if (arg.equals(OPTION_SDL)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private static boolean doDecodeIp(String[] args) {
+    for (String arg : args) {
+      if (arg.equals(OPTION_IP)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private static String sdlKey(String[] args) {
+    for (String arg : args) {
+      if (arg.startsWith(OPTION_SDL_KEY)) {
+        return arg.substring(OPTION_SDL_KEY.length());
+      }
+    }
+    return null;
+  }
+
   public static void main(String[] args) {
     System.out.println(" @ Starting...");
 
     // Get the input file.
     if (args.length == 0) {
+      String usage = String.format("java -jar Decoder.jar inputFilename [%s] [%s] [%s]", OPTION_SDL, OPTION_IP);
       System.out.println(" @ Error: incorrect usage.");
-      System.out.println(" @ Usage: java -jar Decode.jar inputFilename");
+      System.out.println(" @ Usage: " + usage);
       System.out.println(" @ Exiting.");
       return;
     }
@@ -54,11 +87,17 @@ public class Decode {
     System.out.println(" @ ...parsed log...");
 
     ParseTreeWalker walker = new ParseTreeWalker();
-    SdlLogIpv6Listener decoder = new SdlLogIpv6Listener();
     System.out.println(" @ ...ready.");
 
-    // Perform the decoding.
-    walker.walk(decoder, tree);
+    // SDL decoding.
+    if (doDecodeSdl(args)) {
+      walker.walk(new SdlLogSdlListener(sdlKey(args)), tree);
+    }
+
+    // IPv6 decoding.
+    if (doDecodeIp(args)) {
+      walker.walk(new SdlLogIpv6Listener(), tree);
+    }
     
     System.out.println(" @ Done.");
   }

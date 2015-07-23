@@ -281,7 +281,7 @@ $(CAP_DIR)/Decode.jar: $(CAP_DIR)
 	cd $<; jar cfm $(@F) $(MANIFEST_FILE) *.class $(IPV6_YAML_FILE)
 
 decoder: $(CAP_DIR)/Decode.jar
-	java -jar $<
+	java -jar $< $(ARGS)
 
 clean-cap:
 	rm -f $(CAP_DIR)/*.class $(CAP_DIR)/*.jar $(CAP_DIR)/Decode.jar

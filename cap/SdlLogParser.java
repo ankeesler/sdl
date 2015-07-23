@@ -17,7 +17,7 @@ public class SdlLogParser extends Parser {
 		T__4=1, T__3=2, T__2=3, T__1=4, T__0=5, TIMESTAMP=6, FLOAT=7, DIRECTION=8, 
 		DATA=9, HEXBYTES=10, HEXBYTE=11, WS=12;
 	public static final String[] tokenNames = {
-		"<INVALID>", "'('", "')'", "'{'", "'CAPTURE'", "'}'", "TIMESTAMP", "FLOAT", 
+		"<INVALID>", "'CAPTURE'", "'{'", "')'", "'('", "'}'", "TIMESTAMP", "FLOAT", 
 		"DIRECTION", "DATA", "HEXBYTES", "HEXBYTE", "WS"
 	};
 	public static final int
@@ -73,8 +73,8 @@ public class SdlLogParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(4); match(4);
-			setState(5); match(3);
+			setState(4); match(1);
+			setState(5); match(2);
 			setState(7); 
 			_errHandler.sync(this);
 			_la = _input.LA(1);
@@ -87,7 +87,7 @@ public class SdlLogParser extends Parser {
 				setState(9); 
 				_errHandler.sync(this);
 				_la = _input.LA(1);
-			} while ( _la==1 );
+			} while ( _la==4 );
 			setState(11); match(5);
 			}
 		}
@@ -126,9 +126,9 @@ public class SdlLogParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(13); match(1);
+			setState(13); match(4);
 			setState(14); match(TIMESTAMP);
-			setState(15); match(2);
+			setState(15); match(3);
 			setState(16); match(DIRECTION);
 			setState(17); match(DATA);
 			}
@@ -147,9 +147,9 @@ public class SdlLogParser extends Parser {
 	public static final String _serializedATN =
 		"\3\u0430\ud6d1\u8206\uad2d\u4417\uaef1\u8d80\uaadd\3\16\26\4\2\t\2\4\3"+
 		"\t\3\3\2\3\2\3\2\6\2\n\n\2\r\2\16\2\13\3\2\3\2\3\3\3\3\3\3\3\3\3\3\3\3"+
-		"\3\3\2\2\4\2\4\2\2\24\2\6\3\2\2\2\4\17\3\2\2\2\6\7\7\6\2\2\7\t\7\5\2\2"+
+		"\3\3\2\2\4\2\4\2\2\24\2\6\3\2\2\2\4\17\3\2\2\2\6\7\7\3\2\2\7\t\7\4\2\2"+
 		"\b\n\5\4\3\2\t\b\3\2\2\2\n\13\3\2\2\2\13\t\3\2\2\2\13\f\3\2\2\2\f\r\3"+
-		"\2\2\2\r\16\7\7\2\2\16\3\3\2\2\2\17\20\7\3\2\2\20\21\7\b\2\2\21\22\7\4"+
+		"\2\2\2\r\16\7\7\2\2\16\3\3\2\2\2\17\20\7\6\2\2\20\21\7\b\2\2\21\22\7\5"+
 		"\2\2\22\23\7\n\2\2\23\24\7\13\2\2\24\5\3\2\2\2\3\13";
 	public static final ATN _ATN =
 		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
