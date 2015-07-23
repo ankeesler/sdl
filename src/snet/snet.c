@@ -126,7 +126,8 @@ static SnetNode *findNodeForPid(pid_t pid)
 {
   uint8_t i;
   for (i = 0; i < SNET_MAX_HOSTS; i ++) {
-    if (nodePool[i].pid == pid) {
+    if (nodePool[i].mask & SNET_NODE_MASK_ON_NETWORK
+        && nodePool[i].pid == pid) {
       return nodePool + i;
     }
   }
