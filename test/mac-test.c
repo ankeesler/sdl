@@ -84,6 +84,7 @@ int loopbackTest(void)
   expect(packet.source == source);
   expect(packet.destination == source);
   expect(!memcmp(packet.data, data, dataBufferLength));
+  expect(packet.dataLength == dataBufferLength);
 
   // After, the SDL should be empty.
   expect(sdlMacReceive(&packet)

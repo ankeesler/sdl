@@ -168,6 +168,9 @@ void sdlPhyReceiveIsr(uint8_t *data, uint8_t length)
   // Data.
   memcpy(rxBuffer[rxTail].data, data + 12, dataLength);
 
+  // Data length.
+  rxBuffer[rxTail].dataLength = dataLength;
+
   rxTail = nextRxBufferIndex(rxTail);
 }
 
