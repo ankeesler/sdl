@@ -63,3 +63,12 @@
 
 #define SENSOR_SINK_DATA_TYPE_TIME        (0x34)
 #define SENSOR_SINK_DATA_TYPE_TIME_LENGTH (4)
+
+// Common routines to the Sensor/Sink scenario.
+void sensorSinkEncryptOrDecrypt(uint8_t *data, uint8_t length, const char *key);
+#define sensorSinkEncrypt(data, length, key)    \
+  sensorSinkEncryptOrDecrypt(data, length, key)
+#define sensorSinkDecrypt(data, length, key)    \
+  sensorSinkEncryptOrDecrypt(data, length, key)
+
+void sensorSinkPrintf(const char *format, ...);

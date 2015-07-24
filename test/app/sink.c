@@ -17,7 +17,6 @@
 #include <unistd.h> // getpid()
 #include <stdlib.h> // exit()
 #include <string.h> // strlen(), memset()
-#include <stdarg.h> // va_list, va_start(), va_arg(), va_end()
 #include <stdio.h>  // vsnprint()
 
 // -----------------------------------------------------------------------------
@@ -48,10 +47,6 @@ static void processAdvertisement(SdlPacket *advertisement);
 // If the address is SDL_MAC_ADDRESS_BROADCAST, then this will return
 // the first available sensor index.
 static uint8_t findSensorForAddress(SdlAddress address);
-
-static void decryptData(uint8_t *data, uint8_t length);
-
-static void sinkPrint(const char *format, ...);
 
 // -----------------------------------------------------------------------------
 // Main
@@ -94,11 +89,11 @@ static void listenForAdvertisement(void)
   // If there is a packet to receive...
   if (sdlMacReceive(&packet) == SDL_SUCCESS) {
     // ...we first must decrypt it.
-    decryptData(packet.data, packet.dataLength);
+    sensorSinkDecrypt(packet.data, packet.dataLength, SENSOR_SINK_CRYPTO_KEY);
     // If it is an advertisement...
     if (packet.data[SENSOR_SINK_COMMAND_INDEX] == SENSOR_SINK_ADVERTISEMENT) {
       // ...then process the advertisement.
-      sinkPrint("Sink: Received advertisement from: 0x%08X", packet.source);
+      sensorSinkPrintf("Sink: Received advertisement from: 0x%08X", packet.source);
       processAdvertisement(&packet);
     }
   }
@@ -137,7 +132,7 @@ static void processAdvertisement(SdlPacket *advertisement)
       sensorList[sensorIndex].profile = profile;
       sensorList[sensorIndex].mask |= SENSOR_DATA_MASK_USED;
       responseStatus = SENSOR_SINK_ADVERTISEMENT_RESPONSE_STATUS_SUCCESS;
-      sinkPrint("Sink: Connected with sensor for profile: 0x%04X", profile);
+      sensorSinkPrintf("Sink: Connected with sensor for profile: 0x%04X", profile);
     }
   }
 }
@@ -159,37 +154,6 @@ static uint8_t findSensorForAddress(SdlAddress address)
   }
 
   return 0xFF;
-}
-
-static void decryptData(uint8_t *data, uint8_t length)
-{
-  const char *key = SENSOR_SINK_CRYPTO_KEY;
-  uint8_t dataI, keyI, keyLength;
-
-  keyLength = strlen(key);
-
-  // Only the highest of encryption standards.
-  for (dataI = 0; dataI < length; dataI ++) {
-    data[dataI] -= key[keyI];
-
-    if (++keyI == keyLength) {
-      keyI = 0;
-    }
-  }
-}
-
-static void sinkPrint(const char *format, ...)
-{
-  char data[UINT8_MAX];
-  va_list args;
-
-  va_start(args, format);
-
-  vsnprintf(data, sizeof(data), format, args);
-
-  sdlUartTransmit((uint8_t *)data, strlen(data));
-
-  va_end(args);
 }
 
 // -----------------------------------------------------------------------------

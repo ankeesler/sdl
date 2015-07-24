@@ -42,7 +42,7 @@ public class SdlLogSdlListener extends SdlLogBaseListener {
 
     for (int cryptI = 0, keyI = 0; cryptI < bytes.size(); cryptI ++) {
       int crypt = bytes.get(cryptI);
-      int plain = crypt - key.charAt(keyI);
+      int plain = crypt ^ key.charAt(keyI);
 
       // Stupid java with its all signed types.
       if (plain < 0) plain += 255;

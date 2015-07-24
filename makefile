@@ -256,7 +256,7 @@ $(SENSOR_DIR_CREATED): $(BUILD_DIR_CREATED)
 $(SENSOR_DIR)/%.o: DEFINES += -DSDL_LOG -DSDL_LOG_FILE=\"sensor.sdl\"
 $(SENSOR_DIR)/%.o: %.c | $(SENSOR_DIR_CREATED)
 	$(COMPILE)
-SENSOR_FILES=$(SNET_CHILD_FILES) $(TEST_APPS_DIR)/sensor.c $(SNET_DEBUG_FILE)
+SENSOR_FILES=$(SNET_CHILD_FILES) $(TEST_APPS_DIR)/sensor.c  $(TEST_APPS_DIR)/sensor-sink-common.c
 SENSOR_OBJ=$(addprefix $(SENSOR_DIR)/,$(notdir $(SENSOR_FILES:.c=.o)))
 $(SENSOR_DIR)/sensor: $(addprefix $(SENSOR_DIR)/,$(notdir $(SENSOR_FILES:.c=.o)))
 	$(LINK)
@@ -269,7 +269,7 @@ $(SINK_DIR_CREATED): $(BUILD_DIR_CREATED)
 $(SINK_DIR)/%.o: DEFINES += -DSDL_LOG -DSDL_LOG_FILE=\"sink.sdl\"
 $(SINK_DIR)/%.o: %.c | $(SINK_DIR_CREATED)
 	$(COMPILE)
-SINK_FILES=$(SNET_CHILD_FILES) $(TEST_APPS_DIR)/sink.c $(SNET_DEBUG_FILE)
+SINK_FILES=$(SNET_CHILD_FILES) $(TEST_APPS_DIR)/sink.c $(TEST_APPS_DIR)/sensor-sink-common.c
 SINK_OBJ=$(addprefix $(SINK_DIR)/,$(notdir $(SINK_FILES:.c=.o)))
 $(SINK_DIR)/sink: $(addprefix $(SINK_DIR)/,$(notdir $(SINK_FILES:.c=.o)))
 	$(LINK)

@@ -18,7 +18,6 @@
 #include <stdlib.h> // exit()
 #include <string.h> // memcpy(), strlen()
 #include <stdarg.h> // va_list, va_start(), va_arg(), va_end()
-#include <stdio.h>  // vsnprint()
 
 // -----------------------------------------------------------------------------
 // Internal State
@@ -33,10 +32,6 @@ static uint8_t state = STATE_UNCONNECTED;
 
 static void loop(void);
 static void unconnectedTask(void);
-
-static void encryptData(uint8_t *data, uint8_t length);
-
-static void sensorPrint(const char *format, ...);
 
 // -----------------------------------------------------------------------------
 // Main
@@ -92,47 +87,14 @@ static void unconnectedTask(void)
   data[SENSOR_SINK_ADVERTISEMENT_PROFILE_INDEX + 1] = ((prof & 0x00FF) >> 0x00);
 
   // Encrypt the advertisement.
-  encryptData(data, sizeof(data));
+  sensorSinkEncrypt(data, sizeof(data), SENSOR_SINK_CRYPTO_KEY);
 
   // Transmit.
   status = sdlMacTransmit(SDL_PACKET_TYPE_DATA,
                           SDL_MAC_ADDRESS_BROADCAST,
                           data,
                           sizeof(data));
-  sensorPrint("Sensor: Broadcast advertisement: 0x%02X", status);
-}
-
-static void encryptData(uint8_t *data, uint8_t length)
-{
-  const char *key = SENSOR_SINK_CRYPTO_KEY;
-  uint8_t dataI, keyI, keyLength;
-  uint16_t overflow;
-
-  keyLength = strlen(key);
-
-  // Only the highest of encryption standards.
-  for (dataI = 0; dataI < length; dataI ++) {
-    overflow = data[dataI] + key[keyI];
-    data[dataI] = (overflow > 0xFF ? overflow - 0xFF : overflow);
-
-    if (++keyI == keyLength) {
-      keyI = 0;
-    }
-  }
-}
-
-static void sensorPrint(const char *format, ...)
-{
-  char data[UINT8_MAX];
-  va_list args;
-
-  va_start(args, format);
-
-  vsnprintf(data, sizeof(data), format, args);
-
-  sdlUartTransmit((uint8_t *)data, strlen(data));
-
-  va_end(args);
+  sensorSinkPrintf("Sensor: Broadcast advertisement: 0x%02X", status);
 }
 
 // -----------------------------------------------------------------------------
