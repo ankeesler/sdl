@@ -2,8 +2,7 @@
 /build/
 
 # Log files.
-tuna.sdl
-sensor.sdl
+*.sdl
 
 # Class files
 *.class

@@ -41,8 +41,27 @@ static int sensorSinkTest(void)
                     "Sensor: Broadcast advertisement: 0x00",
                     SENSOR_UNCONNECTED_DUTY_CYCLE_US << 2));
 
+  // Create the sink.
+  expect((int)(sink = snetNodeMake("build/sink/sink", "sink")));
+
+  // Boot the sink.
+  expectEquals(snetNodeStart(sink), SDL_SUCCESS);
+
+  // The sink should receive the sink's advertisement.
+  expect(snetExpect(sink,
+                    "Sink: Received advertisement from: 0x........",
+                    SENSOR_UNCONNECTED_DUTY_CYCLE_US << 2));
+
+  // The sink should successfully connect with the sensor.
+  // FIXME: crypto stuff...
+  /*
+  expect(snetExpect(sink,
+                    "Sink: Connected with sensor for profile: 0xABCD",
+                      SENSOR_UNCONNECTED_DUTY_CYCLE_US << 2));
+  */
+
   // Tear down the network.
-  expectEquals(snetManagementDeinit(), 1);
+  expectEquals(snetManagementDeinit(), 2);
   expectEquals(snetManagementSize(), 0);
 
   return 0;

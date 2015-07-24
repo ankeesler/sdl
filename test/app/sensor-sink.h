@@ -23,6 +23,10 @@
 #define SENSOR_SINK_ADVERTISEMENT          (0x0A)
 #define SENSOR_SINK_ADVERTISEMENT_RESPONSE (0x8A)
 
+#define SENSOR_SINK_ADVERTISEMENT_RESPONSE_STATUS_INDEX   (1)
+#define SENSOR_SINK_ADVERTISEMENT_RESPONSE_STATUS_SUCCESS (0x00)
+#define SENSOR_SINK_ADVERTISEMENT_RESPONSE_STATUS_FAILURE (0x01)
+
 // In order for the sink to protect itself from evil sensors, it uses
 // a very advanced form of encryption on its received and transmitted
 // packets. Sensor devices wishing to establish a connection with a sink
