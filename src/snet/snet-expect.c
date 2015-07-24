@@ -79,9 +79,8 @@ bool snetExpect(SnetNode *node, const char *regexString, uint32_t timeoutUS)
   regmatch_t regmatch;
   int regexStatus;
 
-  // TODO: if the data on the UART is old, we should probably clear it.
-  // However, this creates a race condition if a call to this function
-  // is placed right after a print.
+  // Clear old UART data so we don't catch something that is old.
+  uartRxClear();
 
   // Compile the regex, returning failure if there was an issue.
   regexStatus = regcomp(&regex, regexString, REG_EXTENDED);

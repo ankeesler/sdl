@@ -58,10 +58,17 @@ static int expectTest(void)
   expect(snetExpect(server1, ".*", DEFAULT_TIMEOUT_US));
 
   // Push button1 again. The expect for server2 should not work.
-  // Again, wait for only a second so that the test is shorter.
+  // Again, wait for only a millisecond so that the test is shorter.
   expectEquals(snetNodeCommand(server1, BUTTON, SERVER_UART_BUTTON1),
                SDL_SUCCESS);
   expect(!snetExpect(server2, SERVER_UART_BUTTON1_STRING, 1000));
+
+  // We should not catch something on the uart that has been printed
+  // in the past!
+  expectEquals(snetNodeCommand(server1, BUTTON, SERVER_UART_BUTTON1),
+               SDL_SUCCESS);
+  usleep(SERVER_DUTY_CYCLE_US << 2);
+  expect(!snetExpect(server1, SERVER_UART_BUTTON1_STRING, 1000));
 
   // Tear down the network.
   expectEquals(snetManagementDeinit(), 2);
