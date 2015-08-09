@@ -24,3 +24,6 @@ cscope.*
 
 # child log file
 .child*
+
+# Log files
+*.log

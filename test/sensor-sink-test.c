@@ -15,6 +15,20 @@
 #include "sdl-test-util.h"
 #include "test/app/sensor.h"
 
+#include <assert.h> // assert()
+
+static FILE *logFile = NULL;
+
+static void initLogFile(void)
+{
+  assert((logFile = fopen(__FILE__ ".log", "w")));
+}
+
+static void deinitLogFile(void)
+{
+  fclose(logFile);
+}
+
 SnetNode *sensor = NULL, *sink = NULL;
 
 static void failureHandler(void)
@@ -23,12 +37,14 @@ static void failureHandler(void)
   if (sensor) kill(sensor->pid, SIGTERM);
 
   while (wait(NULL) != -1) ;
+
+  deinitLogFile();
 }
 
 static int sensorSinkTest(void)
 {
   // Initialize the expect framework.
-  expectEquals(snetExpectInit(), SDL_SUCCESS);
+  expectEquals(snetExpectInit(logFile), SDL_SUCCESS);
 
   // Create the sensor.
   expect((int)(sensor = snetNodeMake("build/sensor/sensor", "sensor")));
@@ -73,6 +89,8 @@ int main(int argc, char *argv[])
 
   setFailureHandler(failureHandler);
   setVerbose((argc > 1 && !strcmp(argv[1], "-v")));
+
+  initLogFile();
 
   run(sensorSinkTest);
 

@@ -13,12 +13,15 @@
 
 #include "snet.h"
 
+#include <stdio.h>
+
 #define DEFAULT_TIMEOUT_US (3000000) // 3 seconds
 
 // Initialize the SNET Expect framework.
 // If someone else is using the SnetNodeUartIsr, the initialization will fail.
 // This function also initializes the SNET management layer.
-SdlStatus snetExpectInit(void);
+// Also logs the UART data to a file with the argument name.
+SdlStatus snetExpectInit(FILE *file);
 
 bool snetExpect(SnetNode *node, const char *regex, uint32_t timeoutUS);
 

@@ -18,6 +18,12 @@
   #include <unit-test.h>
 #endif
 
+// Start time.
+static struct timeval frameworkStartTime;
+
+// File to log uart stuff.
+static FILE *logFile = NULL;
+
 // State for received uart stuff.
 static uint8_t uartRxData[UINT8_MAX], uartRxDataLength;
 static const char *uartRxNode = NULL;
@@ -32,13 +38,24 @@ static struct timeval uartRxTime;
 // The one uart isr to rule them all.
 static void uartIsr(const char *node, uint8_t *data, uint8_t length)
 {
-  gettimeofday(&uartRxTime, NULL); // don't care about timezone
-
   memcpy(uartRxData, data, length);
   uartRxDataLength = length;
   uartRxNode = node;
 
-  // TODO: write data to a file!
+  if (logFile) {
+    struct timeval now;
+
+    gettimeofday(&now, NULL); // don't care about timezone
+
+    // Get the framework time.
+    timersub(&now, &frameworkStartTime, &uartRxTime);
+
+    fprintf(logFile, "%s(%.6lf): [ %s ]\n",
+            node,
+            uartRxTime.tv_sec + (uartRxTime.tv_usec / 1000000.0),
+            data);
+    fflush(0);
+  }
 }
 
 static inline void getStopTime(struct timeval *start,
@@ -57,7 +74,7 @@ static inline void getStopTime(struct timeval *start,
   timeradd(start, &add, stop);
 }
 
-SdlStatus snetExpectInit(void)
+SdlStatus snetExpectInit(FILE *file)
 {
   SdlStatus status = SDL_FATAL;
 
@@ -69,6 +86,12 @@ SdlStatus snetExpectInit(void)
     snetManagementInit();
   }
 
+  // Record the start time for the framework.
+  gettimeofday(&frameworkStartTime, NULL); // don't care about timezone
+
+  // Set the log file.
+  logFile = file;
+
   return status;
 }
 
@@ -78,6 +101,9 @@ bool snetExpect(SnetNode *node, const char *regexString, uint32_t timeoutUS)
   regex_t regex;
   regmatch_t regmatch;
   int regexStatus;
+
+  // If we aren't initialized, then return false.
+  if (!logFile) return false;
 
   // Clear old UART data so we don't catch something that is old.
   uartRxClear();

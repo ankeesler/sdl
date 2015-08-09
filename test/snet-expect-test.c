@@ -15,6 +15,20 @@
 #include "sdl-test-util.h"
 #include "test/app/server.h"
 
+#include <assert.h> // assert()
+
+static FILE *logFile = NULL;
+
+static void initLogFile(void)
+{
+  assert((logFile = fopen(__FILE__ ".log", "w")));
+}
+
+static void deinitLogFile(void)
+{
+  fclose(logFile);
+}
+
 static SnetNode *server1 = NULL, *server2 = NULL;
 
 static void failureHandler(void)
@@ -23,6 +37,8 @@ static void failureHandler(void)
   if (server2) kill(server2->pid, SIGTERM);
 
   while (wait(NULL) != -1) ;
+
+  deinitLogFile();
 }
 
 static int expectTest(void)
@@ -30,7 +46,7 @@ static int expectTest(void)
   server1 = server2 = NULL;
 
   // Initialize the expect framework.
-  expectEquals(snetExpectInit(), SDL_SUCCESS);
+  expectEquals(snetExpectInit(logFile), SDL_SUCCESS);
 
   // Add two servers.
   expect((int)(server1 = snetNodeMake("build/server/server", "server1")));
@@ -83,6 +99,8 @@ int main(int argc, char *argv[])
 
   setFailureHandler(failureHandler);
   setVerbose((argc > 1 && !strcmp(argv[1], "-v")));
+
+  initLogFile();
 
   run(expectTest);
 
