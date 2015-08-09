@@ -39,7 +39,7 @@ void sensorSinkPrintf(const char *format, ...)
 
   vsnprintf(data, sizeof(data), format, args);
 
-  sdlUartTransmit((uint8_t *)data, strlen(data));
+  sdlUartTransmit((uint8_t *)data, strlen(data) + 1); // for \0
 
   va_end(args);
 }

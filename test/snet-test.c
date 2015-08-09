@@ -381,35 +381,35 @@ int uartTest(void)
   expectEquals(snetNodeCommand(server1, BUTTON, SERVER_UART_BUTTON1),
                SDL_SUCCESS);
   usleep(SERVER_DUTY_CYCLE_US << 1);
-  expectLastUartLength(strlen(SERVER_UART_BUTTON1_STRING));
+  expectLastUartLength(strlen(SERVER_UART_BUTTON1_STRING) + 1); // for 0
   expectLastUartName("server1");
   expectLastUartData(SERVER_UART_BUTTON1_STRING,
-                     strlen(SERVER_UART_BUTTON1_STRING));
+                     strlen(SERVER_UART_BUTTON1_STRING) + 1); // for 0
 
   // Because I am too skeptical...
-  expectLastUartLength(strlen(SERVER_UART_BUTTON1_STRING));
+  expectLastUartLength(strlen(SERVER_UART_BUTTON1_STRING) + 1); // for 0
   expectLastUartName("server1");
   expectLastUartData(SERVER_UART_BUTTON1_STRING,
-                     strlen(SERVER_UART_BUTTON1_STRING));
+                     strlen(SERVER_UART_BUTTON1_STRING) + 1); // for 0
 
   // We should get the correct source node for each uart isr.
   expectEquals(snetNodeCommand(server2, BUTTON, SERVER_UART_BUTTON2),
                SDL_SUCCESS);
   usleep(SERVER_DUTY_CYCLE_US << 1);
-  expectLastUartLength(strlen(SERVER_UART_BUTTON2_STRING));
+  expectLastUartLength(strlen(SERVER_UART_BUTTON2_STRING) + 1); // for 0
   expectLastUartName("server2");
   expectLastUartData(SERVER_UART_BUTTON2_STRING,
-                     strlen(SERVER_UART_BUTTON2_STRING));
+                     strlen(SERVER_UART_BUTTON2_STRING) + 1); // for 0
 
   // If we set the uart isr to null, we shouldn't get any data again.
   expect(uartIsr == snetNodeUartIsr(NULL));
   expectEquals(snetNodeCommand(server1, BUTTON, SERVER_UART_BUTTON1),
                SDL_SUCCESS);
   usleep(SERVER_DUTY_CYCLE_US << 1);
-  expectLastUartLength(strlen(SERVER_UART_BUTTON2_STRING));
+  expectLastUartLength(strlen(SERVER_UART_BUTTON2_STRING) + 1); // for 0
   expectLastUartName("server2");
   expectLastUartData(SERVER_UART_BUTTON2_STRING,
-                     strlen(SERVER_UART_BUTTON2_STRING));
+                     strlen(SERVER_UART_BUTTON2_STRING) + 1); // for 0
 
   // Tear down the network.
   snetManagementDeinit();
