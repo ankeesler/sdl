@@ -69,11 +69,15 @@ static int sensorSinkTest(void)
                     SENSOR_UNCONNECTED_DUTY_CYCLE_US << 2));
 
   // The sink should successfully connect with the sensor.
-  // FIXME: crypto stuff...
-  /*
   expect(snetExpect(sink,
                     "Sink: Connected with sensor for profile: 0xABCD",
-                      SENSOR_UNCONNECTED_DUTY_CYCLE_US << 2));
+                    DEFAULT_TIMEOUT_US << 3));
+
+  // FIXME: the sink should receive a successfull advertisement response.
+  /*
+  expect(snetExpect(sensor,
+                    "Sensor: Connected with sink: 0x........",
+                    SENSOR_UNCONNECTED_DUTY_CYCLE_US << 2));
   */
 
   // Tear down the network.

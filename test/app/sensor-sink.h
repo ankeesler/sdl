@@ -46,7 +46,8 @@
 #define SENSOR_SINK_ADVERTISEMENT_PROFILE_PIZZA (0xABCD)
 #define SENSOR_SINK_ADVERTISEMENT_PROFILE_FISH  (0x1234)
 
-#define SENSOR_SINK_ADVERTISEMENT_PAYLOAD_SIZE (7)
+#define SENSOR_SINK_ADVERTISEMENT_PAYLOAD_SIZE          (7)
+#define SENSOR_SINK_ADVERTISEMENT_RESPONSE_PAYLOAD_SIZE (2)
 
 // After the two devices are successfully connected, the sensor can send
 // SENSOR_SINK_DATA_COMMAND to the sink. Each of these commands has a

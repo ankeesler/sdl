@@ -17,7 +17,7 @@
 #include <unistd.h> // getpid()
 #include <stdlib.h> // exit()
 #include <string.h> // strlen(), memset()
-#include <stdio.h>  // vsnprint()
+#include <stdio.h>  // printf()
 
 // -----------------------------------------------------------------------------
 // Internal State
@@ -105,6 +105,7 @@ static void processAdvertisement(SdlPacket *advertisement)
   uint16_t profile = 0;
   uint8_t responseStatus = SENSOR_SINK_ADVERTISEMENT_RESPONSE_STATUS_FAILURE;
   uint8_t sensorIndex = 0xFF;
+  uint8_t data[SENSOR_SINK_ADVERTISEMENT_RESPONSE_PAYLOAD_SIZE];
   
   // Remember, big-endian.
 
@@ -135,6 +136,15 @@ static void processAdvertisement(SdlPacket *advertisement)
       sensorSinkPrintf("Sink: Connected with sensor for profile: 0x%04X", profile);
     }
   }
+
+  // Send the response.
+  data[SENSOR_SINK_COMMAND_INDEX] = SENSOR_SINK_ADVERTISEMENT_RESPONSE;
+  data[SENSOR_SINK_ADVERTISEMENT_RESPONSE_STATUS_INDEX] = responseStatus;
+  sensorSinkEncrypt(data, sizeof(data), SENSOR_SINK_CRYPTO_KEY);
+  sdlMacTransmit(SDL_PACKET_TYPE_DATA,
+                 advertisement->source,
+                 data,
+                 sizeof(data));
 }
 
 // This returns 0xFF if it couldn't find any sensor with that address.
