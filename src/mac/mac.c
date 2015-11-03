@@ -12,7 +12,7 @@
 #include "phy.h"
 
 #include "mac-internal.h"
-#include "phy-internal.h"
+#include "phy/phy-internal.h"
 
 #include <string.h> // memcpy()
 #include <signal.h> // sig_atomic_t

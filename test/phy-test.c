@@ -41,6 +41,12 @@ void snetChildLogPrintf(SnetChildLog_t *log,
 {
 }
 
+void snetChildLogPrintBytes(SnetChildLog_t *log,
+                            uint8_t *bytes,
+                            uint8_t count)
+{
+}
+
 #define expectPhyReceiveIsr(data, count)              \
   do {                                                \
     expectEquals(phyReceiveDataLength, (count));      \

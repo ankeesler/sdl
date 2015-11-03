@@ -13,16 +13,16 @@ SHELL=sh
 INC_DIR=inc
 SRC_DIR=src
 
-SNET_DIR=$(SRC_DIR)/snet
+SNET_DIR=snet
 PHY_DIR=$(SRC_DIR)/phy
 MAC_DIR=$(SRC_DIR)/mac
 TEST_DIR=test
-TEST_APPS_DIR=$(TEST_DIR)/app
+APP_DIR=app
 CAP_DIR=cap
 
 SDL_TEST_LOG_FILE=sdl-test.sdl
 
-INCLUDES=-I. -I$(INC_DIR) -I$(PHY_DIR) -I$(MAC_DIR) -I$(SNET_DIR)
+INCLUDES=-I. -I$(INC_DIR) -I$(SRC_DIR)
 DEFINES=-DSDL_TEST -DSDL_LOG -DSDL_LOG_FILE=\"$(SDL_TEST_LOG_FILE)\"
 
 CC=gcc
@@ -32,7 +32,7 @@ LDFLAGS=-lmcgoo
 BUILD_DIR=build
 BUILD_DIR_CREATED=$(BUILD_DIR)/tuna
 
-VPATH=$(PHY_DIR) $(MAC_DIR) $(TEST_APPS_DIR) $(TEST_DIR) $(CAP_DIR)
+VPATH=$(PHY_DIR) $(MAC_DIR) $(APP_DIR) $(TEST_DIR) $(CAP_DIR)
 
 #
 # SOURCE
@@ -46,8 +46,9 @@ PHY_FILES=$(PHY_DIR)/phy.c
 
 SDL_FILES=$(PHY_FILES) $(MAC_FILES) $(SDL_LOG_FILES)
 
-SNET_ROOT_DIR=snet
+SNET_ROOT_DIR=$(SNET_DIR)
 -include snet/snet.mak
+INCLUDES += -I$(SNET_SRC_DIR)
 
 ALL_SOURCE=$(shell find . -name "*.[ch]") $(shell find . -name "*.java")
 
@@ -74,7 +75,7 @@ clean-sdl-test-log-file:
 # BUILD
 #
 
--include $(patsubst %.c, $(BUILD_DIR)/%.d, $(notdir $(shell find $(SRC_DIR) -name "*.c")))
+-include $(patsubst %.c, $(BUILD_DIR)/%.d, $(notdir $(shell find . -name "*.c")))
 
 clean: clean-cap clean-cscope
 	rm -rf $(BUILD_DIR)
@@ -160,7 +161,7 @@ $(SERVER_DIR_CREATED): $(BUILD_DIR_CREATED)
 	touch $@
 $(SERVER_DIR)/%.o: %.c | $(SERVER_DIR_CREATED)
 	$(COMPILE)
-SERVER_FILES=$(SNET_CHILD_FILES) $(TEST_APPS_DIR)/server.c $(SNET_DEBUG_FILE)
+SERVER_FILES=$(SNET_CHILD_FILES) $(APP_DIR)/server.c $(SNET_DEBUG_FILE)
 SERVER_OBJ=$(addprefix $(SERVER_DIR)/,$(notdir $(SERVER_FILES:.c=.o)))
 $(SERVER_DIR)/server: $(addprefix $(SERVER_DIR)/,$(notdir $(SERVER_FILES:.c=.o)))
 	$(LINK)
@@ -170,13 +171,16 @@ SENSOR_DIR_CREATED=$(SENSOR_DIR)/tuna
 $(SENSOR_DIR_CREATED): $(BUILD_DIR_CREATED)
 	mkdir $(@D)
 	touch $@
-$(SENSOR_DIR)/%.o: DEFINES += -DSDL_LOG -DSDL_LOG_FILE=\"sensor.sdl\"
+SENSOR_DEFINES=-DSDL_LOG -DSDL_LOG_FILE=\"sensor.sdl\" -DSNET_APP
 $(SENSOR_DIR)/%.o: %.c | $(SENSOR_DIR_CREATED)
-	$(COMPILE)
-SENSOR_FILES=$(SNET_CHILD_FILES) $(TEST_APPS_DIR)/sensor.c  $(TEST_APPS_DIR)/sensor-sink-common.c
+	$(CC) -g -O0 -Wall -Werror -MD $(INCLUDES) $(SENSOR_DEFINES) -o $@ -c $<
+SENSOR_FILES=$(SNET_CHILD_FILES) $(SDL_FILES) $(APP_DIR)/sensor.c  $(APP_DIR)/sensor-sink-common.c
 SENSOR_OBJ=$(addprefix $(SENSOR_DIR)/,$(notdir $(SENSOR_FILES:.c=.o)))
 $(SENSOR_DIR)/sensor: $(addprefix $(SENSOR_DIR)/,$(notdir $(SENSOR_FILES:.c=.o)))
 	$(LINK)
+
+.PHONY: sensor
+sensor: $(SENSOR_DIR)/sensor
 
 SINK_DIR=$(BUILD_DIR)/sink
 SINK_DIR_CREATED=$(SINK_DIR)/tuna
@@ -186,7 +190,7 @@ $(SINK_DIR_CREATED): $(BUILD_DIR_CREATED)
 $(SINK_DIR)/%.o: DEFINES += -DSDL_LOG -DSDL_LOG_FILE=\"sink.sdl\"
 $(SINK_DIR)/%.o: %.c | $(SINK_DIR_CREATED)
 	$(COMPILE)
-SINK_FILES=$(SNET_CHILD_FILES) $(TEST_APPS_DIR)/sink.c $(TEST_APPS_DIR)/sensor-sink-common.c
+SINK_FILES=$(SNET_CHILD_FILES) $(APP_DIR)/sink.c $(APP_DIR)/sensor-sink-common.c
 SINK_OBJ=$(addprefix $(SINK_DIR)/,$(notdir $(SINK_FILES:.c=.o)))
 $(SINK_DIR)/sink: $(addprefix $(SINK_DIR)/,$(notdir $(SINK_FILES:.c=.o)))
 	$(LINK)

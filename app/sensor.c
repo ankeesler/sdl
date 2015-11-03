@@ -13,6 +13,9 @@
 #include "sensor-sink.h"
 #include "sensor.h"
 
+#include "snet/src/child/child-main.h" // snetChildMain
+#include "snet/src/child/child-log.h"  // snetChildLogPrintf
+
 #include <assert.h> // assert()
 #include <unistd.h> // getpid()
 #include <stdlib.h> // exit()
@@ -40,7 +43,7 @@ static void unconnectedTask(void);
 // -----------------------------------------------------------------------------
 // Main
 
-int main(void)
+int main(int argc, char *argv[])
 {
   // Initialize SDL functionality.
   assert(sdlMacInit(getpid()) == SDL_SUCCESS);

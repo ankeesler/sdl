@@ -47,6 +47,11 @@ SdlStatus sdlPhyTransmit(uint8_t *data, uint8_t length)
                                          data);
   status = (snetErrnoUnix(_transmitSnetErrno) != 0 ? SDL_FATAL : SDL_SUCCESS);
 
+  snetChildLogPrintf(snetChildLog,
+                     "Transmit with status 0x%08X.\n",
+                     _transmitSnetErrno);
+  snetChildLogPrintBytes(snetChildLog, data, length);
+
   if (status == SDL_SUCCESS) {
     sdlLogTx(data, length);
   }
@@ -80,6 +85,13 @@ void snetChildSignalHandler(int signal)
                          "Error: snetChildSignalHandler 0x%04X (0x%02X, 0x%02X).",
                          _receiveSnetErrno, _childCommand, _childPayloadLength);
       return;
+    } else {
+      snetChildLogPrintf(snetChildLog,
+                         "Receive command 0x%02X.\n",
+                         _childCommand);
+      snetChildLogPrintBytes(snetChildLog,
+                             (uint8_t *)_childPayload,
+                             (uint8_t)(_childPayloadLength & 0xFF));
     }
 
     // Process the command.

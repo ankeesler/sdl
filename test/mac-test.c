@@ -13,8 +13,8 @@
 #include "mac.h"
 #include "phy.h"
 
-#include "mac-internal.h"
-#include "phy-internal.h"
+#include "mac/mac-internal.h"
+#include "phy/phy-internal.h"
 
 #include <unistd.h>  // getpid()
 #include <stdbool.h> // bool
