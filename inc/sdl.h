@@ -26,11 +26,6 @@
 // is included here. This API provides access to the raw simulated
 // networking interface that SDL provides.
 //
-// SDL also provides some simulated platform utilities, such as unidirectional
-// UART transmission and a button ISR. These APIs seek to provide both
-// testing utilities and closer adherance to the true functionality in
-// a networking application.
-//
 
 // SDL Protocol definitions.
 #include "sdl-protocol.h"
@@ -43,15 +38,3 @@
 
 // SDL PHY layer interface.
 #include "phy.h"
-
-// SDL platform utilities.
-#include "plat.h"
-
-// SDL steals the main function from applications so that it can run setup
-// code in a main entry point of its own. It then promptly calls the
-// application's main function and runs it as any other normal entry point.
-#if !defined(__SNET_C__) && !defined(__SNET_TEST_C__)
-#define main SNET_MAIN
-#else
-int SNET_MAIN(int argc, char *argv[]);
-#endif

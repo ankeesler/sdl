@@ -11,25 +11,41 @@
 
 #include <unit-test.h>
 
-#include "sdl.h"
-#include "snet.h"
+#define SNET_CHILD_MAIN
+#include "snet/src/child/child-main.h"  // snetChildSignalHandler
+#include "snet/src/common/child-data.h" // SnetErrno_t
+#include "snet/src/common/snet-command.h" // SDL_PHY_CHILD_COMMAND_NETIF_RECEIVE
 
-#include "snet-internal.h" // snetChildAlert
+#include "sdl-protocol.h" // SDL_PHY_SDU_MAX
+#include "sdl-types.h" // SDL_SUCCESS
+#include "phy.h" // sdlPhyTransmit
 
-#include "cap/sdl-log.h"
+#include "cap/sdl-log.h" // sdlLogOn, sdlLogDump
+#include "src/phy/phy-internal.h" // phyInit()
 
-#include <signal.h>   // kill
-#include <assert.h>   // assert
-#include <string.h>   // memcpy
-#include <stdbool.h>  // bool
+#include <signal.h> // sig_atmoic_t
 
-// Keep this inline with PHY_TEST_IN in the makefile.
-// This test reads from this file for the PARENT_TO_CHILD data.
-#define PHY_TEST_IN_NAME "phy-test.in"
+// There are defined in the phy.c code.
+extern volatile sig_atomic_t _childCommand, _childPayloadLength, _childPayload[];
 
 // -----------------------------------------------------------------------------
 // Stubs
 
+int snetParentToChildFd = 3, snetChildToParentFd = 4;
+
+SnetChildLog_t *snetChildLog = NULL;
+
+void snetChildLogPrintf(SnetChildLog_t *log,
+                        const char *format,
+                        ...)
+{
+}
+
+#define expectPhyReceiveIsr(data, count)              \
+  do {                                                \
+    expectEquals(phyReceiveDataLength, (count));      \
+    expect(!memcmp(phyReceiveData, (data), (count))); \
+  } while (0);
 static uint8_t phyReceiveData[SDL_PHY_SDU_MAX];
 static uint8_t phyReceiveDataLength = 0;
 void sdlPhyReceiveIsr(uint8_t *data, uint8_t count)
@@ -38,170 +54,101 @@ void sdlPhyReceiveIsr(uint8_t *data, uint8_t count)
   phyReceiveDataLength = count;
 }
 
-static uint8_t buttonId = 0xFF;
-void sdlPhyButtonIsr(uint8_t button)
+static uint8_t childCommand, childPayloadLength, childPayload[255];
+static SnetErrno_t childDataReceiveSnetErrno = 0;
+SnetErrno_t snetChildDataReceive(int fd,
+                                 uint8_t *command,
+                                 uint8_t *payloadLength,
+                                 uint8_t *payload)
 {
-  buttonId = button;
+  expectEquals(fd, snetParentToChildFd);
+
+  *command = childCommand;
+  *payloadLength = childPayloadLength;
+  memcpy(payload, childPayload, *payloadLength);
+
+  return childDataReceiveSnetErrno;
+}
+
+static SnetErrno_t childDataSendSnetErrno = 0;
+static uint8_t childSendCommand, childSendPayloadLength, childSendPayload[255];
+SnetErrno_t snetChildDataSend(int fd,
+                              pid_t childPid,
+                              uint8_t command,
+                              uint8_t payloadLength,
+                              uint8_t *payload)
+{
+  expectEquals(fd, snetChildToParentFd);
+
+  expectEquals(command, childSendCommand);
+  expectEquals(payloadLength, childSendPayloadLength);
+  expect(!memcmp(payload, childSendPayload, childSendPayloadLength));
+
+  return childDataSendSnetErrno;
 }
 
 // -----------------------------------------------------------------------------
 // Utility
 
-static const uint8_t phyTestInData[] = {
-  // sanityTest
-  NOOP, // First command is a NOOP command, i.e., do nothing.
-
-  // receiveTest
-  RECEIVE , // SnetNodeCommand
-  0x02    , // SDL_PHY_PDU
-  0x80    , // SDL_PHY_SDU
-
-  // transmitTest
-  TRANSMIT, // SnetNodeCommand
-  0x02    , // SDL_PHY_PDU
-  0xA0    , // SDL_PHY_SDU
-  
-  RECEIVE , // SnetNodeCommand
-  0x02    , // SDL_PHY_PDU
-  0xC0    , // SDL_PHY_SDU
-
-  // buttonTest
-  BUTTON  , // SnetNodeCommand
-  0x00    , // Button ID
-
-  BUTTON  , // SnetNodeCommand
-  0x01    , // Button ID
-
-  // uartTest
-  BUTTON  , // SnetNodeCommand
-  0x02    , // Button ID
-
-  BUTTON  , // SnetNodeCommand
-  0x03    , // Button ID
-};
-#define PHY_TEST_IN_LEN (sizeof(phyTestInData) / sizeof(phyTestInData[0]))
-
-static void setupPhyTestIn(void)
-{
-  FILE *phyTestIn = NULL;
-  uint8_t i;
-
-  assert((phyTestIn = fopen(PHY_TEST_IN_NAME, "w")));
-  for (i = 0; i < PHY_TEST_IN_LEN; i ++) {
-    fputc(phyTestInData[i], phyTestIn);
-  }
-  fflush(phyTestIn);
-}
-
-static void tearDownPhyTestIn(void)
-{
-  unlink(PHY_TEST_IN_NAME);
-}
-
-static void failureHandler(void)
-{
-  tearDownPhyTestIn();
-}
-
-static bool childReadySignalReceived = false;
-void phyTestSignalHandler(int signal)
-{
-  childReadySignalReceived = (signal == CHILD_READY_SIGNAL);
-}
-#define expectChildReadySignalReceived() (expect(childReadySignalReceived))
+#define callChildSignalHandler(command, payloadLength, payload) \
+  do {                                                          \
+    childCommand       = (command);                             \
+    childPayloadLength = (payloadLength);                       \
+    memcpy(childPayload, (payload), (payloadLength));           \
+    snetChildSignalHandler(SNET_CHILD_SIGNAL_ALERT);            \
+  } while(0);
 
 // -----------------------------------------------------------------------------
 // Tests
 
-int sanityTest(void)
-{
-  // We should be able send an error checking signal to ourselves.
-  expectEquals(kill(getpid(), 0), 0);
-
-  // Make sure we send our parent (or ourselves in this test) the
-  // signal that we are up and running. This happens in the phy.c code.
-  expectChildReadySignalReceived();
-
-  // Since we sign ourselves up for the CHILD_ALERT_SIGNAL, we should
-  // handle the signal by reading from the PARENT_TO_CHILD_FD, i.e., stdin
-  // in this test.
-  expectEquals(snetChildAlert(getpid()), 0);
-
-  return 0;
-}
-
 int receiveTest(void)
 {
-  // We should be able to send an error checking signal to ourselves.
-  expectEquals(kill(getpid(), 0), 0);
+  uint8_t shortPayload = 0xAC;
+  uint8_t longPayload[] = { 5, 4, 3, 2, 1, };
 
-  // We should be able to receive something.
-  // See phyTestTxtData for these values.
-  expectEquals(snetChildAlert(getpid()), 0);
-  expectEquals(phyReceiveDataLength, 1);
-  expectEquals(phyReceiveData[0], 0x80);
+  expectEquals(phyInit(), SDL_SUCCESS);
+
+  // We should receive a signal from our parent.
+  callChildSignalHandler(SNET_CHILD_COMMAND_NETIF_RECEIVE,
+                         1,
+                         &shortPayload);
+  expectEquals(_childCommand, SNET_CHILD_COMMAND_NETIF_RECEIVE);
+  expectEquals(_childPayloadLength, 1);
+  expectEquals(_childPayload[0] & 0xFF, shortPayload);
+
+  // We should call the pseudo-isr.
+  expectPhyReceiveIsr(&shortPayload, 1);
+
+  // Again again!
+  callChildSignalHandler(SNET_CHILD_COMMAND_NETIF_RECEIVE,
+                         5,
+                         &longPayload);
+  expectEquals(_childCommand, SNET_CHILD_COMMAND_NETIF_RECEIVE);
+  expectEquals(_childPayloadLength, 5);
+  expect(!memcmp((uint8_t *)_childPayload, longPayload, 5));
+  expectPhyReceiveIsr(&longPayload, 5);
+
+  // One last time.
+  callChildSignalHandler(SNET_CHILD_COMMAND_NETIF_RECEIVE,
+                         1,
+                         &shortPayload);
+  expectEquals(_childCommand, SNET_CHILD_COMMAND_NETIF_RECEIVE);
+  expectEquals(_childPayloadLength, 1);
+  expectEquals(_childPayload[0] & 0xFF, shortPayload);
+  expectPhyReceiveIsr(&shortPayload, 1);
 
   return 0;
 }
 
 int transmitTest(void)
 {
-  // We should be able to send an error checking signal to ourselves.
-  expectEquals(kill(getpid(), 0), 0);
+  uint8_t shortPayload = 0xAC;
 
-  // We should be able to send something and have it written to stderr,
-  // per the correct fd passed to this executable via the makefile.
-  expectEquals(snetChildAlert(getpid()), 0);
-
-  // Per the snet-internal.h definition, upon successfully transmitting,
-  // we send outselves another CHILD_ALERT_SIGNAL so that we can make
-  // sure that we actually sent something. Otherwise, we would most likely
-  // be sending the CHILD_ALERT_SIGNAL to make or the terminal. This would
-  // probably lead to incorrectly failing tests.
-  // See the phyTestTxtData array for these values.
-  expectEquals(phyReceiveDataLength, 1);
-  expectEquals(phyReceiveData[0], 0xC0);
-
-  return 0;
-}
-
-int buttonTest(void)
-{
-  // We should be able to send an error checking signal to ourselves.
-  expectEquals(kill(getpid(), 0), 0);
-
-  // Tell ourselves that we should read about a button ISR.
-  expectEquals(snetChildAlert(getpid()), 0);
-  expectEquals(buttonId, 0x00);
-
-  // Run it back.
-  expectEquals(snetChildAlert(getpid()), 0);
-  expectEquals(buttonId, 0x01);
-
-  return 0;
-}
-
-int uartTest(void)
-{
-  uint8_t data[10], dataLength = 0;
-  for (; dataLength < 10; dataLength ++) data[dataLength] = dataLength;
-  dataLength = 10;
-
-  // We should be able to send an error checking signal to ourselves.
-  expectEquals(kill(getpid(), 0), 0);
-
-  // When we transmit something over the uart, we should make sure that
-  // we are notifying our parent that something is up. In this test,
-  // we notify ourselves instead (see snet-internal.h). Therefore, we
-  // should run our signal handler and read a button command out of
-  // the fd (see phyTestInData).
-  expectEquals(sdlUartTransmit(data, dataLength), SDL_SUCCESS);
-  expectEquals(buttonId, 0x02);
-
-  // Just to make sure it is not a coincidence...
-  expectEquals(sdlUartTransmit(data, dataLength), SDL_SUCCESS);
-  expectEquals(buttonId, 0x03);
-
+  childSendCommand = 0;
+  childSendPayloadLength = 0;
+  childSendPayload[0] = 0;
+  expectEquals(sdlPhyTransmit(&shortPayload, 1), SDL_SUCCESS);
+  
   return 0;
 }
 
@@ -215,9 +162,9 @@ int logTest(void)
   expect( system("grep -q TUNA    " SDL_LOG_FILE));
   
   // File.
-  expect(!system("grep -q -E '\\([0-9]+.[0-9]+\\) RX \\[0x02, 0x80\\]' " SDL_LOG_FILE));
-  expect(!system("grep -q -E '\\([0-9]+\\.[0-9]+\\) TX \\[0x02, 0xA0\\]' " SDL_LOG_FILE));
-  expect(!system("grep -q -E '\\([0-9]+\\.[0-9]+\\) RX \\[0x02, 0xC0\\]' " SDL_LOG_FILE));
+  expect(!system("grep -q -E '\\([0-9]+.[0-9]+\\) RX \\[0xAC\\]' " SDL_LOG_FILE));
+  expect(!system("grep -q -E '\\([0-9]+\\.[0-9]+\\) RX \\[0x05, 0x04, 0x03, 0x02, 0x01\\]' " SDL_LOG_FILE));
+  expect(!system("grep -q -E '\\([0-9]+\\.[0-9]+\\) RX \\[0xAC\\]' " SDL_LOG_FILE));
 
   return 0;
 }
@@ -226,20 +173,10 @@ int main(void)
 {
   announce();
 
-  setFailureHandler(failureHandler);
-  setupPhyTestIn();
-
-  run(sanityTest);
   run(receiveTest);
   run(transmitTest);
 
-  run(buttonTest);
-
-  run(uartTest);
-
   run(logTest);
-
-  tearDownPhyTestIn();
 
   return 0;
 }

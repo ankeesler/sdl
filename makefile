@@ -21,19 +21,16 @@ TEST_APPS_DIR=$(TEST_DIR)/app
 CAP_DIR=cap
 
 INCLUDES=-I. -I$(INC_DIR) -I$(PHY_DIR) -I$(MAC_DIR) -I$(SNET_DIR)
-DEFINES=
+DEFINES=-DSDL_TEST -DSDL_LOG -DSDL_LOG_FILE=\"sdl-test.sdl\"
 
 CC=gcc
-CFLAGS=-g -O0 -Wall -Werror $(INCLUDES) $(DEFINES)
+CFLAGS=-g -O0 -Wall -Werror -MD $(INCLUDES) $(DEFINES)
 LDFLAGS=-lmcgoo
-SHELL=sh
 
 BUILD_DIR=build
 BUILD_DIR_CREATED=$(BUILD_DIR)/tuna
 
-VPATH=$(SNET_DIR) $(PHY_DIR) $(MAC_DIR) $(TEST_APPS_DIR) $(TEST_DIR) $(CAP_DIR)
-
-SDL_LOG_TEST_FILE=tuna.sdl
+VPATH=$(PHY_DIR) $(MAC_DIR) $(TEST_APPS_DIR) $(TEST_DIR) $(CAP_DIR)
 
 #
 # SOURCE
@@ -43,13 +40,12 @@ SDL_LOG_FILES=$(CAP_DIR)/sdl-log.c
 
 MAC_FILES=$(MAC_DIR)/mac.c $(MAC_DIR)/mac-util.c
 
-PHY_FILES=$(PHY_DIR)/phy.c $(PHY_DIR)/uart.c
+PHY_FILES=$(PHY_DIR)/phy.c
 
 SDL_FILES=$(PHY_FILES) $(MAC_FILES) $(SDL_LOG_FILES)
 
-SNET_CHILD_FILES=$(SDL_FILES)
-SNET_DEBUG_FILE=$(SNET_DIR)/snet-debug.c
-SNET_PARENT_FILES=$(SNET_DIR)/snet.c $(SNET_DEBUG_FILE) $(SNET_DIR)/snet-expect.c
+SNET_ROOT_DIR=snet
+-include snet/snet.mak
 
 ALL_SOURCE=$(shell find . -name "*.[ch]") $(shell find . -name "*.java")
 
@@ -73,18 +69,25 @@ clean-cscope:
 # BUILD
 #
 
+-include $(patsubst %.c, $(BUILD_DIR)/%.d, $(notdir $(shell find $(SRC_DIR) -name "*.c")))
+
 clean: clean-cap clean-cscope
-	rm -frd ./*.o $(BUILD_DIR) $(SDL_LOG_TEST_FILE) .child*
+	rm -rf $(BUILD_DIR)
+	rm -rf $(shell find . -name "*.sdl")
+	rm -rf $(shell find . -name "*.log")
 
 $(BUILD_DIR_CREATED):
 	mkdir $(@D)
 	touch $@
 
+$(BUILD_DIR)/%.o: %.c | $(BUILD_DIR_CREATED)
+	$(COMPILE)
+
 #
 # TEST
 #
 
-TESTS=snet phy mac snet-expect sensor-sink
+TESTS=phy mac
 
 .PHONY: test
 test: $(patsubst %, run-%-test, $(TESTS))
@@ -93,40 +96,14 @@ test: $(patsubst %, run-%-test, $(TESTS))
 # PHY
 #
 
-PHY_TEST_FILES=          \
-  $(TEST_DIR)/phy-test.c \
-  $(PHY_FILES)           \
-  $(SNET_DEBUG_FILE)     \
-  $(SDL_LOG_FILES)
+PHY_TEST_FILES=$(TEST_DIR)/phy-test.c $(PHY_FILES) $(SDL_LOG_FILES)
 
-PHY_TEST_IN=phy-test.in
-STDIN  = 0
-STDERR = 2
-
-PHY_TEST_DIR=$(BUILD_DIR)/phy-test-dir
-PHY_TEST_DIR_CREATED=$(PHY_TEST_DIR)/tuna
-$(PHY_TEST_DIR_CREATED): $(BUILD_DIR_CREATED)
-	mkdir $(@D)
-	touch $@
-
-$(PHY_TEST_DIR)/%.o: %.c | $(PHY_TEST_DIR_CREATED)
-	$(COMPILE)
-
-$(PHY_TEST_IN):
-	touch $@
-
-$(PHY_TEST_DIR)/phy-test:                              \
-    DEFINES += -DSNET_TEST                             \
-               -DPHY_TEST                              \
-               -DSDL_LOG                               \
-               -DSDL_LOG_FILE=\"$(SDL_LOG_TEST_FILE)\"
-
-$(PHY_TEST_DIR)/phy-test: $(addprefix $(PHY_TEST_DIR)/,$(notdir $(PHY_TEST_FILES:.c=.o)))
+$(BUILD_DIR)/phy-test: $(addprefix $(BUILD_DIR)/,$(notdir $(PHY_TEST_FILES:.c=.o)))
 	$(LINK)
 
 .PHONY: run-phy-test
-run-phy-test: $(PHY_TEST_DIR)/phy-test $(PHY_TEST_IN)
-	./$< phy-test $(STDIN) $(STDERR) < $(PHY_TEST_IN) 2>/dev/null
+run-phy-test: $(BUILD_DIR)/phy-test
+	./$< phy-test
 
 #
 # MAC
@@ -134,80 +111,19 @@ run-phy-test: $(PHY_TEST_DIR)/phy-test $(PHY_TEST_IN)
 
 MAC_TEST_FILES=$(TEST_DIR)/mac-test.c $(MAC_FILES)
 
-MAC_TEST_DIR=$(BUILD_DIR)/mac-test-dir
-MAC_TEST_DIR_CREATED=$(MAC_TEST_DIR)/tuna
-$(MAC_TEST_DIR_CREATED): $(BUILD_DIR_CREATED)
-	mkdir $(@D)
-	touch $@
-
-$(MAC_TEST_DIR)/%.o: %.c | $(MAC_TEST_DIR_CREATED)
-	$(COMPILE)
-
-$(MAC_TEST_DIR)/mac-test: $(addprefix $(MAC_TEST_DIR)/,$(notdir $(MAC_TEST_FILES:.c=.o)))
+$(BUILD_DIR)/mac-test: $(addprefix $(BUILD_DIR)/,$(notdir $(MAC_TEST_FILES:.c=.o)))
 	$(LINK)
 
 .PHONY: run-mac-test
-run-mac-test: $(MAC_TEST_DIR)/mac-test
+run-mac-test: $(BUILD_DIR)/mac-test
 	./$<
 
 #
-# SDL
+# TEST APPS
 #
-
-#
-# SNET
-#
-
-SNET_TEST_FILES=$(SNET_PARENT_FILES) $(TEST_DIR)/snet-test.c $(MAC_FILES)
-
-SNET_TEST_DIR=$(BUILD_DIR)/snet-test-dir
-SNET_TEST_DIR_CREATED=$(SNET_TEST_DIR)/tuna
-$(SNET_TEST_DIR_CREATED): $(BUILD_DIR_CREATED)
-	mkdir $(@D)
-	touch $@
-
-$(SNET_TEST_DIR)/%.o: DEFINES += -DSNET_TEST
-$(SNET_TEST_DIR)/%.o: %.c | $(SNET_TEST_DIR_CREATED)
-	$(COMPILE)
-
-SNET_TEST_EXES=               \
-  $(SNET_TEST_DIR)/snet-test  \
-  $(BUILD_DIR)/server/server
-
-$(SNET_TEST_DIR)/snet-test: $(addprefix $(SNET_TEST_DIR)/,$(notdir $(SNET_TEST_FILES:.c=.o)))
-	$(LINK)
-
-.PHONY: run-snet-test
-run-snet-test: $(SNET_TEST_EXES)
-	./$<
-
-SNET_EXPECT_TEST_FILES=          \
-  $(SNET_PARENT_FILES)           \
-  $(TEST_DIR)/snet-expect-test.c
-
-SNET_EXPECT_TEST_DIR=$(BUILD_DIR)/snet-expect-test-dir
-SNET_EXPECT_TEST_DIR_CREATED=$(SNET_EXPECT_TEST_DIR)/tuna
-$(SNET_EXPECT_TEST_DIR_CREATED): $(BUILD_DIR_CREATED)
-	mkdir $(@D)
-	touch $@
-
-$(SNET_EXPECT_TEST_DIR)/%.o: DEFINES += -DSNET_TEST
-$(SNET_EXPECT_TEST_DIR)/%.o: %.c | $(SNET_EXPECT_TEST_DIR_CREATED)
-	$(COMPILE)
-
-SNET_EXPECT_TEST_EXES=                      \
-  $(SNET_EXPECT_TEST_DIR)/snet-expect-test  \
-  $(BUILD_DIR)/server/server
-
-$(SNET_EXPECT_TEST_DIR)/snet-expect-test: $(addprefix $(SNET_EXPECT_TEST_DIR)/,$(notdir $(SNET_EXPECT_TEST_FILES:.c=.o)))
-	$(LINK)
-
-.PHONY: run-expect-snet-test
-run-snet-expect-test: $(SNET_EXPECT_TEST_EXES)
-	./$< $(ARGS)
 
 SENSOR_SINK_TEST_FILES=          \
-  $(SNET_PARENT_FILES)           \
+  $(SNET_CHILD_FILES)            \
   $(TEST_DIR)/sensor-sink-test.c
 
 SENSOR_SINK_TEST_DIR=$(BUILD_DIR)/sensor-sink-test-dir
@@ -231,10 +147,6 @@ $(SENSOR_SINK_TEST_DIR)/sensor-sink-test: $(addprefix $(SENSOR_SINK_TEST_DIR)/,$
 .PHONY: run-expect-snet-test
 run-sensor-sink-test: $(SENSOR_SINK_TEST_EXES)
 	./$< $(ARGS)
-
-#
-# TEST APPS
-#
 
 SERVER_DIR=$(BUILD_DIR)/server
 SERVER_DIR_CREATED=$(SERVER_DIR)/tuna
