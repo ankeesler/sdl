@@ -47,6 +47,10 @@ SdlStatus sdlPhyTransmit(uint8_t *data, uint8_t length)
                                          data);
   status = (snetErrnoUnix(_transmitSnetErrno) != 0 ? SDL_FATAL : SDL_SUCCESS);
 
+  if (status == SDL_SUCCESS) {
+    sdlLogTx(data, length);
+  }
+
   return status;
 }
 

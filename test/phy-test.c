@@ -171,6 +171,8 @@ int logTest(void)
   expect(!system("grep -q -E '\\([0-9]+.[0-9]+\\) RX \\[0xAC\\]' " SDL_LOG_FILE));
   expect(!system("grep -q -E '\\([0-9]+\\.[0-9]+\\) RX \\[0x05, 0x04, 0x03, 0x02, 0x01\\]' " SDL_LOG_FILE));
   expect(!system("grep -q -E '\\([0-9]+\\.[0-9]+\\) RX \\[0xAC\\]' " SDL_LOG_FILE));
+  expect(!system("grep -q -E '\\([0-9]+\\.[0-9]+\\) TX \\[0xAC\\]' " SDL_LOG_FILE));
+  expect(!system("grep -q -E '\\([0-9]+\\.[0-9]+\\) TX \\[0x05, 0x04, 0x03, 0x02, 0x01\\]' " SDL_LOG_FILE));
 
   return 0;
 }
