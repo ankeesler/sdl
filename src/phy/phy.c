@@ -55,9 +55,7 @@ SdlStatus sdlPhyTransmit(uint8_t *data, uint8_t length)
 
 SdlStatus phyInit(void)
 {
-#ifdef SDL_LOG
   assert(sdlLogInit() == 0);
-#endif
 
   return SDL_SUCCESS;
 }

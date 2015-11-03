@@ -20,8 +20,10 @@ TEST_DIR=test
 TEST_APPS_DIR=$(TEST_DIR)/app
 CAP_DIR=cap
 
+SDL_TEST_LOG_FILE=sdl-test.sdl
+
 INCLUDES=-I. -I$(INC_DIR) -I$(PHY_DIR) -I$(MAC_DIR) -I$(SNET_DIR)
-DEFINES=-DSDL_TEST -DSDL_LOG -DSDL_LOG_FILE=\"sdl-test.sdl\"
+DEFINES=-DSDL_TEST -DSDL_LOG -DSDL_LOG_FILE=\"$(SDL_TEST_LOG_FILE)\"
 
 CC=gcc
 CFLAGS=-g -O0 -Wall -Werror -MD $(INCLUDES) $(DEFINES)
@@ -65,6 +67,9 @@ cscope: clean-cscope cscope.files
 clean-cscope:
 	rm -f cscope*
 
+clean-sdl-test-log-file:
+	rm -f $(SDL_TEST_LOG_FILE)
+
 #
 # BUILD
 #
@@ -102,8 +107,8 @@ $(BUILD_DIR)/phy-test: $(addprefix $(BUILD_DIR)/,$(notdir $(PHY_TEST_FILES:.c=.o
 	$(LINK)
 
 .PHONY: run-phy-test
-run-phy-test: $(BUILD_DIR)/phy-test
-	./$< phy-test
+run-phy-test: $(BUILD_DIR)/phy-test clean-sdl-test-log-file
+	./$<
 
 #
 # MAC

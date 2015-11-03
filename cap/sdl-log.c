@@ -18,7 +18,7 @@
 
 #ifndef SDL_LOG
 // Then stubs.
-int sdlLogInit() { return 1; }
+int sdlLogInit() { return 0; }
 int sdlLogOn() { return 0; }
 int sdlLogDump() { return 1; }
 int sdlLogTx(unsigned char *bytes, int length) { return 1; }
@@ -26,9 +26,9 @@ int sdlLogRx(unsigned char *bytes, int length) { return 1; }
 #else //SDL_LOG
 
 #ifdef SDL_LOG_FILE
-#define FILENAME SDL_LOG_FILE
+  #define FILENAME SDL_LOG_FILE
 #else
-#define FILENAME ""
+  #define FILENAME ""
 #endif
 
 typedef struct LogEvent {
@@ -59,15 +59,14 @@ int sdlLogOn() { return 1; }
 int sdlLogDump()
 {
   FILE *stream = NULL;
-  const char *possibleFilename = FILENAME;
   int i;
 
   // This is gonna be a doozy.
 
   // Find out if the stream is a file or stdout.
-  if (!strlen(possibleFilename)) {
+  if (!strlen(FILENAME)) {
     stream = stdout;
-  } else if (!(stream = fopen(possibleFilename, "w+"))) {
+  } else if (!(stream = fopen(FILENAME, "w+"))) {
     return 1;
   }
 
@@ -89,7 +88,8 @@ int sdlLogDump()
     // Use a tail as a place holder.
     tail = head;
     head = head->next;
-    free(tail->data); free(tail);
+    free(tail->data);
+    free(tail);
   }
   fprintf(stream, "}\n");
 
