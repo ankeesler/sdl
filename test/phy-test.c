@@ -48,7 +48,7 @@ void snetChildLogPrintf(SnetChildLog_t *log,
   } while (0);
 static uint8_t phyReceiveData[SDL_PHY_SDU_MAX];
 static uint8_t phyReceiveDataLength = 0;
-void sdlPhyReceiveIsr(uint8_t *data, uint8_t count)
+void phyReceiveIsr(uint8_t *data, uint8_t count)
 {
   memcpy(phyReceiveData, data, count);
   phyReceiveDataLength = count;
@@ -143,12 +143,18 @@ int receiveTest(void)
 int transmitTest(void)
 {
   uint8_t shortPayload = 0xAC;
+  uint8_t longPayload[] = {5, 4, 3, 2, 1,};
 
-  childSendCommand = 0;
-  childSendPayloadLength = 0;
-  childSendPayload[0] = 0;
+  childSendCommand = SNET_CHILD_COMMAND_NETIF_TRANSMIT;
+  childSendPayloadLength = 1;
+  childSendPayload[0] = shortPayload;
   expectEquals(sdlPhyTransmit(&shortPayload, 1), SDL_SUCCESS);
   
+  childSendCommand = SNET_CHILD_COMMAND_NETIF_TRANSMIT;
+  childSendPayloadLength = 5;
+  memcpy(childSendPayload, longPayload, 5);
+  expectEquals(sdlPhyTransmit(longPayload, 5), SDL_SUCCESS);
+
   return 0;
 }
 

@@ -104,7 +104,7 @@ int broadcastTest(void)
   flatPacket[11] = 0xFF;
   
   // If we receive something broadcasted...
-  sdlPhyReceiveIsr(flatPacket, SDL_MAC_PDU_LEN);
+  phyReceiveIsr(flatPacket, SDL_MAC_PDU_LEN);
 
   // ...then we should be able to receive it.
   expect(sdlMacReceive(&packet)
@@ -119,7 +119,7 @@ int broadcastTest(void)
   flatPacket[9] = 0xF2;
   flatPacket[10] = 0xF3;
   flatPacket[11] = 0xF4;
-  sdlPhyReceiveIsr(flatPacket, SDL_MAC_PDU_LEN);
+  phyReceiveIsr(flatPacket, SDL_MAC_PDU_LEN);
   expect(sdlMacReceive(&packet)
          == SDL_MAC_EMPTY);
 
@@ -195,12 +195,12 @@ static int rxOverflowTest(void)
   for (i = 0; i < macQueueSize; i ++) {
     expect(sdlCounterValue(SDL_COUNTER_MAC_RX_OVERFLOW, &value));
     expectEquals(value, 0);
-    sdlPhyReceiveIsr(packet, SDL_MAC_PDU_LEN);
+    phyReceiveIsr(packet, SDL_MAC_PDU_LEN);
   }
   for (i = 1; i < 5; i ++) {
     expect(sdlCounterValue(SDL_COUNTER_MAC_RX_OVERFLOW, &value));
     expectEquals(value, i);
-    sdlPhyReceiveIsr(packet, SDL_MAC_PDU_LEN);
+    phyReceiveIsr(packet, SDL_MAC_PDU_LEN);
   }
 
   // Clear the counter.
@@ -211,11 +211,11 @@ static int rxOverflowTest(void)
   // If we take a packet off the queue...
   expectEquals(sdlMacReceive(&reallyPacket), SDL_SUCCESS);
   // ...then we should have room to add one...
-  sdlPhyReceiveIsr(packet, SDL_MAC_PDU_LEN);
+  phyReceiveIsr(packet, SDL_MAC_PDU_LEN);
   expect(sdlCounterValue(SDL_COUNTER_MAC_RX_OVERFLOW, &value));
   expectEquals(value, 0);
   // ...but then go back to our overflow stuff...
-  sdlPhyReceiveIsr(packet, SDL_MAC_PDU_LEN);
+  phyReceiveIsr(packet, SDL_MAC_PDU_LEN);
   expect(sdlCounterValue(SDL_COUNTER_MAC_RX_OVERFLOW, &value));
   expectEquals(value, 1);
 

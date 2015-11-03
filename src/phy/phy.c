@@ -30,20 +30,22 @@
 volatile sig_atomic_t _childCommand, _childPayloadLength;
 volatile sig_atomic_t _childPayload[(UINT8_MAX + 1) / sizeof(sig_atomic_t)];
 
+// These are the signal-safe global transmit and receive errors.
+volatile sig_atomic_t _transmitSnetErrno, _receiveSnetErrno;
+
 // -----------------------------------------------------------------------------
 // Public API
 
 SdlStatus sdlPhyTransmit(uint8_t *data, uint8_t length)
 {
   SdlStatus status;
-  SnetErrno_t snetErrno;
 
-  snetErrno = snetChildDataSend(snetChildToParentFd,
-                                getpid(),
-                                0,
-                                0,
-                                0);
-  status = (snetErrnoUnix(snetErrno) != 0 ? SDL_FATAL : SDL_SUCCESS);
+  _transmitSnetErrno = snetChildDataSend(snetChildToParentFd,
+                                         getpid(),
+                                         SNET_CHILD_COMMAND_NETIF_TRANSMIT,
+                                         length,
+                                         data);
+  status = (snetErrnoUnix(_transmitSnetErrno) != 0 ? SDL_FATAL : SDL_SUCCESS);
 
   return status;
 }
@@ -66,15 +68,15 @@ SdlStatus phyInit(void)
 void snetChildSignalHandler(int signal)
 {
   if (signal == SNET_CHILD_SIGNAL_ALERT) {
-    SnetErrno_t err = snetChildDataReceive(snetParentToChildFd,
-                                           (uint8_t *)&_childCommand,
-                                           (uint8_t *)&_childPayloadLength,
-                                           (uint8_t *)&_childPayload);
+    _receiveSnetErrno = snetChildDataReceive(snetParentToChildFd,
+                                             (uint8_t *)&_childCommand,
+                                             (uint8_t *)&_childPayloadLength,
+                                             (uint8_t *)&_childPayload);
     // If we get an error, all we can do is write it to log.
-    if (err != 0) {
+    if (_receiveSnetErrno != 0) {
       snetChildLogPrintf(snetChildLog,
-                         "Error: snetChildSignalHandler %d (%d, %d).",
-                         err, _childCommand, _childPayloadLength);
+                         "Error: snetChildSignalHandler 0x%04X (0x%02X, 0x%02X).",
+                         _receiveSnetErrno, _childCommand, _childPayloadLength);
       return;
     }
 
@@ -83,7 +85,7 @@ void snetChildSignalHandler(int signal)
       uint8_t *data = (uint8_t *)&_childPayload;
       uint8_t dataLength = _childPayloadLength & 0xFF;
       sdlLogRx(data, dataLength);
-      sdlPhyReceiveIsr(data, dataLength);
+      phyReceiveIsr(data, dataLength);
     }
   }
 }

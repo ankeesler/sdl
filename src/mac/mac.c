@@ -112,7 +112,7 @@ SdlStatus sdlMacTransmit(SdlPacketType type,
   // If this is for us, put it in the receive queue.
   // Otherwise, throw it to the PHY.
   if (destination == ourAddress || destination == SDL_MAC_ADDRESS_BROADCAST) {
-    sdlPhyReceiveIsr(txBuffer, SDL_MAC_PDU_LEN + dataLength);
+    phyReceiveIsr(txBuffer, SDL_MAC_PDU_LEN + dataLength);
   }
   if (destination != ourAddress) {
     status = sdlPhyTransmit(txBuffer, SDL_MAC_PDU_LEN + dataLength);
@@ -136,7 +136,7 @@ SdlStatus sdlMacReceive(SdlPacket *packet)
 
 // The data points to the first byte past the PHY PDU.
 // The length is the length of the data vector.
-void sdlPhyReceiveIsr(uint8_t *data, uint8_t length)
+void phyReceiveIsr(uint8_t *data, uint8_t length)
 {
   uint8_t dataLength = length - SDL_MAC_PDU_LEN;
 
