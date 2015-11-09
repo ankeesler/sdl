@@ -93,7 +93,7 @@ $(BUILD_DIR)/%.o: %.c | $(BUILD_DIR_CREATED)
 # TEST
 #
 
-TESTS=phy mac
+TESTS=phy mac sensor-sink
 
 .PHONY: test
 test: $(patsubst %, run-%-test, $(TESTS))
@@ -125,34 +125,20 @@ run-mac-test: $(BUILD_DIR)/mac-test
 	./$<
 
 #
-# TEST APPS
+# APP
 #
 
-SENSOR_SINK_TEST_FILES=          \
-  $(SNET_CHILD_FILES)            \
-  $(TEST_DIR)/sensor-sink-test.c
+SENSOR_SINK_TEST_FILES=$(SNET_PARENT_FILES) $(TEST_DIR)/sensor-sink-test.c
 
-SENSOR_SINK_TEST_DIR=$(BUILD_DIR)/sensor-sink-test-dir
-SENSOR_SINK_TEST_DIR_CREATED=$(SENSOR_SINK_TEST_DIR)/tuna
-$(SENSOR_SINK_TEST_DIR_CREATED): $(BUILD_DIR_CREATED)
-	mkdir $(@D)
-	touch $@
-
-$(SENSOR_SINK_TEST_DIR)/%.o: DEFINES += -DSNET_TEST
-$(SENSOR_SINK_TEST_DIR)/%.o: %.c | $(SENSOR_SINK_TEST_DIR_CREATED)
-	$(COMPILE)
-
-SENSOR_SINK_TEST_EXES=                      \
-  $(SENSOR_SINK_TEST_DIR)/sensor-sink-test  \
-  $(BUILD_DIR)/sensor/sensor                \
-  $(BUILD_DIR)/sink/sink
-
-$(SENSOR_SINK_TEST_DIR)/sensor-sink-test: $(addprefix $(SENSOR_SINK_TEST_DIR)/,$(notdir $(SENSOR_SINK_TEST_FILES:.c=.o)))
+$(BUILD_DIR)/sensor-sink-test: $(addprefix $(BUILD_DIR)/,$(notdir $(SENSOR_SINK_TEST_FILES:.c=.o)))
 	$(LINK)
 
-.PHONY: run-expect-snet-test
-run-sensor-sink-test: $(SENSOR_SINK_TEST_EXES)
-	./$< $(ARGS)
+run-sensor-sink-test: $(BUILD_DIR)/sensor-sink-test sensor
+	./$<
+
+#
+# TEST APPS
+#
 
 SERVER_DIR=$(BUILD_DIR)/server
 SERVER_DIR_CREATED=$(SERVER_DIR)/tuna

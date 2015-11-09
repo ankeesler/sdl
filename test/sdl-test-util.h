@@ -16,3 +16,6 @@
 // SNET test harness.
 extern void printSignalData(void);
 extern void printNodeData(void);
+
+// Apps.
+#define SENSOR_IMAGE "build/sensor/sensor"
