@@ -128,29 +128,6 @@ run-mac-test: $(BUILD_DIR)/mac-test
 # APP
 #
 
-SENSOR_SINK_TEST_FILES=$(SNET_PARENT_FILES) $(TEST_DIR)/sensor-sink-test.c
-
-$(BUILD_DIR)/sensor-sink-test: $(addprefix $(BUILD_DIR)/,$(notdir $(SENSOR_SINK_TEST_FILES:.c=.o)))
-	$(LINK)
-
-run-sensor-sink-test: $(BUILD_DIR)/sensor-sink-test sensor sink
-	./$<
-
-#
-# TEST APPS
-#
-
-SERVER_DIR=$(BUILD_DIR)/server
-SERVER_DIR_CREATED=$(SERVER_DIR)/tuna
-$(SERVER_DIR_CREATED): $(BUILD_DIR_CREATED)
-	mkdir $(@D)
-	touch $@
-$(SERVER_DIR)/%.o: %.c | $(SERVER_DIR_CREATED)
-	$(COMPILE)
-SERVER_FILES=$(SNET_CHILD_FILES) $(APP_DIR)/server.c $(SNET_DEBUG_FILE)
-SERVER_OBJ=$(addprefix $(SERVER_DIR)/,$(notdir $(SERVER_FILES:.c=.o)))
-$(SERVER_DIR)/server: $(addprefix $(SERVER_DIR)/,$(notdir $(SERVER_FILES:.c=.o)))
-	$(LINK)
 
 SENSOR_DIR=$(BUILD_DIR)/sensor
 SENSOR_DIR_CREATED=$(SENSOR_DIR)/tuna
@@ -183,6 +160,14 @@ $(SINK_DIR)/sink: $(addprefix $(SINK_DIR)/,$(notdir $(SINK_FILES:.c=.o)))
 
 .PHONY: sink
 sink: $(SINK_DIR)/sink
+
+SENSOR_SINK_TEST_FILES=$(SNET_PARENT_FILES) $(TEST_DIR)/sensor-sink-test.c
+
+$(BUILD_DIR)/sensor-sink-test: $(addprefix $(BUILD_DIR)/,$(notdir $(SENSOR_SINK_TEST_FILES:.c=.o)))
+	$(LINK)
+
+run-sensor-sink-test: $(BUILD_DIR)/sensor-sink-test sensor sink
+	./$<
 
 #
 # CAPTURE FRAMEWORK
