@@ -13,6 +13,8 @@
 #include "sensor-sink.h"
 #include "sink.h"
 
+#include "snet/src/child/child-main.h" // snetChildMain
+
 #include <assert.h> // assert()
 #include <unistd.h> // getpid()
 #include <stdlib.h> // exit()
@@ -51,7 +53,7 @@ static uint8_t findSensorForAddress(SdlAddress address);
 // -----------------------------------------------------------------------------
 // Main
 
-int main(void)
+int main(int argc, char *argv[])
 {
   uint8_t i;
 

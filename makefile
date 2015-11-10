@@ -133,7 +133,7 @@ SENSOR_SINK_TEST_FILES=$(SNET_PARENT_FILES) $(TEST_DIR)/sensor-sink-test.c
 $(BUILD_DIR)/sensor-sink-test: $(addprefix $(BUILD_DIR)/,$(notdir $(SENSOR_SINK_TEST_FILES:.c=.o)))
 	$(LINK)
 
-run-sensor-sink-test: $(BUILD_DIR)/sensor-sink-test sensor
+run-sensor-sink-test: $(BUILD_DIR)/sensor-sink-test sensor sink
 	./$<
 
 #
@@ -173,13 +173,16 @@ SINK_DIR_CREATED=$(SINK_DIR)/tuna
 $(SINK_DIR_CREATED): $(BUILD_DIR_CREATED)
 	mkdir $(@D)
 	touch $@
-$(SINK_DIR)/%.o: DEFINES += -DSDL_LOG -DSDL_LOG_FILE=\"sink.sdl\"
+SINK_DEFINES=-DSDL_LOG -DSDL_LOG_FILE=\"sink.sdl\" -DSNET_APP
 $(SINK_DIR)/%.o: %.c | $(SINK_DIR_CREATED)
-	$(COMPILE)
-SINK_FILES=$(SNET_CHILD_FILES) $(APP_DIR)/sink.c $(APP_DIR)/sensor-sink-common.c
+	$(CC) -g -O0 -Wall -Werror -MD $(INCLUDES) $(SINK_DEFINES) -o $@ -c $<
+SINK_FILES=$(SNET_CHILD_FILES) $(SDL_FILES) $(APP_DIR)/sink.c $(APP_DIR)/sensor-sink-common.c
 SINK_OBJ=$(addprefix $(SINK_DIR)/,$(notdir $(SINK_FILES:.c=.o)))
 $(SINK_DIR)/sink: $(addprefix $(SINK_DIR)/,$(notdir $(SINK_FILES:.c=.o)))
 	$(LINK)
+
+.PHONY: sink
+sink: $(SINK_DIR)/sink
 
 #
 # CAPTURE FRAMEWORK

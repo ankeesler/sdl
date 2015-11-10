@@ -19,3 +19,4 @@ extern void printNodeData(void);
 
 // Apps.
 #define SENSOR_IMAGE "build/sensor/sensor"
+#define SINK_IMAGE   "build/sink/sink"

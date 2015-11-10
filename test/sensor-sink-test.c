@@ -18,12 +18,21 @@ static void failureHandler(void)
 {
 }
 
-static int sensorTest(void)
+static int sensorSinkTest(void)
 {
+  expectEquals(snetNetworkSize(), 0);
+
   expectEquals(snetNetworkAddNode("sensor", SENSOR_IMAGE), 0);
   expectEquals(snetNetworkSize(), 1);
 
+  expectEquals(snetNetworkAddNode("sink", SINK_IMAGE), 0);
+  expectEquals(snetNetworkSize(), 2);
+
   expectEquals(snetNetworkRemoveNode("sensor"), 0);
+  expectEquals(snetNetworkSize(), 1);
+
+  expectEquals(snetNetworkRemoveNode("sink"), 0);
+  expectEquals(snetNetworkSize(), 0);
 
   return 0;
 }
@@ -35,7 +44,7 @@ int main(int argc, char *argv[])
   setFailureHandler(failureHandler);
   setVerbose((argc > 1 && !strcmp(argv[1], "-v")));
 
-  run(sensorTest);
+  run(sensorSinkTest);
 
   return 0;
 }
