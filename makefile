@@ -14,6 +14,7 @@ INC_DIR=inc
 SRC_DIR=src
 
 SNET_DIR=snet
+PLAT_DIR=$(SRC_DIR)/plat
 PHY_DIR=$(SRC_DIR)/phy
 MAC_DIR=$(SRC_DIR)/mac
 TEST_DIR=test
@@ -32,7 +33,7 @@ LDFLAGS=-lmcgoo
 BUILD_DIR=build
 BUILD_DIR_CREATED=$(BUILD_DIR)/tuna
 
-VPATH=$(PHY_DIR) $(MAC_DIR) $(APP_DIR) $(TEST_DIR) $(CAP_DIR)
+VPATH=$(PLAT_DIR) $(PHY_DIR) $(MAC_DIR) $(APP_DIR) $(TEST_DIR) $(CAP_DIR)
 
 #
 # SOURCE
@@ -44,7 +45,9 @@ MAC_FILES=$(MAC_DIR)/mac.c $(MAC_DIR)/mac-util.c
 
 PHY_FILES=$(PHY_DIR)/phy.c
 
-SDL_FILES=$(PHY_FILES) $(MAC_FILES) $(SDL_LOG_FILES)
+PLAT_FILES=$(PLAT_DIR)/nvic.c
+
+SDL_FILES=$(PLAT_FILES) $(PHY_FILES) $(MAC_FILES) $(SDL_LOG_FILES)
 
 SNET_ROOT_DIR=$(SNET_DIR)
 -include snet/snet.mak
@@ -102,7 +105,7 @@ test: $(patsubst %, run-%-test, $(TESTS))
 # PHY
 #
 
-PHY_TEST_FILES=$(TEST_DIR)/phy-test.c $(PHY_FILES) $(SDL_LOG_FILES)
+PHY_TEST_FILES=$(TEST_DIR)/phy-test.c $(PLAT_FILES) $(PHY_FILES) $(SDL_LOG_FILES)
 
 $(BUILD_DIR)/phy-test: $(addprefix $(BUILD_DIR)/,$(notdir $(PHY_TEST_FILES:.c=.o)))
 	$(LINK)

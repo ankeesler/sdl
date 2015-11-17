@@ -1,0 +1,72 @@
+//
+// nvic.c
+//
+// Andrew Keesler
+//
+// November 16, 2015
+// Flight back from Charlotte to Boston.
+//
+// Pseudo-ISR controller. Link from simulated network to stack.
+//
+
+#include "snet/src/common/snet-command.h" // SNET_CHILD_COMMAND_*
+#include "snet/src/common/child-data.h"   // SNET_CHILD_SIGNAL_ALERT, snetChildData*
+#include "snet/src/child/child-log.h"     // snetChildLogPrint*
+#include "snet/src/child/child-main.h"    // snetChildSignalHandler
+
+#include "nvic.h"
+
+// -----------------------------------------------------------------------------
+// Globals
+
+// These are the signal-safe global receive values.
+volatile sig_atomic_t _childCommand, _childPayloadLength;
+volatile sig_atomic_t _childPayload[(UINT8_MAX + 1) / sizeof(sig_atomic_t)];
+
+// These are the signal-safe global transmit and receive errors.
+volatile sig_atomic_t _receiveSnetErrno;
+
+// -----------------------------------------------------------------------------
+// SNET pseudo-ISR
+
+void snetChildSignalHandler(int signal)
+{
+  if (signal == SNET_CHILD_SIGNAL_ALERT) {
+    uint8_t *data;
+    uint8_t dataLength;
+
+    // Read the data out of the file descriptor.
+    _receiveSnetErrno = snetChildDataReceive(snetParentToChildFd,
+                                             (uint8_t *)&_childCommand,
+                                             (uint8_t *)&_childPayloadLength,
+                                             (uint8_t *)&_childPayload);
+
+    // If we get an error, all we can do is write it to log.
+    if (_receiveSnetErrno != 0) {
+      snetChildLogPrintf(snetChildLog,
+                         "Error: snetChildSignalHandler 0x%04X (0x%02X, 0x%02X).",
+                         _receiveSnetErrno, _childCommand, _childPayloadLength);
+      return;
+    } else {
+      snetChildLogPrintf(snetChildLog,
+                         "Receive command 0x%02X.\n",
+                         _childCommand);
+      snetChildLogPrintBytes(snetChildLog,
+                             (uint8_t *)_childPayload,
+                             (uint8_t)(_childPayloadLength & 0xFF));
+    }
+
+    // Dispatch the command.
+    data = (uint8_t *)&_childPayload;
+    dataLength = _childPayloadLength & 0xFF;
+    switch (_childCommand) {
+    case SNET_CHILD_COMMAND_NETIF_RECEIVE:
+      nvicNetifReceiveIsr(data, dataLength);
+      break;
+    default:
+      ; // uh?
+    }
+  }
+}
+
+
