@@ -36,7 +36,7 @@ SdlStatus sdlPhyTransmit(uint8_t *data, uint8_t length)
   SdlStatus status;
 
   _transmitSnetErrno = snetChildDataSend(snetChildToParentFd,
-                                         getpid(),
+                                         getppid(),
                                          SNET_CHILD_COMMAND_NETIF_TRANSMIT,
                                          length,
                                          data);

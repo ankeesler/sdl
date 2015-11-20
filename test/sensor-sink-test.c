@@ -10,9 +10,13 @@
 
 #include <unit-test.h>
 
-#include "snet/src/parent/network.h"
+#include "snet/src/parent/network.h" // snetNetworkLedRead()
 
 #include "sdl-test-util.h"
+
+#include "app/sensor.h"
+
+#include <unistd.h> // usleep()
 
 static void failureHandler(void)
 {
@@ -27,6 +31,12 @@ static int sensorSinkTest(void)
 
   expectEquals(snetNetworkAddNode("sink", SINK_IMAGE), 0);
   expectEquals(snetNetworkSize(), 2);
+
+  // The sensor should have its advertise LED on.
+  bool led = false;
+  expectEquals(snetNetworkLedRead("sensor", SENSOR_ADVERTISE_LED, &led), 0);
+  usleep(CHILD_TIMEOUT_USEC);
+  expect(led);
 
   expectEquals(snetNetworkRemoveNode("sensor"), 0);
   expectEquals(snetNetworkSize(), 1);

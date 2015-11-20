@@ -9,10 +9,15 @@
 // Pseudo-ISR controller. Link from simulated network to stack.
 //
 
+#include <stdlib.h> // exit()
+
 #include "snet/src/common/snet-command.h" // SNET_CHILD_COMMAND_*
 #include "snet/src/common/child-data.h"   // SNET_CHILD_SIGNAL_ALERT, snetChildData*
 #include "snet/src/child/child-log.h"     // snetChildLogPrint*
 #include "snet/src/child/child-main.h"    // snetChildSignalHandler
+
+#include "led.h"
+#include "assert.h"
 
 #include "nvic.h"
 
@@ -63,9 +68,24 @@ void snetChildSignalHandler(int signal)
     case SNET_CHILD_COMMAND_NETIF_RECEIVE:
       nvicNetifReceiveIsr(data, dataLength);
       break;
+    case SNET_CHILD_COMMAND_LED_SET:
+    case SNET_CHILD_COMMAND_LED_CLEAR:
+      nvicLedTouchedIsr(data[0], (_childCommand == SNET_CHILD_COMMAND_LED_SET));
+      break;
+    case SNET_CHILD_COMMAND_LED_READ:
+      data[0] = sdlPlatLedRead(data[0]);
+      sdlPlatAssert(snetChildDataSend(snetChildToParentFd,
+                                      getppid(),
+                                      _childCommand,
+                                      1, // length
+                                      data)
+                    == 0);
+      break;
     default:
       ; // uh?
     }
+  } else if (signal == SNET_CHILD_SIGNAL_SIGTERM) {
+    exit(SNET_CHILD_EXIT_STATUS_SUCCESS);
   }
 }
 

@@ -14,7 +14,9 @@
 #include "sensor.h"
 
 #include "snet/src/child/child-main.h" // snetChildMain
-#include "snet/src/child/child-log.h"  // snetChildLogPrintf
+#include "snet/src/child/child-log.h"  // snetChildLogPrintf()
+
+#include "src/plat/led.h" // sdlPlatLedSet()
 
 #include <assert.h> // assert()
 #include <unistd.h> // getpid()
@@ -61,6 +63,7 @@ static void loop(void)
   while (1) {
     switch (state) {
     case STATE_ADVERTISE:
+      sdlPlatLedSet(SENSOR_ADVERTISE_LED);
       unconnectedTask();
       break;
 

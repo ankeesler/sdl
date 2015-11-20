@@ -45,7 +45,7 @@ MAC_FILES=$(MAC_DIR)/mac.c $(MAC_DIR)/mac-util.c
 
 PHY_FILES=$(PHY_DIR)/phy.c
 
-PLAT_FILES=$(PLAT_DIR)/nvic.c
+PLAT_FILES=$(PLAT_DIR)/nvic.c $(PLAT_DIR)/led.c $(PLAT_DIR)/assert.c
 
 SDL_FILES=$(PLAT_FILES) $(PHY_FILES) $(MAC_FILES) $(SDL_LOG_FILES)
 
@@ -146,7 +146,8 @@ $(SENSOR_DIR)/sensor: $(addprefix $(SENSOR_DIR)/,$(notdir $(SENSOR_FILES:.c=.o))
 	$(LINK)
 
 .PHONY: sensor
-sensor: $(SENSOR_DIR)/sensor
+sensor:
+	make $(SENSOR_DIR)/sensor -j
 
 SINK_DIR=$(BUILD_DIR)/sink
 SINK_DIR_CREATED=$(SINK_DIR)/tuna
@@ -162,7 +163,8 @@ $(SINK_DIR)/sink: $(addprefix $(SINK_DIR)/,$(notdir $(SINK_FILES:.c=.o)))
 	$(LINK)
 
 .PHONY: sink
-sink: $(SINK_DIR)/sink
+sink:
+	make $(SINK_DIR)/sink -j
 
 SENSOR_SINK_TEST_FILES=$(SNET_PARENT_FILES) $(TEST_DIR)/sensor-sink-test.c
 
