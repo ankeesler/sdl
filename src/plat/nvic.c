@@ -16,6 +16,7 @@
 #include "snet/src/child/child-log.h"     // snetChildLogPrint*
 #include "snet/src/child/child-main.h"    // snetChildSignalHandler
 
+#include "cap/sdl-log.h"
 #include "led.h"
 #include "assert.h"
 
@@ -85,6 +86,7 @@ void snetChildSignalHandler(int signal)
       ; // uh?
     }
   } else if (signal == SNET_CHILD_SIGNAL_SIGTERM) {
+    sdlLogDump();
     exit(SNET_CHILD_EXIT_STATUS_SUCCESS);
   }
 }
