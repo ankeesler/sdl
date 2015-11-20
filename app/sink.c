@@ -55,15 +55,11 @@ static uint8_t findSensorForAddress(SdlAddress address);
 
 int main(int argc, char *argv[])
 {
-  uint8_t i;
-
   // Initialize SDL functionality.
   assert(sdlMacInit(getpid()) == SDL_SUCCESS);
 
   // Initialize the sensor list.
-  for (i = 0; i < SINK_MAX_SENSOR_COUNT; i ++) {
-    memset(sensorList, 0, sizeof(sensorList));
-  }
+  memset(sensorList, 0, sizeof(sensorList));
 
   loop();
 
