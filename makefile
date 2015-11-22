@@ -83,6 +83,7 @@ clean-sdl-test-log-file:
 clean: clean-cap clean-cscope
 	rm -rf $(BUILD_DIR)
 	rm -rf $(shell find . -name "*.sdl")
+	rm -rf $(shell find . -name "*.snet")
 	rm -rf $(shell find . -name "*.log")
 
 $(BUILD_DIR_CREATED):

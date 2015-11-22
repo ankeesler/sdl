@@ -22,8 +22,8 @@ COMMIT.txt
 # cscope
 cscope.*
 
-# child log file
-.child*
-
 # Log files
 *.log
+
+# Snet log files
+*.snet
