@@ -53,7 +53,10 @@ public class Decode {
 
     // Get the input file.
     if (args.length == 0) {
-      String usage = String.format("java -jar Decoder.jar inputFilename [%s] [%s] [%s]", OPTION_SDL, OPTION_IP);
+      String usage = String.format("java -jar Decode.jar inputFilename [%s] [%s] [%s]",
+                                   OPTION_SDL,
+                                   OPTION_IP,
+                                   OPTION_SDL_KEY);
       System.out.println(" @ Error: incorrect usage.");
       System.out.println(" @ Usage: " + usage);
       System.out.println(" @ Exiting.");
