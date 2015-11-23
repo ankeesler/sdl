@@ -21,6 +21,8 @@
 #include <string.h> // strlen(), memset()
 #include <stdio.h>  // printf()
 
+#include "plat.h"
+
 // -----------------------------------------------------------------------------
 // Internal State
 
@@ -40,6 +42,7 @@ static SensorData sensorList[SINK_MAX_SENSOR_COUNT];
 
 #define note(...) printf(__VA_ARGS__), fflush(0);
 
+static void initSensorList(void);
 static void loop(void);
 static void listenForAdvertisement(void);
 
@@ -59,11 +62,21 @@ int main(int argc, char *argv[])
   assert(sdlMacInit(getpid()) == SDL_SUCCESS);
 
   // Initialize the sensor list.
-  memset(sensorList, 0, sizeof(sensorList));
+  initSensorList();
 
   loop();
 
   exit(0);
+}
+
+static void initSensorList(void)
+{
+  uint8_t i;
+
+  for (i = 0; i < SINK_MAX_SENSOR_COUNT; i ++) {
+    sensorList[i].mask = 0;
+    sdlPlatLedClear(i);
+  }
 }
 
 static void loop(void)
@@ -131,6 +144,7 @@ static void processAdvertisement(SdlPacket *advertisement)
       sensorList[sensorIndex].profile = profile;
       sensorList[sensorIndex].mask |= SENSOR_DATA_MASK_USED;
       responseStatus = SENSOR_SINK_ADVERTISEMENT_RESPONSE_STATUS_SUCCESS;
+      sdlPlatLedSet(sensorIndex);
       sensorSinkPrintf("Sink: Connected with sensor for profile: 0x%04X", profile);
     }
   }

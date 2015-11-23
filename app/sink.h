@@ -8,4 +8,4 @@
 // Sink test app.
 //
 
-#define SINK_MAX_SENSOR_COUNT (5)
+#define SINK_MAX_SENSOR_COUNT (3)
