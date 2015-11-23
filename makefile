@@ -148,7 +148,7 @@ $(SENSOR_DIR)/sensor: $(addprefix $(SENSOR_DIR)/,$(notdir $(SENSOR_FILES:.c=.o))
 
 .PHONY: sensor
 sensor:
-	make $(SENSOR_DIR)/sensor -j
+	make $(SENSOR_DIR)/sensor
 
 SINK_DIR=$(BUILD_DIR)/sink
 SINK_DIR_CREATED=$(SINK_DIR)/tuna
@@ -165,7 +165,7 @@ $(SINK_DIR)/sink: $(addprefix $(SINK_DIR)/,$(notdir $(SINK_FILES:.c=.o)))
 
 .PHONY: sink
 sink:
-	make $(SINK_DIR)/sink -j
+	make $(SINK_DIR)/sink
 
 SENSOR_SINK_TEST_FILES=$(SNET_PARENT_FILES) $(TEST_DIR)/sensor-sink-test.c
 
