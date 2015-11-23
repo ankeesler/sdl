@@ -16,7 +16,7 @@
 #include "snet/src/common/child-data.h" // SnetErrno_t
 #include "snet/src/common/snet-command.h" // SDL_PHY_CHILD_COMMAND_NETIF_RECEIVE
 
-#include "sdl-protocol.h" // SDL_PHY_SDU_MAX
+#include "sdl-protocol.h" // SDL_PHY_SDU_MAX, SDL_PHY_PDU_LEN
 #include "sdl-types.h" // SDL_SUCCESS
 #include "phy.h" // sdlPhyTransmit
 
@@ -77,18 +77,24 @@ SnetErrno_t snetChildDataReceive(int fd,
 }
 
 static SnetErrno_t childDataSendSnetErrno = 0;
-static uint8_t childSendCommand, childSendPayloadLength, childSendPayload[255];
+static uint8_t expectedChildSendCommand;
+static uint8_t expectedChildSendPayloadLength;
+static uint8_t expectedChildSendPayload[255];
 SnetErrno_t snetChildDataSend(int fd,
                               pid_t childPid,
-                              uint8_t command,
-                              uint8_t payloadLength,
-                              uint8_t *payload)
+                              uint8_t actualChildSendCommand,
+                              uint8_t actualChildSendPayloadLength,
+                              uint8_t *actualChildSendPayload)
 {
   expectEquals(fd, snetChildToParentFd);
 
-  expectEquals(command, childSendCommand);
-  expectEquals(payloadLength, childSendPayloadLength);
-  expect(!memcmp(payload, childSendPayload, childSendPayloadLength));
+  expectEquals(actualChildSendCommand, expectedChildSendCommand);
+  expectEquals(actualChildSendPayloadLength, expectedChildSendPayloadLength);
+
+  // phy pdu length byte + sdu
+  expect(!memcmp(actualChildSendPayload,
+                 expectedChildSendPayload,
+                 expectedChildSendPayloadLength));
 
   return childDataSendSnetErrno;
 }
@@ -109,39 +115,42 @@ SnetErrno_t snetChildDataSend(int fd,
 
 int receiveTest(void)
 {
-  uint8_t shortPayload = 0xAC;
-  uint8_t longPayload[] = { 5, 4, 3, 2, 1, };
+  uint8_t shortPacket[] = { 0x02, 0xAC, };
+  uint8_t longPacket[] = { 6, 5, 4, 3, 2, 1, };
 
   expectEquals(phyInit(), SDL_SUCCESS);
 
   // We should receive a signal from our parent.
   callChildSignalHandler(SNET_CHILD_COMMAND_NETIF_RECEIVE,
-                         1,
-                         &shortPayload);
+                         sizeof(shortPacket),
+                         &shortPacket);
   expectEquals(_childCommand, SNET_CHILD_COMMAND_NETIF_RECEIVE);
-  expectEquals(_childPayloadLength, 1);
-  expectEquals(_childPayload[0] & 0xFF, shortPayload);
+  expectEquals(_childPayloadLength, sizeof(shortPacket));
+  expect(!memcmp((uint8_t *)_childPayload, shortPacket, sizeof(shortPacket)));
 
   // We should call the pseudo-isr.
-  expectPhyReceiveIsr(&shortPayload, 1);
+  expectPhyReceiveIsr(&shortPacket[SDL_PHY_PDU_LEN],
+                      sizeof(shortPacket) - SDL_PHY_PDU_LEN);
 
   // Again again!
   callChildSignalHandler(SNET_CHILD_COMMAND_NETIF_RECEIVE,
-                         5,
-                         &longPayload);
+                         sizeof(longPacket),
+                         &longPacket);
   expectEquals(_childCommand, SNET_CHILD_COMMAND_NETIF_RECEIVE);
-  expectEquals(_childPayloadLength, 5);
-  expect(!memcmp((uint8_t *)_childPayload, longPayload, 5));
-  expectPhyReceiveIsr(&longPayload, 5);
+  expectEquals(_childPayloadLength, sizeof(longPacket));
+  expect(!memcmp((uint8_t *)_childPayload, longPacket, sizeof(longPacket)));
+  expectPhyReceiveIsr(&longPacket[SDL_PHY_PDU_LEN],
+                      sizeof(longPacket) - SDL_PHY_PDU_LEN);
 
   // One last time.
   callChildSignalHandler(SNET_CHILD_COMMAND_NETIF_RECEIVE,
-                         1,
-                         &shortPayload);
+                         sizeof(shortPacket),
+                         &shortPacket);
   expectEquals(_childCommand, SNET_CHILD_COMMAND_NETIF_RECEIVE);
-  expectEquals(_childPayloadLength, 1);
-  expectEquals(_childPayload[0] & 0xFF, shortPayload);
-  expectPhyReceiveIsr(&shortPayload, 1);
+  expectEquals(_childPayloadLength, sizeof(shortPacket));
+  expect(!memcmp((uint8_t *)_childPayload, shortPacket, sizeof(shortPacket)));
+  expectPhyReceiveIsr(&shortPacket[SDL_PHY_PDU_LEN],
+                      sizeof(shortPacket) - SDL_PHY_PDU_LEN);
 
   return 0;
 }
@@ -151,15 +160,19 @@ int transmitTest(void)
   uint8_t shortPayload = 0xAC;
   uint8_t longPayload[] = {5, 4, 3, 2, 1,};
 
-  childSendCommand = SNET_CHILD_COMMAND_NETIF_TRANSMIT;
-  childSendPayloadLength = 1;
-  childSendPayload[0] = shortPayload;
-  expectEquals(sdlPhyTransmit(&shortPayload, 1), SDL_SUCCESS);
+  expectedChildSendCommand = SNET_CHILD_COMMAND_NETIF_TRANSMIT;
+  expectedChildSendPayloadLength = sizeof(shortPayload) + SDL_PHY_PDU_LEN;
+  expectedChildSendPayload[0] = expectedChildSendPayloadLength;
+  expectedChildSendPayload[SDL_PHY_PDU_LEN] = shortPayload;
+  expectEquals(sdlPhyTransmit(&shortPayload, sizeof(shortPayload)), SDL_SUCCESS);
   
-  childSendCommand = SNET_CHILD_COMMAND_NETIF_TRANSMIT;
-  childSendPayloadLength = 5;
-  memcpy(childSendPayload, longPayload, 5);
-  expectEquals(sdlPhyTransmit(longPayload, 5), SDL_SUCCESS);
+  expectedChildSendCommand = SNET_CHILD_COMMAND_NETIF_TRANSMIT;
+  expectedChildSendPayloadLength = sizeof(longPayload) + SDL_PHY_PDU_LEN;
+  expectedChildSendPayload[0] = expectedChildSendPayloadLength;
+  memcpy(&expectedChildSendPayload[SDL_PHY_PDU_LEN],
+         longPayload,
+         sizeof(longPayload));
+  expectEquals(sdlPhyTransmit(longPayload, sizeof(longPayload)), SDL_SUCCESS);
 
   return 0;
 }
@@ -174,11 +187,11 @@ int logTest(void)
   expect( system("grep -q TUNA    " SDL_LOG_FILE));
   
   // File.
-  expect(!system("grep -q -E '\\([0-9]+.[0-9]+\\) RX \\[0xAC\\]' " SDL_LOG_FILE));
-  expect(!system("grep -q -E '\\([0-9]+\\.[0-9]+\\) RX \\[0x05, 0x04, 0x03, 0x02, 0x01\\]' " SDL_LOG_FILE));
-  expect(!system("grep -q -E '\\([0-9]+\\.[0-9]+\\) RX \\[0xAC\\]' " SDL_LOG_FILE));
-  expect(!system("grep -q -E '\\([0-9]+\\.[0-9]+\\) TX \\[0xAC\\]' " SDL_LOG_FILE));
-  expect(!system("grep -q -E '\\([0-9]+\\.[0-9]+\\) TX \\[0x05, 0x04, 0x03, 0x02, 0x01\\]' " SDL_LOG_FILE));
+  expect(!system("grep -q -E '\\([0-9]+.[0-9]+\\) RX \\[0x02, 0xAC\\]' " SDL_LOG_FILE));
+  expect(!system("grep -q -E '\\([0-9]+\\.[0-9]+\\) RX \\[0x06, 0x05, 0x04, 0x03, 0x02, 0x01\\]' " SDL_LOG_FILE));
+  expect(!system("grep -q -E '\\([0-9]+\\.[0-9]+\\) RX \\[0x02, 0xAC\\]' " SDL_LOG_FILE));
+  expect(!system("grep -q -E '\\([0-9]+\\.[0-9]+\\) TX \\[0x02, 0xAC\\]' " SDL_LOG_FILE));
+  expect(!system("grep -q -E '\\([0-9]+\\.[0-9]+\\) TX \\[0x06, 0x05, 0x04, 0x03, 0x02, 0x01\\]' " SDL_LOG_FILE));
 
   return 0;
 }
