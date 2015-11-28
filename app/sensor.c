@@ -97,7 +97,9 @@ static void unconnectedTask(void)
             == SENSOR_SINK_ADVERTISEMENT_RESPONSE_STATUS_SUCCESS)) {
       // ...then we have found our sink!
       sinkAddress = packet.source;
-      sensorSinkPrintf("Sensor: Connected with sink: 0x%08X", sinkAddress);
+      state = STATE_REPORT;
+      snetChildLogPrintf(snetChildLog, "Connected with sink: 0x%08X.\n",
+                         sinkAddress);
     }
   } else {
     // Else, we send out another advertisement.
@@ -121,7 +123,8 @@ static void unconnectedTask(void)
                             SDL_MAC_ADDRESS_BROADCAST,
                             data,
                             sizeof(data));
-    sensorSinkPrintf("Sensor: Broadcast advertisement: 0x%02X", status);
+    snetChildLogPrintf(snetChildLog, "Broadcast advertisement: 0x%02X.\n",
+                       status);
   }
 }
 

@@ -117,6 +117,11 @@ static void processAdvertisement(SdlPacket *advertisement)
   uint8_t responseStatus = SENSOR_SINK_ADVERTISEMENT_RESPONSE_STATUS_FAILURE;
   uint8_t sensorIndex = 0xFF;
   uint8_t data[SENSOR_SINK_ADVERTISEMENT_RESPONSE_PAYLOAD_SIZE];
+
+  // Don't reconnect with any address that you already are connected with.
+  if (findSensorForAddress(advertisement->source) != 0xFF) {
+    return;
+  }
   
   // Remember, big-endian.
 
