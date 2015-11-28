@@ -18,10 +18,6 @@
 
 #include <unistd.h> // usleep()
 
-static void failureHandler(void)
-{
-}
-
 static int sensorSinkTest(void)
 {
   expectEquals(snetNetworkSize(), 0);
@@ -61,7 +57,7 @@ int main(int argc, char *argv[])
 {
   announce();
 
-  setFailureHandler(failureHandler);
+  setFailureHandler(snetNetworkClear);
   setVerbose((argc > 1 && !strcmp(argv[1], "-v")));
 
   run(sensorSinkTest);
