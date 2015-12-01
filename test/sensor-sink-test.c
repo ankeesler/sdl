@@ -44,6 +44,11 @@ static int sensorSinkTest(void)
   expectEquals(snetNetworkLedRead("sink", 0, &led), 0);
   expect(led);
 
+  // The sensor should turn off its advertising LED since it is connected.
+  usleep(CHILD_TIMEOUT_USEC);
+  expectEquals(snetNetworkLedRead("sensor", SENSOR_ADVERTISE_LED, &led), 0);
+  expect(!led);
+
   expectEquals(snetNetworkRemoveNode("sensor"), 0);
   expectEquals(snetNetworkSize(), 1);
 

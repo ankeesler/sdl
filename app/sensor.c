@@ -41,6 +41,7 @@ static SdlAddress sinkAddress = SDL_MAC_ADDRESS_BROADCAST;
 
 static void loop(void);
 static void unconnectedTask(void);
+static void reportTask(void);
 
 // -----------------------------------------------------------------------------
 // Main
@@ -65,6 +66,11 @@ static void loop(void)
     case STATE_ADVERTISE:
       sdlPlatLedSet(SENSOR_ADVERTISE_LED);
       unconnectedTask();
+      break;
+
+    case STATE_REPORT:
+      sdlPlatLedClear(SENSOR_ADVERTISE_LED);
+      reportTask();
       break;
 
     default:
@@ -128,9 +134,24 @@ static void unconnectedTask(void)
   }
 }
 
-// -----------------------------------------------------------------------------
-// Callbacks
-
-void sdlPhyButtonIsr(uint8_t button)
+static void reportTask(void)
 {
+  uint8_t payload[SENSOR_REPORT_DATA_MAX_SIZE], *finger;
+  SdlStatus status;
+  uint16_t data = 0x1234;
+
+  // TODO: make this configurable by the sink.
+  usleep(SENSOR_REPORT_DUTY_CYCLE_US);
+
+  finger = payload;
+  *finger++ = SENSOR_SINK_DATA_COMMAND;
+  *finger++ = SENSOR_SINK_DATA_TYPE_COUNT;
+  *finger++ = (data & 0x00FF) >> 0x00;
+  *finger++ = (data & 0xFF00) >> 0x08;
+
+  status = sdlMacTransmit(SDL_PACKET_TYPE_DATA,
+                          sinkAddress,
+                          payload,
+                          finger - payload);
+  snetChildLogPrintf(snetChildLog, "Report data: 0x%02x.\n", data);
 }
