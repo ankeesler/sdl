@@ -1,4 +1,4 @@
-// Generated from cap/SdlLog.g4 by ANTLR 4.2
+// Generated from SdlLog.g4 by ANTLR 4.2
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.*;

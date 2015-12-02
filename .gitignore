@@ -27,3 +27,6 @@ cscope.*
 
 # Snet log files
 *.snet
+
+# The cap bin
+cap/bin

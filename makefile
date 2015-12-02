@@ -181,22 +181,30 @@ run-sensor-sink-test: $(BUILD_DIR)/sensor-sink-test sensor sink
 
 ANTLR_JAR=/usr/local/lib/antlr-4.2-complete.jar
 SNAKE_YAML_JAR=/usr/local/lib/snakeyaml-1.14.jar
-IPV6_YAML_FILE=ipv6.yaml
-MANIFEST_FILE=manifest.txt
 
+CAP_SRC_DIR=$(CAP_DIR)/src
+CAP_BIN_DIR=$(CAP_DIR)/bin
+
+CAP_SRC_FILES=$(shell find $(CAP_SRC_DIR) -name "*.java")
+
+DECODER_JAR=$(CAP_BIN_DIR)/Decoder.jar
+
+.PHONY: grammar
 grammar:
-	java -jar $(ANTLR_JAR) cap/SdlLog.g4
+	cd $(CAP_SRC_DIR)/grammar && java -jar $(ANTLR_JAR) SdlLog.g4
+
+$(CAP_BIN_DIR):
+	mkdir $@
 
 .PHONY: $(CAP_DIR)
-$(CAP_DIR): grammar
-	javac -cp $(ANTLR_JAR):$@:$(SNAKE_YAML_JAR) $@/*.java
+$(CAP_DIR): $(CAP_SRC_FILES) | grammar $(CAP_BIN_DIR)
+	javac -cp $(ANTLR_JAR):$(SNAKE_YAML_JAR) -d $(CAP_BIN_DIR) $^
 
-.PHONY: cap/Decode.jar
-$(CAP_DIR)/Decode.jar: $(CAP_DIR)
-	cd $<; jar cfm $(@F) $(MANIFEST_FILE) *.class $(IPV6_YAML_FILE)
+$(DECODER_JAR): $(CAP_DIR)
+	cd $(@D) && jar cfm $(@F) ../manifest.txt ../src/decode/ipv6.yaml *.class
 
-decoder: $(CAP_DIR)/Decode.jar
+decoder: $(DECODER_JAR)
 	java -jar $< $(ARGS)
 
 clean-cap:
-	rm -f $(CAP_DIR)/*.class $(CAP_DIR)/*.jar $(CAP_DIR)/Decode.jar
+	rm -rf $(CAP_BIN_DIR)

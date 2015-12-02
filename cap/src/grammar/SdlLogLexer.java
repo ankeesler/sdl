@@ -1,4 +1,4 @@
-// Generated from cap/SdlLog.g4 by ANTLR 4.2
+// Generated from SdlLog.g4 by ANTLR 4.2
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.Token;
