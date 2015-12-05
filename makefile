@@ -191,7 +191,7 @@ DECODER_JAR=$(CAP_BIN_DIR)/Decoder.jar
 
 .PHONY: grammar
 grammar:
-	cd $(CAP_SRC_DIR)/grammar && java -jar $(ANTLR_JAR) SdlLog.g4
+	cd $(CAP_DIR) && java -jar $(ANTLR_JAR) -o src/grammar SdlLog.g4
 
 $(CAP_BIN_DIR):
 	mkdir $@

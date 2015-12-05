@@ -7,9 +7,6 @@
 # Class files
 *.class
 
-# The decode jar
-cap/Decode.jar
-
 # emacs files
 *~
 
@@ -28,5 +25,6 @@ cscope.*
 # Snet log files
 *.snet
 
-# The cap bin
+# The cap bin and generated grammar
 cap/bin
+cap/src/grammar
