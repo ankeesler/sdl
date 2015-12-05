@@ -185,7 +185,7 @@ SNAKE_YAML_JAR=/usr/local/lib/snakeyaml-1.14.jar
 CAP_SRC_DIR=$(CAP_DIR)/src
 CAP_BIN_DIR=$(CAP_DIR)/bin
 
-CAP_SRC_FILES=$(shell find $(CAP_SRC_DIR) -name "*.java")
+CAP_SRC_FILES=$(CAP_SRC_DIR)/decode/*.java $(CAP_SRC_DIR)/grammar/*.java
 
 DECODER_JAR=$(CAP_BIN_DIR)/Decoder.jar
 
@@ -197,8 +197,8 @@ $(CAP_BIN_DIR):
 	mkdir $@
 
 .PHONY: $(CAP_DIR)
-$(CAP_DIR): $(CAP_SRC_FILES) | grammar $(CAP_BIN_DIR)
-	javac -cp $(ANTLR_JAR):$(SNAKE_YAML_JAR) -d $(CAP_BIN_DIR) $^
+$(CAP_DIR): grammar $(CAP_BIN_DIR)
+	javac -cp $(ANTLR_JAR):$(SNAKE_YAML_JAR) -d $(CAP_BIN_DIR) $(CAP_SRC_FILES)
 
 $(DECODER_JAR): $(CAP_DIR)
 	cd $(@D) && jar cfm $(@F) ../manifest.txt ../src/decode/ipv6.yaml *.class
@@ -207,4 +207,4 @@ decoder: $(DECODER_JAR)
 	java -jar $< $(ARGS)
 
 clean-cap:
-	rm -rf $(CAP_BIN_DIR)
+	rm -rf $(CAP_BIN_DIR) $(CAP_SRC_DIR)/grammar
