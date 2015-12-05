@@ -16,8 +16,6 @@
 #include "snet/src/child/child-main.h" // snetChildMain
 #include "snet/src/child/child-log.h"  // snetChildLogPrintf()
 
-#include "src/plat/led.h" // sdlPlatLedSet()
-
 #include <assert.h> // assert()
 #include <unistd.h> // getpid()
 #include <stdlib.h> // exit()

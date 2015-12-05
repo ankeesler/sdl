@@ -21,8 +21,6 @@
 #include <string.h> // strlen(), memset()
 #include <stdio.h>  // printf()
 
-#include "plat.h"
-
 // -----------------------------------------------------------------------------
 // Internal State
 

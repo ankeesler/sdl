@@ -38,3 +38,6 @@
 
 // SDL PHY layer interface.
 #include "phy.h"
+
+/// SDL PLAT layer interface.
+#include "plat.h"
