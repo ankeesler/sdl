@@ -23,16 +23,17 @@ static int sensorSinkTest(void)
 {
   expectEquals(snetNetworkSize(), 0);
 
-  expectEquals(snetNetworkAddNode("sensor", SENSOR_IMAGE), 0);
+  expectEquals(snetNetworkAddNode("sensor", SENSOR_IMAGE), SNET_ERRNO_SUCCESS);
   expectEquals(snetNetworkSize(), 1);
 
-  expectEquals(snetNetworkAddNode("sink", SINK_IMAGE), 0);
+  expectEquals(snetNetworkAddNode("sink", SINK_IMAGE), SNET_ERRNO_SUCCESS);
   expectEquals(snetNetworkSize(), 2);
 
   // The sensor should have its advertise LED on.
   bool led = false;
   usleep(CHILD_TIMEOUT_USEC);
-  expectEquals(snetNetworkLedRead("sensor", SENSOR_ADVERTISE_LED, &led), 0);
+  expectEquals(snetNetworkLedRead("sensor", SENSOR_ADVERTISE_LED, &led),
+               SNET_ERRNO_SUCCESS);
   expect(led);
 
   // Sleep so that we make sure the sensor sends out at least one advertisement.
@@ -42,30 +43,31 @@ static int sensorSinkTest(void)
   // Since this is the first sensor, the led should be 0.
   led = false;
   usleep(CHILD_TIMEOUT_USEC);
-  expectEquals(snetNetworkLedRead("sink", 0, &led), 0);
+  expectEquals(snetNetworkLedRead("sink", 0, &led), SNET_ERRNO_SUCCESS);
   expect(led);
 
   // The sensor should turn off its advertising LED since it is connected.
   usleep(CHILD_TIMEOUT_USEC);
-  expectEquals(snetNetworkLedRead("sensor", SENSOR_ADVERTISE_LED, &led), 0);
+  expectEquals(snetNetworkLedRead("sensor", SENSOR_ADVERTISE_LED, &led),
+               SNET_ERRNO_SUCCESS);
   expect(!led);
 
   // The sensor should report at some point.
   expectEquals(snetExpect("sensor",
                           "Report data: 0x[A-F0-9]{4}.*",
                           SENSOR_REPORT_DUTY_CYCLE_US * 2),
-               0);
+               SNET_ERRNO_SUCCESS);
 
   // The sink should receive it.
   expectEquals(snetExpect("sink",
                           "Sink: Receive data from 0x[A-F0-9]{8}.*",
                           SENSOR_REPORT_DUTY_CYCLE_US * 2),
-               0);
+               SNET_ERRNO_SUCCESS);
 
-  expectEquals(snetNetworkRemoveNode("sensor"), 0);
+  expectEquals(snetNetworkRemoveNode("sensor"), SNET_ERRNO_SUCCESS);
   expectEquals(snetNetworkSize(), 1);
 
-  expectEquals(snetNetworkRemoveNode("sink"), 0);
+  expectEquals(snetNetworkRemoveNode("sink"), SNET_ERRNO_SUCCESS);
   expectEquals(snetNetworkSize(), 0);
 
   return 0;
