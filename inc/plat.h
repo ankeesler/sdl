@@ -10,3 +10,6 @@
 
 // LED interface.
 #include "src/plat/led.h"
+
+// Serial interface.
+#include "src/plat/serial.h"

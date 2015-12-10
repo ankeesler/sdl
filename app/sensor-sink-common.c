@@ -30,17 +30,3 @@ void sensorSinkEncryptOrDecrypt(uint8_t *data, uint8_t length, const char *key)
   }
 }
 
-void sensorSinkPrintf(const char *format, ...)
-{
-  char data[UINT8_MAX];
-  va_list args;
-
-  va_start(args, format);
-
-  vsnprintf(data, sizeof(data), format, args);
-
-  //sdlUartTransmit((uint8_t *)data, strlen(data) + 1); // for \0
-
-  va_end(args);
-}
-

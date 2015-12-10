@@ -11,6 +11,7 @@
 #include <unit-test.h>
 
 #include "snet/src/parent/network.h" // snetNetworkLedRead()
+#include "snet/src/parent/expect.h"  // snetExpect()
 
 #include "sdl-test-util.h"
 
@@ -48,6 +49,18 @@ static int sensorSinkTest(void)
   usleep(CHILD_TIMEOUT_USEC);
   expectEquals(snetNetworkLedRead("sensor", SENSOR_ADVERTISE_LED, &led), 0);
   expect(!led);
+
+  // The sensor should report at some point.
+  expectEquals(snetExpect("sensor",
+                          "Report data: 0x[A-F0-9]{4}.*",
+                          SENSOR_REPORT_DUTY_CYCLE_US * 2),
+               0);
+
+  // The sink should receive it.
+  expectEquals(snetExpect("sink",
+                          "Sink: Receive data from 0x[A-F0-9]{8}.*",
+                          SENSOR_REPORT_DUTY_CYCLE_US * 2),
+               0);
 
   expectEquals(snetNetworkRemoveNode("sensor"), 0);
   expectEquals(snetNetworkSize(), 1);

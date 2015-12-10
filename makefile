@@ -45,7 +45,7 @@ MAC_FILES=$(MAC_DIR)/mac.c $(MAC_DIR)/mac-util.c
 
 PHY_FILES=$(PHY_DIR)/phy.c
 
-PLAT_FILES=$(PLAT_DIR)/nvic.c $(PLAT_DIR)/led.c $(PLAT_DIR)/assert.c
+PLAT_FILES=$(PLAT_DIR)/nvic.c $(PLAT_DIR)/led.c $(PLAT_DIR)/assert.c $(PLAT_DIR)/serial.c
 
 SDL_FILES=$(PLAT_FILES) $(PHY_FILES) $(MAC_FILES) $(SDL_LOG_FILES)
 
@@ -84,7 +84,6 @@ clean: clean-cap clean-cscope
 	rm -rf $(BUILD_DIR)
 	rm -rf $(shell find . -name "*.sdl")
 	rm -rf $(shell find . -name "*.snet")
-	rm -rf $(shell find . -name "*.log")
 
 $(BUILD_DIR_CREATED):
 	mkdir $(@D)

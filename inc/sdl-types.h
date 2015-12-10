@@ -20,9 +20,11 @@
 enum {
   /* General */
   // Success!
-  SDL_SUCCESS = 0x00,
+  SDL_SUCCESS  = 0x00,
   // A fatal failure has occured.
-  SDL_FATAL   = 0x01,
+  SDL_FATAL    = 0x01,
+  // There was an error with the size of a buffer.
+  SDL_SIZE_ERR = 0x02,
 
   /* MAC */
   // The SDL MAC layer does not have any received data in it.

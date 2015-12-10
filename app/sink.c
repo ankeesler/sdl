@@ -43,6 +43,7 @@ static SensorData sensorList[SINK_MAX_SENSOR_COUNT];
 static void initSensorList(void);
 static void loop(void);
 static void listenForAdvertisement(void);
+static void processData(SdlPacket *packet);
 
 static void processAdvertisement(SdlPacket *advertisement);
 
@@ -101,9 +102,11 @@ static void listenForAdvertisement(void)
     sensorSinkDecrypt(packet.data, packet.dataLength, SENSOR_SINK_CRYPTO_KEY);
     // If it is an advertisement...
     if (packet.data[SENSOR_SINK_COMMAND_INDEX] == SENSOR_SINK_ADVERTISEMENT) {
-      // ...then process the advertisement.
-      sensorSinkPrintf("Sink: Received advertisement from: 0x%08X", packet.source);
+      // ...then process the advertisement...
       processAdvertisement(&packet);
+    } else if (packet.data[SENSOR_SINK_COMMAND_INDEX] == SENSOR_SINK_DATA_COMMAND) {
+      // ...and if it is data, then process that.
+      processData(&packet);
     }
   }
 }
@@ -115,6 +118,9 @@ static void processAdvertisement(SdlPacket *advertisement)
   uint8_t responseStatus = SENSOR_SINK_ADVERTISEMENT_RESPONSE_STATUS_FAILURE;
   uint8_t sensorIndex = 0xFF;
   uint8_t data[SENSOR_SINK_ADVERTISEMENT_RESPONSE_PAYLOAD_SIZE];
+
+  sensorSinkPrintf("Sink: Received advertisement from: 0x%08X.\n",
+                   advertisement->source);
 
   // Don't reconnect with any address that you already are connected with.
   if (findSensorForAddress(advertisement->source) != 0xFF) {
@@ -148,7 +154,7 @@ static void processAdvertisement(SdlPacket *advertisement)
       sensorList[sensorIndex].mask |= SENSOR_DATA_MASK_USED;
       responseStatus = SENSOR_SINK_ADVERTISEMENT_RESPONSE_STATUS_SUCCESS;
       sdlPlatLedSet(sensorIndex);
-      sensorSinkPrintf("Sink: Connected with sensor for profile: 0x%04X", profile);
+      sensorSinkPrintf("Sink: Connected with sensor for profile: 0x%04X.\n", profile);
     }
   }
 
@@ -160,6 +166,11 @@ static void processAdvertisement(SdlPacket *advertisement)
                  advertisement->source,
                  data,
                  sizeof(data));
+}
+
+static void processData(SdlPacket *packet)
+{
+  sensorSinkPrintf("Sink: Receive data from 0x%08X.\n", packet->source);
 }
 
 // This returns 0xFF if it couldn't find any sensor with that address.
@@ -179,11 +190,4 @@ static uint8_t findSensorForAddress(SdlAddress address)
   }
 
   return 0xFF;
-}
-
-// -----------------------------------------------------------------------------
-// Callbacks
-
-void sdlPhyButtonIsr(uint8_t button)
-{
 }

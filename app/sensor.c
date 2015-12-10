@@ -102,8 +102,7 @@ static void unconnectedTask(void)
       // ...then we have found our sink!
       sinkAddress = packet.source;
       state = STATE_REPORT;
-      snetChildLogPrintf(snetChildLog, "Connected with sink: 0x%08X.\n",
-                         sinkAddress);
+      sensorSinkPrintf("Connected with sink: 0x%08X.\n", sinkAddress);
     }
   } else {
     // Else, we send out another advertisement.
@@ -127,14 +126,13 @@ static void unconnectedTask(void)
                             SDL_MAC_ADDRESS_BROADCAST,
                             data,
                             sizeof(data));
-    snetChildLogPrintf(snetChildLog, "Broadcast advertisement: 0x%02X.\n",
-                       status);
+    sensorSinkPrintf("Broadcast advertisement: 0x%02X.\n", status);
   }
 }
 
 static void reportTask(void)
 {
-  uint8_t payload[SENSOR_REPORT_DATA_MAX_SIZE], *finger;
+  uint8_t payload[SENSOR_REPORT_DATA_MAX_SIZE], *finger, length;
   SdlStatus status;
   uint16_t data = 0x1234;
 
@@ -147,9 +145,12 @@ static void reportTask(void)
   *finger++ = (data & 0x00FF) >> 0x00;
   *finger++ = (data & 0xFF00) >> 0x08;
 
+  length = finger - &payload[0];
+  sensorSinkEncrypt(payload, length, SENSOR_SINK_CRYPTO_KEY);
+
   status = sdlMacTransmit(SDL_PACKET_TYPE_DATA,
                           sinkAddress,
                           payload,
-                          finger - payload);
-  snetChildLogPrintf(snetChildLog, "Report data: 0x%02x.\n", data);
+                          length);
+  sensorSinkPrintf("Report data: 0x%04X.\n", data);
 }

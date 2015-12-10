@@ -72,4 +72,8 @@ void sensorSinkEncryptOrDecrypt(uint8_t *data, uint8_t length, const char *key);
 #define sensorSinkDecrypt(data, length, key)    \
   sensorSinkEncryptOrDecrypt(data, length, key)
 
-void sensorSinkPrintf(const char *format, ...);
+#define sensorSinkPrintf(...)                        \
+    do {                                             \
+      snetChildLogPrintf(snetChildLog, __VA_ARGS__); \
+      sdlPlatSerialPrintf(__VA_ARGS__);              \
+    } while (0);
