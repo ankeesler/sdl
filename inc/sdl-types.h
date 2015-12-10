@@ -37,14 +37,8 @@ enum {
   SDL_TRANSMIT_FAILURE = 0x21,
 
   /* SNET */
-  // An unknown node has been passed to a SNET API.
-  SDL_SNET_UNKNOWN_NODE          = 0x31,
-  // The network state for a SnetNode is invalid.
-  SDL_SNET_INVALID_NETWORK_STATE = 0x32,
   // The node cannot be communicated with.
   SDL_SNET_COM_FAILURE           = 0x33,
-  // The passed commandf is unknown.
-  SDL_SNET_UNKNOWN_COMMAND       = 0x34,
 };
 typedef uint8_t SdlStatus;
 

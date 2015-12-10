@@ -47,7 +47,9 @@ SdlStatus sdlPhyTransmit(uint8_t *data, uint8_t length)
                                          SNET_CHILD_COMMAND_NETIF_TRANSMIT,
                                          transmitLength,
                                          _transmitBuffer);
-  status = (snetErrnoUnix(_transmitSnetErrno) != 0 ? SDL_FATAL : SDL_SUCCESS);
+  status = (snetErrnoUnix(_transmitSnetErrno) != 0
+            ? SDL_TRANSMIT_FAILURE
+            : SDL_SUCCESS);
 
   snetChildLogPrintf(snetChildLog,
                      "Transmit with status 0x%08X.\n",
