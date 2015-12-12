@@ -27,6 +27,7 @@ INCLUDES=-I. -I$(INC_DIR) -I$(SRC_DIR)
 DEFINES=-DSDL_TEST -DSDL_LOG -DSDL_LOG_FILE=\"$(SDL_TEST_LOG_FILE)\"
 
 CC=gcc
+LD=gcc
 CFLAGS=-g -O0 -Wall -Werror -MD $(INCLUDES) $(DEFINES)
 LDFLAGS=-lmcgoo
 
@@ -60,7 +61,7 @@ ALL_SOURCE=$(shell find . -name "*.[ch]") $(shell find . -name "*.java")
 #
 
 COMPILE=$(CC) $(CFLAGS) -o $@ -c $<
-LINK=$(CC) $(LDFLAGS) -o $@ $^
+LINK=$(LD) $(LDFLAGS) -o $@ $^
 
 cscope.files: $(ALL_SOURCE)
 	echo $^ > $@
