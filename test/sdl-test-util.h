@@ -22,4 +22,4 @@ extern void printNodeData(void);
 #define SINK_IMAGE   "build/sink/sink"
 
 // App timeout.
-#define CHILD_TIMEOUT_USEC (100000) // .1 seconds
+#define CHILD_TIMEOUT_USEC (25000) // .025 seconds
