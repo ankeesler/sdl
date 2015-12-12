@@ -99,8 +99,12 @@ $(BUILD_DIR)/%.o: %.c | $(BUILD_DIR_CREATED)
 
 TESTS=phy mac sensor-sink
 
+.PHONY: snet-test
+snet-test:
+	make -C $(SNET_DIR) test
+
 .PHONY: test
-test: $(patsubst %, run-%-test, $(TESTS))
+test: snet-test $(patsubst %, run-%-test, $(TESTS))
 
 #
 # PHY
