@@ -17,3 +17,6 @@ void nvicNetifReceiveIsr(uint8_t *data, uint8_t dataLength);
 
 // An LED was touched.
 void nvicLedTouchedIsr(uint8_t led, bool on);
+
+// Something was received over the UART.
+void nvicUartIsr(uint8_t *data, uint8_t dataLength);

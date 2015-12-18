@@ -35,6 +35,9 @@ enum {
   /* PHY */
   // A transmit failure has occured.
   SDL_TRANSMIT_FAILURE = 0x21,
+  
+  /* PLAT */
+  SDL_SERIAL_EMPTY = 0x31,
 
   /* SNET */
   // The node cannot be communicated with.
@@ -67,6 +70,12 @@ typedef struct {
 enum {
   // How many times the MAC gets a packet for which it doesn't have room.
   SDL_COUNTER_MAC_RX_OVERFLOW = 0x01,
+  
+  // How many times the UART received too much data.
+  SDL_COUNTER_PLAT_SERIAL_RX_OVERFLOW = 0x02,
+  
+  // How many times the UART had to drop RX data.
+  SDL_COUNTER_PLAT_SERIAL_RX_DROP = 0x03,
 };
 typedef uint8_t SdlCounter;
 

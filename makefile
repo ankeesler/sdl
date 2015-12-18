@@ -97,7 +97,7 @@ $(BUILD_DIR)/%.o: %.c | $(BUILD_DIR_CREATED)
 # TEST
 #
 
-TESTS=phy mac sensor-sink
+TESTS=phy mac plat sensor-sink
 
 .PHONY: snet-test
 snet-test:
@@ -130,6 +130,19 @@ $(BUILD_DIR)/mac-test: $(addprefix $(BUILD_DIR)/,$(notdir $(MAC_TEST_FILES:.c=.o
 
 .PHONY: run-mac-test
 run-mac-test: $(BUILD_DIR)/mac-test
+	./$<
+
+#
+# PLAT
+#
+
+PLAT_TEST_FILES=$(TEST_DIR)/plat-test.c $(PLAT_FILES)
+
+$(BUILD_DIR)/plat-test: $(addprefix $(BUILD_DIR)/,$(notdir $(PLAT_TEST_FILES:.c=.o)))
+	$(LINK)
+
+.PHONY: run-plat-test
+run-plat-test: $(BUILD_DIR)/plat-test
 	./$<
 
 #

@@ -64,6 +64,20 @@ static int sensorSinkTest(void)
                           SENSOR_REPORT_DUTY_CYCLE_US * 2),
                SNET_ERRNO_SUCCESS);
 
+  // Send a serial command to the sensor.
+  expectEquals(snetNetworkUartTransmit("sensor",
+                                       (const uint8_t *)"status",
+                                       sizeof("status")),
+               SNET_ERRNO_SUCCESS);
+  expectEquals(snetExpect("sensor",
+                          "Received serial command 'status'\\.",
+                          1000000), // 1 second
+               SNET_ERRNO_SUCCESS);
+  expectEquals(snetExpect("sensor",
+                          "Status: 0x01\\.",
+                          1000000), // 1 second
+               SNET_ERRNO_SUCCESS);
+
   expectEquals(snetNetworkRemoveNode("sensor"), SNET_ERRNO_SUCCESS);
   expectEquals(snetNetworkSize(), 1);
 

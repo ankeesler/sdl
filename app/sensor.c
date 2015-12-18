@@ -19,7 +19,7 @@
 #include <assert.h> // assert()
 #include <unistd.h> // getpid()
 #include <stdlib.h> // exit()
-#include <string.h> // memcpy()
+#include <string.h> // memcpy(), strcmp()
 #include <stdarg.h> // va_list, va_start(), va_arg(), va_end()
 #include <stdio.h>  // printf()
 
@@ -40,6 +40,8 @@ static SdlAddress sinkAddress = SDL_MAC_ADDRESS_BROADCAST;
 static void loop(void);
 static void unconnectedTask(void);
 static void reportTask(void);
+
+static void serialTick(void);
 
 // -----------------------------------------------------------------------------
 // Main
@@ -74,6 +76,8 @@ static void loop(void)
     default:
       ; // eh?
     }
+
+    serialTick();
   }
 }
 
@@ -153,4 +157,25 @@ static void reportTask(void)
                           payload,
                           length);
   sensorSinkPrintf("Report data: 0x%04X.\n", data);
+}
+
+static void serialTick(void)
+{
+  uint8_t command[16];
+  uint8_t commandIndex;
+
+  for (commandIndex = 0;
+       (commandIndex < sizeof(command)
+        && sdlPlatSerialRead(command + commandIndex) == SDL_SUCCESS);
+       commandIndex ++) { }
+
+  if (commandIndex <= 1) {
+    return;
+  }
+
+  sensorSinkPrintf("Received serial command '%s'.\n", command);
+
+  if (strcmp((char *)command, "status") == 0) {
+    sensorSinkPrintf("Status: 0x%02X.\n", state);
+  }
 }
