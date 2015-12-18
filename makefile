@@ -104,7 +104,12 @@ snet-test:
 	make -C $(SNET_DIR) test
 
 .PHONY: test
-test: snet-test $(patsubst %, run-%-test, $(TESTS))
+test: snet-test $(patsubst %, run-%-test, $(TESTS)) zombie-test
+
+zombie-test:
+	$(SNET_DIR)/script/zombies.sh -a spin -d
+	$(SNET_DIR)/script/zombies.sh -a sensor -d
+	$(SNET_DIR)/script/zombies.sh -a sink -d
 
 #
 # PHY
