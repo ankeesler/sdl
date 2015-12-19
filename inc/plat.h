@@ -13,3 +13,6 @@
 
 // Serial interface.
 #include "src/plat/serial.h"
+
+// Assert interface.
+#include "src/plat/assert.h"
