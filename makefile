@@ -52,7 +52,7 @@ SDL_FILES=$(PLAT_FILES) $(PHY_FILES) $(MAC_FILES) $(SDL_LOG_FILES)
 
 SNET_ROOT_DIR=$(SNET_DIR)
 -include snet/snet.mak
-INCLUDES += -I$(SNET_SRC_DIR)
+INCLUDES += -I$(SNET_ROOT_DIR)
 
 ALL_SOURCE=$(shell find . -name "*.[ch]") $(shell find . -name "*.java")
 

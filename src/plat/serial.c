@@ -16,11 +16,11 @@
 #include <string.h> // memcpy()
 #include <signal.h> // sig_atomic_t
 
-#include "common/child-data.h"   // snetChildDataSend()
-#include "common/snet-command.h" // SNET_CHILD_COMMAND_UART_RECEIVE
-#include "common/snet-errno.h"   // SnetErrno_t
-#include "child/child-main.h"    // snetChildToParentFd, snetChildLog
-#include "child/child-log.h"     // snetChildLogPrintf
+#include "snet/src/common/child-data.h"   // snetChildDataSend()
+#include "snet/src/common/snet-command.h" // SNET_CHILD_COMMAND_UART_RECEIVE
+#include "snet/src/common/snet-errno.h"   // SnetErrno_t
+#include "snet/src/child/child-main.h"    // snetChildToParentFd, snetChildLog
+#include "snet/src/child/child-log.h"     // snetChildLogPrintf
 
 #include "sdl-types.h" // SdlCounter
 #include "nvic.h"

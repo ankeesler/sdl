@@ -13,8 +13,7 @@
 #include "sensor-sink.h"
 #include "sensor.h"
 
-#include "snet/src/child/child-main.h" // snetChildMain
-#include "snet/src/child/child-log.h"  // snetChildLogPrintf()
+#include "snet/inc/snet-child.h"
 
 #include <assert.h> // assert()
 #include <unistd.h> // getpid()

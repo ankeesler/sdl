@@ -10,8 +10,7 @@
 
 #include <unit-test.h>
 
-#include "snet/src/parent/network.h" // snetNetworkLedRead()
-#include "snet/src/parent/expect.h"  // snetExpect()
+#include "snet/inc/snet-parent.h"
 
 #include "sdl-test-util.h"
 
