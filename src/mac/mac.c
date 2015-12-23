@@ -8,11 +8,11 @@
 // SDL MAC layer.
 //
 
-#include "mac.h"
-#include "phy.h"
+#include "inc/mac.h"
+#include "inc/phy.h"
 
 #include "mac-internal.h"
-#include "phy/phy-internal.h"
+#include "../phy/phy-internal.h"
 
 #include <string.h> // memcpy()
 #include <signal.h> // sig_atomic_t

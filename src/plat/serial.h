@@ -8,7 +8,7 @@
 // Serial interface.
 //
 
-#include "sdl-types.h" // SdlStatus
+#include "inc/sdl-types.h" // SdlStatus
 
 #include <stdint.h> // uint8_t
 

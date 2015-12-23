@@ -8,7 +8,7 @@
 // Sink test app.
 //
 
-#include "sdl.h"
+#include "inc/sdl.h"
 
 #include "sensor-sink.h"
 #include "sink.h"

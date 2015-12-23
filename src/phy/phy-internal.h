@@ -10,7 +10,7 @@
 
 #include <stdint.h> // uint8_t
 
-#include "sdl-types.h" // SdlStatus
+#include "inc/sdl-types.h" // SdlStatus
 
 // Initializes the phy.
 SdlStatus phyInit(void);

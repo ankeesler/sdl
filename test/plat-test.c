@@ -15,7 +15,7 @@
 #include "snet/src/common/snet-errno.h" // SnetErrno_t, SNET_ERRNO_SUCCESS
 #include "snet/src/child/child-log.h"   // SnetChildLog_t
 
-#include "sdl.h"
+#include "inc/sdl.h"
 #include "src/plat/nvic.h"
 #include "src/plat/serial-internal.h"
 

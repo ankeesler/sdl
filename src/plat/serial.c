@@ -22,7 +22,7 @@
 #include "snet/src/child/child-main.h"    // snetChildToParentFd, snetChildLog
 #include "snet/src/child/child-log.h"     // snetChildLogPrintf
 
-#include "sdl-types.h" // SdlCounter
+#include "inc/sdl-types.h" // SdlCounter
 #include "nvic.h"
 
 static uint8_t txBuffer[255];

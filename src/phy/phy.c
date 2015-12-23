@@ -17,11 +17,11 @@
 #include "snet/src/common/child-data.h"   // snetChildDataSend
 #include "snet/src/child/child-main.h"    // snetChildToParentFd
 
-#include "sdl-protocol.h"
-#include "sdl-types.h"
+#include "inc/sdl-protocol.h"
+#include "inc/sdl-types.h"
 
 #include "phy-internal.h"
-#include "plat/nvic.h"
+#include "../plat/nvic.h"
 #include "cap/sdl-log.h"
 
 // -----------------------------------------------------------------------------

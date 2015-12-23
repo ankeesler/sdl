@@ -8,7 +8,7 @@
 // SDL MAC layer utilities.
 //
 
-#include "mac.h"
+#include "inc/mac.h"
 
 #include "mac-internal.h"
 

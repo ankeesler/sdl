@@ -16,9 +16,9 @@
 #include "snet/src/common/child-data.h" // SnetErrno_t
 #include "snet/src/common/snet-command.h" // SDL_PHY_CHILD_COMMAND_NETIF_RECEIVE
 
-#include "sdl-protocol.h" // SDL_PHY_SDU_MAX, SDL_PHY_PDU_LEN
-#include "sdl-types.h" // SDL_SUCCESS
-#include "phy.h" // sdlPhyTransmit
+#include "inc/sdl-protocol.h" // SDL_PHY_SDU_MAX, SDL_PHY_PDU_LEN
+#include "inc/sdl-types.h" // SDL_SUCCESS
+#include "inc/phy.h" // sdlPhyTransmit
 
 #include "cap/sdl-log.h" // sdlLogOn, sdlLogDump
 #include "src/phy/phy-internal.h" // phyInit()

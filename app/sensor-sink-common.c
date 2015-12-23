@@ -8,7 +8,7 @@
 // Common routines to the Sensor/Sink scenario.
 //
 
-#include "sdl.h"
+#include "inc/sdl.h"
 
 #include <string.h> // strlen()
 #include <stdarg.h> // va_list, va_start(), va_arg(), va_end()

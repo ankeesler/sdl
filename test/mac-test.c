@@ -10,11 +10,11 @@
 
 #include <unit-test.h>
 
-#include "mac.h"
-#include "phy.h"
+#include "inc/mac.h"
+#include "inc/phy.h"
 
-#include "mac/mac-internal.h"
-#include "phy/phy-internal.h"
+#include "src/mac/mac-internal.h"
+#include "src/phy/phy-internal.h"
 
 #include <unistd.h>  // getpid()
 #include <stdbool.h> // bool
