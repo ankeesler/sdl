@@ -38,6 +38,7 @@ SNET_ROOT_DIR=$(SNET_DIR)
 
 SDL_ROOT_DIR=.
 -include sdl.mak
+INCLUDES += $(SDL_INCLUDES)
 
 #
 # UTIL

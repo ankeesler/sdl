@@ -33,11 +33,14 @@
 // SDL type definitions.
 #include "sdl-types.h"
 
-// SDL MAC layer interface.
-#include "mac.h"
+// SDL SNET definitions.
+#include "snet/inc/snet-child.h"
+
+// SDL PLAT layer interface.
+#include "plat.h"
 
 // SDL PHY layer interface.
 #include "phy.h"
 
-/// SDL PLAT layer interface.
-#include "plat.h"
+// SDL MAC layer interface.
+#include "mac.h"

@@ -46,5 +46,7 @@ VPATH +=                     \
   $(SDL_PHY_DIR)             \
   $(SDL_MAC_DIR)
 
+SDL_INCLUDES=-I$(SDL_ROOT_DIR)
+
 echo-sdl-files:
 	@echo $(SDL_FILES)
