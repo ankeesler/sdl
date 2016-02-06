@@ -12,9 +12,9 @@
 #include <unit-test.h>
 
 #define SNET_CHILD_MAIN
-#include "snet/src/child/child-main.h"  // snetChildSignalHandler
-#include "snet/src/common/child-data.h" // SnetErrno_t
-#include "snet/src/common/snet-command.h" // SDL_PHY_CHILD_COMMAND_NETIF_RECEIVE
+#include "src/snet/src/child/child-main.h"  // snetChildSignalHandler
+#include "src/snet/src/common/child-data.h" // SnetErrno_t
+#include "src/snet/src/common/snet-command.h" // SDL_PHY_CHILD_COMMAND_NETIF_RECEIVE
 
 #include "inc/sdl-protocol.h" // SDL_PHY_SDU_MAX, SDL_PHY_PDU_LEN
 #include "inc/sdl-types.h" // SDL_SUCCESS

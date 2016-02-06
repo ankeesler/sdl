@@ -11,10 +11,10 @@
 
 #include <stdlib.h> // exit()
 
-#include "snet/src/common/snet-command.h" // SNET_CHILD_COMMAND_*
-#include "snet/src/common/child-data.h"   // SNET_CHILD_SIGNAL_ALERT, snetChildData*
-#include "snet/src/child/child-log.h"     // snetChildLogPrint*
-#include "snet/src/child/child-main.h"    // snetChildSignalHandler
+#include "src/snet/src/common/snet-command.h" // SNET_CHILD_COMMAND_*
+#include "src/snet/src/common/child-data.h"   // SNET_CHILD_SIGNAL_ALERT, snetChildData*
+#include "src/snet/src/child/child-log.h"     // snetChildLogPrint*
+#include "src/snet/src/child/child-main.h"    // snetChildSignalHandler
 
 #include "cap/sdl-log.h"
 #include "led.h"

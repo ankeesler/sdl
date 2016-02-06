@@ -34,7 +34,7 @@
 #include "sdl-types.h"
 
 // SDL SNET definitions.
-#include "snet/inc/snet-child.h"
+#include "src/snet/inc/snet-child.h"
 
 // SDL PLAT layer interface.
 #include "plat.h"

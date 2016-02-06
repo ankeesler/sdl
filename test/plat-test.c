@@ -12,8 +12,8 @@
 
 #include <stdint.h> // uint32_t
 
-#include "snet/src/common/snet-errno.h" // SnetErrno_t, SNET_ERRNO_SUCCESS
-#include "snet/src/child/child-log.h"   // SnetChildLog_t
+#include "src/snet/src/common/snet-errno.h" // SnetErrno_t, SNET_ERRNO_SUCCESS
+#include "src/snet/src/child/child-log.h"   // SnetChildLog_t
 
 #define SNET_CHILD_MAIN
 #include "inc/sdl.h"

@@ -12,7 +12,7 @@ SHELL=sh
 
 TEST_DIR=test
 APP_DIR=app
-SNET_DIR=snet
+SNET_DIR=src/snet
 
 SDL_TEST_LOG_FILE=sdl-test.sdl
 
@@ -34,7 +34,7 @@ VPATH += $(APP_DIR) $(TEST_DIR)
 #
 
 SNET_ROOT_DIR=$(SNET_DIR)
--include snet/snet.mak
+-include $(SNET_DIR)/snet.mak
 
 SDL_ROOT_DIR=.
 -include sdl.mak

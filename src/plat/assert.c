@@ -10,9 +10,9 @@
 
 #include <stdlib.h> // exit()
 
-#include "snet/src/common/child-data.h" // SNET_CHILD_EXIT_STATUS_ASSERT_ERR
-#include "snet/src/child/child-log.h"   // snetChildLogPrintf
-#include "snet/src/child/child-main.h"  // snetChildLog
+#include "src/snet/src/common/child-data.h" // SNET_CHILD_EXIT_STATUS_ASSERT_ERR
+#include "src/snet/src/child/child-log.h"   // snetChildLogPrintf
+#include "src/snet/src/child/child-main.h"  // snetChildLog
 
 #include "assert.h"
 

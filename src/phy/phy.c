@@ -13,9 +13,9 @@
 #include <assert.h> // assert()
 #include <string.h> // memcpy()
 
-#include "snet/src/common/snet-command.h" // SNET_CHILD_COMMAND_*
-#include "snet/src/common/child-data.h"   // snetChildDataSend
-#include "snet/src/child/child-main.h"    // snetChildToParentFd
+#include "src/snet/src/common/snet-command.h" // SNET_CHILD_COMMAND_*
+#include "src/snet/src/common/child-data.h"   // snetChildDataSend
+#include "src/snet/src/child/child-main.h"    // snetChildToParentFd
 
 #include "inc/sdl-protocol.h"
 #include "inc/sdl-types.h"

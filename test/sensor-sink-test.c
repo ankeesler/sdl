@@ -10,7 +10,7 @@
 
 #include <unit-test.h>
 
-#include "snet/inc/snet-parent.h"
+#include "src/snet/inc/snet-parent.h"
 
 #include "sdl-test-util.h"
 

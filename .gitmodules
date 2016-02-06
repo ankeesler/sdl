@@ -1,2 +1,2 @@
 [submodule "snet"]
-	path = snet
+	path = src/snet
