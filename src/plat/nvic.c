@@ -84,6 +84,8 @@ void snetChildSignalHandler(int signal)
       break;
     case SNET_CHILD_COMMAND_UART_RECEIVE:
       nvicUartIsr(data, dataLength);
+      break;
+
     default:
       ; // uh?
     }
