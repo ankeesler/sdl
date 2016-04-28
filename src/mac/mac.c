@@ -101,7 +101,7 @@ SdlStatus sdlMacTransmit(SdlPacketType type,
   if (!(state & STATE_INITIALIZED)) return SDL_MAC_UNINITIALIZED;
 
   packet.type = type;
-  packet.sequence = sequence;
+  packet.sequence = sequence ++;
   packet.source = ourAddress;
   packet.destination = destination;
   memcpy(packet.data, data, dataLength);
