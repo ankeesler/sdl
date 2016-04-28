@@ -70,6 +70,8 @@ int sanityCheck(void)
 
 int loopbackTest(void)
 {
+  uint16_t first, second;
+
   expect(sdlMacAddress(&source)
          == SDL_SUCCESS);
 
@@ -85,6 +87,21 @@ int loopbackTest(void)
   expect(packet.destination == source);
   expect(!memcmp(packet.data, data, dataBufferLength));
   expect(packet.dataLength == dataBufferLength);
+  first = packet.sequence;
+
+  // TX + RX again.
+  expectEquals(sdlMacTransmit(SDL_PACKET_TYPE_DATA, source, data, dataBufferLength),
+               SDL_SUCCESS);
+  expectEquals(sdlMacReceive(&packet), SDL_SUCCESS);
+  expectEquals(packet.type, SDL_PACKET_TYPE_DATA);
+  expectEquals(packet.source, source);
+  expectEquals(packet.destination, source);
+  expect(!memcmp(packet.data, data, dataBufferLength));
+  expectEquals(packet.dataLength, dataBufferLength);
+  second = packet.sequence;
+
+  // The sequence numbers should be different.
+  expect(second > first);
 
   // After, the SDL should be empty.
   expect(sdlMacReceive(&packet)
